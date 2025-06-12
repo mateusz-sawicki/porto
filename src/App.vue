@@ -1,9 +1,7 @@
 <script setup lang="ts">
-import { RouterLink, RouterView } from 'vue-router'
-import HelloWorld from './components/HelloWorld.vue'
-import Dashboard from '@/pages/dashboard/index.vue'
+import AppShell from '@/components/layout/AppShell.vue'
 </script>
 
 <template>
-  <Dashboard />
+  <AppShell />
 </template>
