@@ -6,6 +6,7 @@ export const containerClass = 'w-full h-full'
 
 <script setup lang="ts">
 import AppSidebar from '@/components/AppSidebar.vue'
+import ThemeSwitch from '@/components/layout/ThemeSwitch.vue'
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -39,6 +40,7 @@ import { SidebarInset, SidebarProvider, SidebarTrigger } from '@/components/ui/s
               </BreadcrumbItem>
             </BreadcrumbList>
           </Breadcrumb>
+          <ThemeSwitch />
         </div>
       </header>
       <div class="flex flex-1 flex-col gap-4 p-4 pt-0">
