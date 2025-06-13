@@ -10,6 +10,10 @@ import {
 } from '@/components/ui/breadcrumb'
 import { Separator } from '@/components/ui/separator'
 import { SidebarTrigger } from '@/components/ui/sidebar'
+import { useBreadcrumbs } from '../../../composables/layout/useBreadcrumbs'
+import { Slash } from 'lucide-vue-next'
+
+const { breadcrumbs } = useBreadcrumbs()
 </script>
 
 <template>
@@ -19,15 +23,27 @@ import { SidebarTrigger } from '@/components/ui/sidebar'
     <div class="flex items-center gap-2 px-4">
       <SidebarTrigger class="-ml-1" />
       <Separator orientation="vertical" class="mr-2 data-[orientation=vertical]:h-4" />
-      <Breadcrumb>
+      <Breadcrumb class="">
         <BreadcrumbList>
-          <BreadcrumbItem class="hidden md:block">
-            <BreadcrumbLink href="#"> Building Your Application </BreadcrumbLink>
-          </BreadcrumbItem>
-          <BreadcrumbSeparator class="hidden md:block" />
-          <BreadcrumbItem>
-            <BreadcrumbPage>Data Fetching</BreadcrumbPage>
-          </BreadcrumbItem>
+          <template v-for="(item, index) in breadcrumbs" :key="item.label">
+            <BreadcrumbItem>
+              <BreadcrumbPage v-if="item.isActive">
+                {{ item.label }}
+              </BreadcrumbPage>
+
+              <!-- Clickable breadcrumb -->
+              <BreadcrumbLink v-else asChild>
+                <router-link :to="item.href || '/'">
+                  {{ item.label }}
+                </router-link>
+              </BreadcrumbLink>
+            </BreadcrumbItem>
+
+            <!-- Separator -->
+            <BreadcrumbSeparator v-if="index < breadcrumbs.length - 1">
+              <Slash />
+            </BreadcrumbSeparator>
+          </template>
         </BreadcrumbList>
       </Breadcrumb>
       <ThemeSwitch />

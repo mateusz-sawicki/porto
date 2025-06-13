@@ -1,6 +1,7 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import Dashboard from '@/pages/dashboard/index.vue'
 import Patient from '@/pages/patient/index.vue'
+import PatientDetails from '@/pages/patient/details/index.vue'
 import Procedure from '@/pages/procedure/index.vue'
 import Settings from '@/pages/settings/index.vue'
 import TreatmentPlan from '@/pages/treatment-plan/index.vue'
@@ -17,6 +18,11 @@ const router = createRouter({
       path: '/patient',
       name: 'patient',
       component: Patient,
+    },
+    {
+      path: '/patient/:id',
+      name: 'patient-details',
+      component: PatientDetails,
     },
     {
       path: '/patient/:id/treatment-plan/:id',
