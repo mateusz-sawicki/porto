@@ -2,7 +2,7 @@ import type { ColumnDef } from '@tanstack/vue-table'
 import { h } from 'vue'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-vue-next'
+import { ArrowUpDown, ArrowUp, ArrowDown, Eye, Trash2 } from 'lucide-vue-next'
 import type { Patient } from '@/types/patient/patient'
 
 // Helper function to get the correct sort icon
@@ -12,7 +12,7 @@ function getSortIcon(column: any) {
   if (sortDirection === 'desc') return ArrowDown
   return ArrowUpDown
 }
-
+const DEFAULT_COLUMN_WIDTH = 150
 export const columns: ColumnDef<Patient>[] = [
   {
     accessorKey: 'name',
@@ -36,10 +36,10 @@ export const columns: ColumnDef<Patient>[] = [
     cell: ({ row }) => {
       const patient = row.original
       return h('div', [
-        h('div', { class: 'font-semibold' }, `${patient.name} ${patient.surname}`),
-        h('div', { class: 'text-sm text-muted-foreground' }, `ID: ${patient.id.slice(0, 8)}...`),
+        h('div', { class: 'font-semibold mx-3 my-2' }, `${patient.name} ${patient.surname}`),
       ])
     },
+    size: DEFAULT_COLUMN_WIDTH,
   },
   {
     accessorKey: 'isActive',
@@ -67,8 +67,8 @@ export const columns: ColumnDef<Patient>[] = [
         {
           variant: isActive ? 'default' : 'secondary',
           class: isActive
-            ? 'bg-green-100 text-green-800 hover:bg-green-100'
-            : 'bg-red-100 text-red-800 hover:bg-red-100',
+            ? 'mx-2 bg-green-100 text-green-800 hover:bg-green-100'
+            : 'mx-2 bg-red-100 text-red-800 hover:bg-red-100',
         },
         () => (isActive ? 'Active' : 'Inactive'),
       )
@@ -79,6 +79,7 @@ export const columns: ColumnDef<Patient>[] = [
       if (value === 'inactive') return row.getValue(id) === false
       return true
     },
+    size: DEFAULT_COLUMN_WIDTH,
   },
   {
     accessorKey: 'creationDate',
@@ -101,8 +102,9 @@ export const columns: ColumnDef<Patient>[] = [
     },
     cell: ({ row }) => {
       const date = row.getValue('creationDate') as Date
-      return h('div', { class: 'text-muted-foreground' }, date.toLocaleDateString())
+      return h('div', { class: 'text-muted-foreground mx-3' }, date.toLocaleDateString())
     },
+    size: DEFAULT_COLUMN_WIDTH,
   },
   {
     accessorKey: 'updateDate',
@@ -118,14 +120,51 @@ export const columns: ColumnDef<Patient>[] = [
         () => [
           'Last Updated',
           h(SortIcon, {
-            class: `ml-2 h-4 w-4 ${column.getIsSorted() ? 'text-blue-600' : 'text-muted-foreground'}`,
+            class: `mx-3 ml-2 h-4 w-4 ${column.getIsSorted() ? 'text-blue-600' : 'text-muted-foreground'}`,
           }),
         ],
       )
     },
     cell: ({ row }) => {
       const date = row.getValue('updateDate') as Date
-      return h('div', { class: 'text-muted-foreground' }, date.toLocaleDateString())
+      return h('div', { class: 'mx-3 text-muted-foreground' }, date.toLocaleDateString())
     },
+    size: DEFAULT_COLUMN_WIDTH,
+  },
+  {
+    id: 'actions',
+    header: () => h('div', { class: 'text-center mx-3' }, 'Actions'),
+    cell: ({ row }) => {
+      const patient = row.original
+      return h('div', { class: 'flex items-center justify-center gap-2 mx-3 my-2' }, [
+        h(
+          Button,
+          {
+            variant: 'ghost',
+            size: 'sm',
+            class: 'h-8 w-8 p-0 hover:bg-blue-100 hover:text-blue-600 cursor-pointer',
+            onClick: () => {
+              console.log('View patient:', patient.id)
+            },
+          },
+          () => h(Eye, { class: 'h-4 w-4' }),
+        ),
+        h(
+          Button,
+          {
+            variant: 'ghost',
+            size: 'sm',
+            class: 'h-8 w-8 p-0 hover:bg-red-100 hover:text-red-600 cursor-pointer',
+            onClick: () => {
+              console.log('Delete patient:', patient.id)
+            },
+          },
+          () => h(Trash2, { class: 'h-4 w-4' }),
+        ),
+      ])
+    },
+    enableSorting: false,
+    maxSize: 50,
+    size: 50,
   },
 ]

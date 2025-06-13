@@ -166,7 +166,16 @@ function resetFilters() {
       <Table>
         <TableHeader>
           <TableRow v-for="headerGroup in table.getHeaderGroups()" :key="headerGroup.id">
-            <TableHead v-for="header in headerGroup.headers" :key="header.id">
+            <TableHead
+              v-for="header in headerGroup.headers"
+              :key="header.id"
+              class="border-r border-border last:border-r-0"
+              :style="
+                header.column.columnDef.id === 'actions'
+                  ? { maxWidth: `${header.column.columnDef.maxSize}px` }
+                  : { maxWidth: `${header.column.columnDef.size}px` }
+              "
+            >
               <FlexRender
                 v-if="!header.isPlaceholder"
                 :render="header.column.columnDef.header"
@@ -178,11 +187,24 @@ function resetFilters() {
         <TableBody>
           <template v-if="table.getRowModel().rows?.length">
             <TableRow
-              v-for="row in table.getRowModel().rows"
+              v-for="(row, index) in table.getRowModel().rows"
               :key="row.id"
               :data-state="row.getIsSelected() && 'selected'"
+              :class="[
+                index % 2 === 1 ? 'bg-muted/40' : '',
+                'hover:bg-muted/100 transition-colors duration-150 ',
+              ]"
             >
-              <TableCell v-for="cell in row.getVisibleCells()" :key="cell.id">
+              <TableCell
+                v-for="cell in row.getVisibleCells()"
+                :key="cell.id"
+                class="border-r border-border last:border-r-0"
+                :style="
+                  cell.column.columnDef.id === 'actions'
+                    ? { maxWidth: `${cell.column.columnDef.maxSize}px` }
+                    : { maxWidth: `${cell.column.columnDef.size}px` }
+                "
+              >
                 <FlexRender :render="cell.column.columnDef.cell" :props="cell.getContext()" />
               </TableCell>
             </TableRow>
