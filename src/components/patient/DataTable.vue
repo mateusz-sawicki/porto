@@ -32,13 +32,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import {
-  DropdownMenu,
-  DropdownMenuCheckboxItem,
-  DropdownMenuContent,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu'
-import { Search, SlidersHorizontal, ChevronDown } from 'lucide-vue-next'
+
+import { Search } from 'lucide-vue-next'
 
 interface DataTableProps {
   columns: ColumnDef<TData, TValue>[]
@@ -139,26 +134,6 @@ function resetFilters() {
         <!-- Reset Filters -->
         <Button variant="outline" @click="resetFilters" class="h-8 px-2 lg:px-3"> Reset </Button>
       </div>
-
-      <!-- Column Visibility -->
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Button variant="outline" class="ml-auto">
-            Columns <ChevronDown class="ml-2 h-4 w-4" />
-          </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="end">
-          <DropdownMenuCheckboxItem
-            v-for="column in table.getAllColumns().filter((column) => column.getCanHide())"
-            :key="column.id"
-            class="capitalize"
-            :checked="column.getIsVisible()"
-            @update:checked="(value: boolean) => column.toggleVisibility(!!value)"
-          >
-            {{ column.id }}
-          </DropdownMenuCheckboxItem>
-        </DropdownMenuContent>
-      </DropdownMenu>
     </div>
 
     <!-- Table -->
