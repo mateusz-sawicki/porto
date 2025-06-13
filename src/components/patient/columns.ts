@@ -4,6 +4,7 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { ArrowUpDown, ArrowUp, ArrowDown, Eye, Trash2 } from 'lucide-vue-next'
 import type { Patient } from '@/types/patient/patient'
+import { RouterLink, useRouter } from 'vue-router'
 
 // Helper function to get the correct sort icon
 function getSortIcon(column: any) {
@@ -13,6 +14,7 @@ function getSortIcon(column: any) {
   return ArrowUpDown
 }
 const DEFAULT_COLUMN_WIDTH = 150
+const router = useRouter()
 export const columns: ColumnDef<Patient>[] = [
   {
     accessorKey: 'name',
@@ -138,16 +140,20 @@ export const columns: ColumnDef<Patient>[] = [
       const patient = row.original
       return h('div', { class: 'flex items-center justify-center gap-2 mx-3 my-2' }, [
         h(
-          Button,
+          RouterLink,
           {
-            variant: 'ghost',
-            size: 'sm',
-            class: 'h-8 w-8 p-0 hover:bg-blue-100 hover:text-blue-600 cursor-pointer',
-            onClick: () => {
-              console.log('View patient:', patient.id)
-            },
+            to: `/patient/${patient.id}`,
           },
-          () => h(Eye, { class: 'h-4 w-4' }),
+          () =>
+            h(
+              Button,
+              {
+                variant: 'ghost',
+                size: 'sm',
+                class: 'h-8 w-8 p-0 hover:bg-blue-100 hover:text-blue-600 cursor-pointer',
+              },
+              () => h(Eye, { class: 'h-4 w-4' }),
+            ),
         ),
         h(
           Button,

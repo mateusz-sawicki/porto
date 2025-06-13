@@ -7,6 +7,26 @@ export interface BreadcrumbItem {
   isActive?: boolean
 }
 
+// Helper function to detect if a string is a GUID
+function isGuid(str: string): boolean {
+  const guidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+  return guidRegex.test(str)
+}
+
+// Helper function to generate label from segment
+function generateLabel(segment: string): string {
+  // If it's a GUID, return it as-is
+  if (isGuid(segment)) {
+    return segment
+  }
+
+  // For non-GUID segments, split on dashes and capitalize
+  return segment
+    .split('-')
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(' ')
+}
+
 export function useBreadcrumbs() {
   const route = useRoute()
   const router = useRouter()
@@ -20,7 +40,7 @@ export function useBreadcrumbs() {
       const matchedRoute = router.getRoutes().find((r) => r.path === route.path)
       items.push({
         label: (matchedRoute?.meta?.title as string) || 'Dashboard',
-        href: undefined, // No link since it's the current page
+        href: undefined,
         isActive: true,
       })
       return items
@@ -54,11 +74,8 @@ export function useBreadcrumbs() {
           .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
           .join(' ')
       } else {
-        // Fallback: capitalize the URL segment
-        label = segment
-          .split('-')
-          .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-          .join(' ')
+        // Use the helper function for label generation
+        label = generateLabel(segment)
       }
 
       items.push({
@@ -71,9 +88,7 @@ export function useBreadcrumbs() {
     return items
   })
 
-  // Get current page title
   const currentPageTitle = computed(() => {
-    // Priority: meta.title > route name > fallback
     if (route.meta?.title) {
       return route.meta.title as string
     }
@@ -88,7 +103,6 @@ export function useBreadcrumbs() {
     return 'Page'
   })
 
-  // Get page description
   const pageDescription = computed(() => {
     return (route.meta?.description as string) || ''
   })
