@@ -246,12 +246,97 @@
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      <!-- Edit Patient Dialog -->
+      <Dialog v-model:open="editPatientDialog.open">
+        <DialogContent class="sm:max-w-[800px]">
+          <DialogHeader>
+            <DialogTitle class="flex items-center gap-2">
+              <Edit class="w-5 h-5" />
+              Edit Patient Information
+            </DialogTitle>
+          </DialogHeader>
+          <div class="grid gap-6 py-6">
+            <div class="grid grid-cols-2 gap-6">
+              <div class="grid gap-2">
+                <Label for="first-name">First Name</Label>
+                <Input
+                  id="first-name"
+                  v-model="editPatientDialog.firstName"
+                  placeholder="Enter first name"
+                />
+              </div>
+              <div class="grid gap-2">
+                <Label for="last-name">Last Name</Label>
+                <Input
+                  id="last-name"
+                  v-model="editPatientDialog.lastName"
+                  placeholder="Enter last name"
+                />
+              </div>
+            </div>
+            <div class="grid grid-cols-2 gap-6">
+              <div class="grid gap-2">
+                <Label for="date-of-birth">Date of Birth</Label>
+                <Input
+                  id="date-of-birth"
+                  type="date"
+                  v-model="editPatientDialog.dateOfBirth"
+                  class="w-full"
+                />
+              </div>
+              <div class="grid gap-2">
+                <Label for="gender">Gender</Label>
+                <Select
+                  :model-value="editPatientDialog.gender"
+                  @update:model-value="editPatientDialog.gender = $event"
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select gender" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Male">Male</SelectItem>
+                    <SelectItem value="Female">Female</SelectItem>
+                    <SelectItem value="Other">Other</SelectItem>
+                    <SelectItem value="Prefer not to say">Prefer not to say</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <div class="grid grid-cols-2 gap-6">
+              <div class="grid gap-2">
+                <Label for="phone">Phone</Label>
+                <Input
+                  id="phone"
+                  v-model="editPatientDialog.phone"
+                  placeholder="Enter phone number"
+                />
+              </div>
+              <div class="grid gap-2">
+                <Label for="email">Email</Label>
+                <Input
+                  id="email"
+                  type="email"
+                  v-model="editPatientDialog.email"
+                  placeholder="Enter email address"
+                />
+              </div>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" @click="cancelEditPatient"> Cancel </Button>
+            <Button @click="savePatientChanges" :disabled="!isPatientFormValid">
+              Save Changes
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import { useRoute } from 'vue-router'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -271,6 +356,14 @@ import {
   DialogFooter,
 } from '@/components/ui/dialog'
 import { Textarea } from '@/components/ui/textarea'
+import { Input } from '@/components/ui/input'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
 import { Badge } from '@/components/ui/badge'
 import { Label } from '@/components/ui/label'
 import { User, Phone, Heart, FileText, Plus, Edit, Eye, Trash2 } from 'lucide-vue-next'
@@ -382,6 +475,17 @@ const deleteDialog = ref({
   noteContent: '',
 })
 
+// Edit patient dialog state
+const editPatientDialog = ref({
+  open: false,
+  firstName: '',
+  lastName: '',
+  dateOfBirth: '', // Keep as string for easier handling
+  gender: '',
+  phone: '',
+  email: '',
+})
+
 // Mock API functions (replace these with real API calls)
 const fetchPatient = async (patientId) => {
   // Simulate API call delay
@@ -480,8 +584,16 @@ const getStatusVariant = (status) => {
 
 // Action handlers
 const editPatient = () => {
-  console.log('Edit patient:', route.params.id)
-  // Navigate to edit patient form
+  // Populate dialog with current patient data
+  editPatientDialog.value = {
+    open: true,
+    firstName: patient.value.firstName,
+    lastName: patient.value.lastName,
+    dateOfBirth: patient.value.dateOfBirth, // Keep as string
+    gender: patient.value.gender,
+    phone: patient.value.phone,
+    email: patient.value.email,
+  }
 }
 
 const createTreatmentPlan = () => {
@@ -592,6 +704,47 @@ const cancelDeleteNote = () => {
     noteContent: '',
   }
 }
+
+// Patient edit handlers
+const savePatientChanges = () => {
+  // Update patient data
+  patient.value = {
+    ...patient.value,
+    firstName: editPatientDialog.value.firstName,
+    lastName: editPatientDialog.value.lastName,
+    dateOfBirth: editPatientDialog.value.dateOfBirth, // Keep as string
+    gender: editPatientDialog.value.gender,
+    phone: editPatientDialog.value.phone,
+    email: editPatientDialog.value.email,
+    updatedAt: new Date().toISOString(),
+  }
+
+  cancelEditPatient()
+}
+
+const cancelEditPatient = () => {
+  editPatientDialog.value = {
+    open: false,
+    firstName: '',
+    lastName: '',
+    dateOfBirth: '', // Reset to empty string
+    gender: '',
+    phone: '',
+    email: '',
+  }
+}
+
+// Form validation
+const isPatientFormValid = computed(() => {
+  return (
+    editPatientDialog.value.firstName.trim() &&
+    editPatientDialog.value.lastName.trim() &&
+    editPatientDialog.value.dateOfBirth &&
+    editPatientDialog.value.gender &&
+    editPatientDialog.value.phone.trim() &&
+    editPatientDialog.value.email.trim()
+  )
+})
 
 // Load data on component mount
 onMounted(() => {
