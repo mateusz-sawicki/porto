@@ -1,178 +1,198 @@
 <template>
-  <div class="container mx-auto p-6 space-y-6">
-    <!-- Patient Header -->
-    <div class="flex items-center justify-between">
-      <div>
-        <h1 class="text-3xl font-bold">{{ patient.firstName }} {{ patient.lastName }}</h1>
-        <p class="text-muted-foreground">Patient ID: {{ patient.id }}</p>
+  <div class="container mx-auto p-6">
+    <!-- Loading State -->
+    <div v-if="loading" class="flex items-center justify-center py-12">
+      <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+      <span class="ml-2 text-muted-foreground">Loading patient details...</span>
+    </div>
+
+    <!-- Error State -->
+    <div v-else-if="error" class="flex items-center justify-center py-12">
+      <div class="text-center">
+        <p class="text-red-600 mb-4">{{ error }}</p>
+        <Button @click="fetchPatientData" variant="outline">Try Again</Button>
       </div>
-      <Button @click="editPatient" variant="outline">
-        <Edit class="w-4 h-4 mr-2" />
-        Edit Patient
-      </Button>
     </div>
 
-    <!-- Patient Information Cards -->
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-      <!-- Personal Information -->
-      <Card>
-        <CardHeader>
-          <CardTitle class="flex items-center">
-            <User class="w-5 h-5 mr-2" />
-            Personal Information
-          </CardTitle>
-        </CardHeader>
-        <CardContent class="space-y-2">
-          <div>
-            <Label class="text-sm font-medium">Date of Birth</Label>
-            <p class="text-sm">{{ formatDate(patient.dateOfBirth) }}</p>
-          </div>
-          <div>
-            <Label class="text-sm font-medium">Age</Label>
-            <p class="text-sm">{{ calculateAge(patient.dateOfBirth) }} years</p>
-          </div>
-          <div>
-            <Label class="text-sm font-medium">Gender</Label>
-            <p class="text-sm">{{ patient.gender }}</p>
-          </div>
-        </CardContent>
-      </Card>
-
-      <!-- Contact Information -->
-      <Card>
-        <CardHeader>
-          <CardTitle class="flex items-center">
-            <Phone class="w-5 h-5 mr-2" />
-            Contact Information
-          </CardTitle>
-        </CardHeader>
-        <CardContent class="space-y-2">
-          <div>
-            <Label class="text-sm font-medium">Phone</Label>
-            <p class="text-sm">{{ patient.phone }}</p>
-          </div>
-          <div>
-            <Label class="text-sm font-medium">Email</Label>
-            <p class="text-sm">{{ patient.email }}</p>
-          </div>
-          <div>
-            <Label class="text-sm font-medium">Address</Label>
-            <p class="text-sm">{{ patient.address }}</p>
-          </div>
-        </CardContent>
-      </Card>
-
-      <!-- Medical Information -->
-      <Card>
-        <CardHeader>
-          <CardTitle class="flex items-center">
-            <Heart class="w-5 h-5 mr-2" />
-            Medical Information
-          </CardTitle>
-        </CardHeader>
-        <CardContent class="space-y-2">
-          <div>
-            <Label class="text-sm font-medium">Insurance</Label>
-            <p class="text-sm">{{ patient.insurance }}</p>
-          </div>
-          <div>
-            <Label class="text-sm font-medium">Emergency Contact</Label>
-            <p class="text-sm">{{ patient.emergencyContact }}</p>
-          </div>
-          <div>
-            <Label class="text-sm font-medium">Allergies</Label>
-            <p class="text-sm">{{ patient.allergies || 'None reported' }}</p>
-          </div>
-        </CardContent>
-      </Card>
-    </div>
-
-    <!-- Treatment Plans Section -->
-    <Card>
-      <CardHeader>
-        <div class="flex items-center justify-between">
-          <CardTitle class="flex items-center">
-            <FileText class="w-5 h-5 mr-2" />
-            Treatment Plans
-          </CardTitle>
-          <Button @click="createTreatmentPlan">
-            <Plus class="w-4 h-4 mr-2" />
-            New Treatment Plan
-          </Button>
+    <!-- Patient Content -->
+    <div v-else-if="patient">
+      <!-- Patient Header -->
+      <div class="flex items-center justify-between mb-6">
+        <div>
+          <h1 class="text-3xl font-bold">{{ patient.firstName }} {{ patient.lastName }}</h1>
+          <p class="text-muted-foreground">Patient ID: {{ route.params.id }}</p>
         </div>
-      </CardHeader>
-      <CardContent>
-        <!-- Treatment Plans Table -->
-        <div class="rounded-md border">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Plan Name</TableHead>
-                <TableHead>Condition</TableHead>
-                <TableHead>Start Date</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead>Progress</TableHead>
-                <TableHead>Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              <TableRow v-for="plan in treatmentPlans" :key="plan.id">
-                <TableCell class="font-medium">{{ plan.name }}</TableCell>
-                <TableCell>{{ plan.condition }}</TableCell>
-                <TableCell>{{ formatDate(plan.startDate) }}</TableCell>
-                <TableCell>
-                  <Badge :variant="getStatusVariant(plan.status)">
-                    {{ plan.status }}
-                  </Badge>
-                </TableCell>
-                <TableCell>
-                  <div class="flex items-center space-x-2">
-                    <div class="w-full bg-gray-200 rounded-full h-2">
-                      <div
-                        class="bg-blue-600 h-2 rounded-full"
-                        :style="{ width: plan.progress + '%' }"
-                      ></div>
+        <Button @click="editPatient" variant="outline">
+          <Edit class="w-4 h-4 mr-2" />
+          Edit Patient
+        </Button>
+      </div>
+
+      <!-- Patient Information Cards -->
+      <div class="grid grid-cols-1 md:grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+        <!-- Personal Information -->
+        <Card>
+          <CardHeader>
+            <CardTitle class="flex items-center">
+              <User class="w-5 h-5 mr-2" />
+              Personal Information
+            </CardTitle>
+          </CardHeader>
+          <CardContent class="space-y-2">
+            <div>
+              <Label class="text-sm font-medium">Date of Birth</Label>
+              <p class="text-sm">{{ formatDate(patient.dateOfBirth) }}</p>
+            </div>
+            <div>
+              <Label class="text-sm font-medium">Age</Label>
+              <p class="text-sm">{{ calculateAge(patient.dateOfBirth) }} years</p>
+            </div>
+            <div>
+              <Label class="text-sm font-medium">Gender</Label>
+              <p class="text-sm">{{ patient.gender }}</p>
+            </div>
+          </CardContent>
+        </Card>
+
+        <!-- Contact Information -->
+        <Card>
+          <CardHeader>
+            <CardTitle class="flex items-center">
+              <Phone class="w-5 h-5 mr-2" />
+              Contact Information
+            </CardTitle>
+          </CardHeader>
+          <CardContent class="space-y-2">
+            <div>
+              <Label class="text-sm font-medium">Phone</Label>
+              <p class="text-sm">{{ patient.phone }}</p>
+            </div>
+            <div>
+              <Label class="text-sm font-medium">Email</Label>
+              <p class="text-sm">{{ patient.email }}</p>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      <!-- Treatment Plans Section -->
+      <Card class="mb-6">
+        <CardHeader>
+          <div class="flex items-center justify-between">
+            <CardTitle class="flex items-center">
+              <FileText class="w-5 h-5 mr-2" />
+              Treatment Plans ({{ treatmentPlans.length }})
+            </CardTitle>
+            <Button @click="createTreatmentPlan">
+              <Plus class="w-4 h-4 mr-2" />
+              New Treatment Plan
+            </Button>
+          </div>
+        </CardHeader>
+        <CardContent>
+          <!-- Treatment Plans Table -->
+          <div v-if="treatmentPlans.length > 0" class="rounded-md border">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Plan Name</TableHead>
+                  <TableHead>Provider</TableHead>
+                  <TableHead>Create Date</TableHead>
+                  <TableHead class="text-center">Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                <TableRow v-for="plan in treatmentPlans" :key="plan.id">
+                  <TableCell class="font-medium">{{ plan.name }}</TableCell>
+                  <TableCell>{{ plan.provider }}</TableCell>
+                  <TableCell>{{ formatDate(plan.startDate) }}</TableCell>
+                  <TableCell>
+                    <div class="flex items-center justify-center space-x-1">
+                      <Button @click="viewPlan(plan.id)" variant="ghost" size="sm">
+                        <Eye class="w-4 h-4" />
+                      </Button>
+                      <Button @click="editPlan(plan.id)" variant="ghost" size="sm">
+                        <Edit class="w-4 h-4" />
+                      </Button>
+                      <Button @click="deletePlan(plan.id)" variant="ghost" size="sm">
+                        <Trash2 class="w-4 h-4" />
+                      </Button>
                     </div>
-                    <span class="text-sm text-muted-foreground">{{ plan.progress }}%</span>
-                  </div>
-                </TableCell>
-                <TableCell>
-                  <div class="flex items-center space-x-2">
-                    <Button @click="viewPlan(plan.id)" variant="ghost" size="sm">
-                      <Eye class="w-4 h-4" />
-                    </Button>
-                    <Button @click="editPlan(plan.id)" variant="ghost" size="sm">
-                      <Edit class="w-4 h-4" />
-                    </Button>
-                    <Button @click="deletePlan(plan.id)" variant="ghost" size="sm">
-                      <Trash2 class="w-4 h-4" />
-                    </Button>
-                  </div>
-                </TableCell>
-              </TableRow>
-            </TableBody>
-          </Table>
-        </div>
+                  </TableCell>
+                </TableRow>
+              </TableBody>
+            </Table>
+          </div>
 
-        <!-- Empty State -->
-        <div v-if="treatmentPlans.length === 0" class="text-center py-8">
-          <FileText class="w-12 h-12 mx-auto text-muted-foreground mb-4" />
-          <h3 class="text-lg font-medium mb-2">No Treatment Plans</h3>
-          <p class="text-muted-foreground mb-4">
-            This patient doesn't have any treatment plans yet.
-          </p>
-          <Button @click="createTreatmentPlan">
-            <Plus class="w-4 h-4 mr-2" />
-            Create First Treatment Plan
-          </Button>
-        </div>
-      </CardContent>
-    </Card>
+          <!-- Empty State -->
+          <div v-else class="text-center py-12">
+            <FileText class="w-12 h-12 mx-auto text-muted-foreground mb-4" />
+            <h3 class="text-lg font-medium mb-2">No Treatment Plans</h3>
+            <p class="text-muted-foreground mb-4">
+              This patient doesn't have any treatment plans yet.
+            </p>
+            <Button @click="createTreatmentPlan">
+              <Plus class="w-4 h-4 mr-2" />
+              Create First Treatment Plan
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+
+      <!-- Notes Section -->
+      <Card>
+        <CardHeader>
+          <div class="flex items-center justify-between">
+            <CardTitle class="flex items-center">
+              <FileText class="w-5 h-5 mr-2" />
+              Notes ({{ notes.length }})
+            </CardTitle>
+            <Button @click="addNote">
+              <Plus class="w-4 h-4 mr-2" />
+              Add Note
+            </Button>
+          </div>
+        </CardHeader>
+        <CardContent>
+          <!-- Notes List -->
+          <div v-if="notes.length > 0" class="space-y-4">
+            <div v-for="note in notes" :key="note.id" class="border rounded-lg p-4 bg-gray-50">
+              <div class="flex justify-between items-start mb-2">
+                <div class="text-sm text-muted-foreground">
+                  {{ formatDateTime(note.createdAt) }} • {{ note.createdBy }}
+                </div>
+                <div class="flex items-center space-x-1">
+                  <Button @click="editNote(note)" variant="ghost" size="sm">
+                    <Edit class="w-4 h-4" />
+                  </Button>
+                  <Button @click="deleteNote(note.id)" variant="ghost" size="sm">
+                    <Trash2 class="w-4 h-4" />
+                  </Button>
+                </div>
+              </div>
+              <p class="text-sm leading-relaxed">{{ note.content }}</p>
+            </div>
+          </div>
+
+          <!-- Empty State -->
+          <div v-else class="text-center py-12">
+            <FileText class="w-12 h-12 mx-auto text-muted-foreground mb-4" />
+            <h3 class="text-lg font-medium mb-2">No Notes</h3>
+            <p class="text-muted-foreground mb-4">No notes have been added for this patient yet.</p>
+            <Button @click="addNote">
+              <Plus class="w-4 h-4 mr-2" />
+              Add First Note
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
   </div>
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, onMounted } from 'vue'
+import { useRoute } from 'vue-router'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import {
@@ -187,56 +207,148 @@ import { Badge } from '@/components/ui/badge'
 import { Label } from '@/components/ui/label'
 import { User, Phone, Heart, FileText, Plus, Edit, Eye, Trash2 } from 'lucide-vue-next'
 
-// Sample patient data
-const patient = ref({
-  id: 'P-2024-001',
+// Mock Data - Single patient for development
+const mockPatient = {
+  id: '123e4567-e89b-12d3-a456-426614174000',
   firstName: 'Sarah',
   lastName: 'Johnson',
   dateOfBirth: '1985-03-15',
   gender: 'Female',
   phone: '+1 (555) 123-4567',
   email: 'sarah.johnson@email.com',
-  address: '123 Main St, Springfield, IL 62701',
-  insurance: 'Blue Cross Blue Shield',
-  emergencyContact: 'John Johnson - (555) 987-6543',
-  allergies: 'Penicillin, Shellfish',
-})
+  createdAt: '2023-01-15T10:30:00Z',
+  updatedAt: '2024-06-10T14:22:00Z',
+}
 
-// Sample treatment plans data
-const treatmentPlans = ref([
+const mockTreatmentPlans = [
   {
-    id: 1,
-    name: 'Post-Surgery Recovery',
+    id: 'tp-001',
+    name: 'Post-Surgery Recovery Protocol',
     condition: 'Knee Replacement Recovery',
+    provider: 'Dr. Smith (Orthopedics)',
     startDate: '2024-01-15',
+    endDate: '2024-07-15',
     status: 'Active',
     progress: 75,
+    description: 'Comprehensive recovery plan including physical therapy and pain management',
   },
   {
-    id: 2,
-    name: 'Physical Therapy',
-    condition: 'Lower Back Pain',
+    id: 'tp-002',
+    name: 'Physical Therapy - Lower Back',
+    condition: 'Chronic Lower Back Pain',
+    provider: 'Sarah Williams, PT',
     startDate: '2024-02-01',
+    endDate: null,
     status: 'Active',
     progress: 45,
+    description: 'Targeted exercises to strengthen core and improve mobility',
   },
   {
-    id: 3,
-    name: 'Diabetes Management',
+    id: 'tp-003',
+    name: 'Diabetes Management Program',
     condition: 'Type 2 Diabetes',
+    provider: 'Dr. Johnson (Endocrinology)',
     startDate: '2023-11-20',
+    endDate: '2024-05-20',
     status: 'Completed',
     progress: 100,
+    description: 'Comprehensive diabetes education and medication optimization',
   },
   {
-    id: 4,
-    name: 'Hypertension Control',
+    id: 'tp-004',
+    name: 'Hypertension Control Plan',
     condition: 'High Blood Pressure',
+    provider: 'Dr. Brown (Cardiology)',
     startDate: '2024-03-10',
+    endDate: null,
     status: 'On Hold',
     progress: 20,
+    description: 'Lifestyle modifications and medication management',
   },
-])
+]
+
+const mockNotes = [
+  {
+    id: 'note-001',
+    content:
+      'Patient reports significant improvement in knee mobility following physical therapy sessions. Range of motion has increased by approximately 30% since last visit. Continuing with current exercise regimen.',
+    createdAt: '2024-06-10T14:30:00Z',
+    createdBy: 'Dr. Smith',
+  },
+  {
+    id: 'note-002',
+    content:
+      'Blood pressure readings have been consistently elevated over the past month. Patient admits to not taking medication as prescribed. Discussed importance of medication compliance and scheduled follow-up in 2 weeks.',
+    createdAt: '2024-06-08T09:15:00Z',
+    createdBy: 'Dr. Brown',
+  },
+  {
+    id: 'note-003',
+    content:
+      'Patient expressed concerns about managing diabetes during upcoming vacation. Provided travel guidelines and adjusted insulin timing. Emergency contact information updated.',
+    createdAt: '2024-05-28T16:45:00Z',
+    createdBy: 'Dr. Johnson',
+  },
+]
+
+// Reactive state
+const route = useRoute()
+const loading = ref(true)
+const error = ref(null)
+const patient = ref(null)
+const treatmentPlans = ref([])
+const notes = ref([])
+
+// Mock API functions (replace these with real API calls)
+const fetchPatient = async (patientId) => {
+  // Simulate API call delay
+  await new Promise((resolve) => setTimeout(resolve, 800))
+
+  // Always return the same mock patient for development
+  return mockPatient
+}
+
+const fetchTreatmentPlans = async (patientId) => {
+  // Simulate API call delay
+  await new Promise((resolve) => setTimeout(resolve, 500))
+
+  // Always return the same mock treatment plans for development
+  return mockTreatmentPlans
+}
+
+const fetchNotes = async (patientId) => {
+  // Simulate API call delay
+  await new Promise((resolve) => setTimeout(resolve, 300))
+
+  // Always return the same mock notes for development
+  return mockNotes
+}
+
+// Load patient data
+const fetchPatientData = async () => {
+  try {
+    loading.value = true
+    error.value = null
+
+    const patientId = route.params.id
+
+    // Fetch patient, treatment plans, and notes in parallel
+    const [patientData, treatmentPlansData, notesData] = await Promise.all([
+      fetchPatient(patientId),
+      fetchTreatmentPlans(patientId),
+      fetchNotes(patientId),
+    ])
+
+    patient.value = patientData
+    treatmentPlans.value = treatmentPlansData
+    notes.value = notesData
+  } catch (err) {
+    error.value = err.message || 'Failed to load patient data'
+    console.error('Error fetching patient data:', err)
+  } finally {
+    loading.value = false
+  }
+}
 
 // Helper functions
 const formatDate = (dateString) => {
@@ -244,6 +356,16 @@ const formatDate = (dateString) => {
     year: 'numeric',
     month: 'long',
     day: 'numeric',
+  })
+}
+
+const formatDateTime = (dateString) => {
+  return new Date(dateString).toLocaleDateString('en-US', {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
   })
 }
 
@@ -275,12 +397,12 @@ const getStatusVariant = (status) => {
 
 // Action handlers
 const editPatient = () => {
-  console.log('Edit patient:', patient.value.id)
+  console.log('Edit patient:', route.params.id)
   // Navigate to edit patient form
 }
 
 const createTreatmentPlan = () => {
-  console.log('Create new treatment plan for patient:', patient.value.id)
+  console.log('Create new treatment plan for patient:', route.params.id)
   // Navigate to create treatment plan form
 }
 
@@ -302,4 +424,38 @@ const deletePlan = (planId) => {
     treatmentPlans.value.splice(planIndex, 1)
   }
 }
+
+// Note action handlers
+const addNote = () => {
+  console.log('Add new note for patient:', route.params.id)
+  // TODO: Open dialog to add new note
+  // For now, we'll add a mock note
+  const newNote = {
+    id: `note-${Date.now()}`,
+    content: 'New note added by user...',
+    createdAt: new Date().toISOString(),
+    createdBy: 'Current User',
+  }
+  notes.value.unshift(newNote)
+}
+
+const editNote = (note) => {
+  console.log('Edit note:', note.id)
+  // TODO: Open dialog to edit note content
+  // For now, just log the action
+}
+
+const deleteNote = (noteId) => {
+  console.log('Delete note:', noteId)
+  // Show confirmation and delete
+  const noteIndex = notes.value.findIndex((note) => note.id === noteId)
+  if (noteIndex !== -1) {
+    notes.value.splice(noteIndex, 1)
+  }
+}
+
+// Load data on component mount
+onMounted(() => {
+  fetchPatientData()
+})
 </script>
