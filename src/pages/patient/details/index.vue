@@ -159,7 +159,8 @@
             <div v-for="note in notes" :key="note.id" class="border rounded-lg p-4 bg-gray-50">
               <div class="flex justify-between items-start mb-2">
                 <div class="text-sm text-muted-foreground">
-                  {{ formatDateTime(note.createdAt) }} • {{ note.createdBy }}
+                  {{ formatDateTime(note.updatedAt || note.createdAt) }} • {{ note.createdBy }}
+                  <span v-if="note.updatedAt" class="text-xs text-blue-600">(edited)</span>
                 </div>
                 <div class="flex items-center space-x-1">
                   <Button @click="editNote(note)" variant="ghost" size="sm">
@@ -186,6 +187,65 @@
           </div>
         </CardContent>
       </Card>
+
+      <!-- Note Add/Edit Dialog -->
+      <Dialog v-model:open="noteDialog.open">
+        <DialogContent class="sm:max-w-[600px]">
+          <DialogHeader>
+            <DialogTitle>
+              {{ noteDialog.mode === 'add' ? 'Add New Note' : 'Edit Note' }}
+            </DialogTitle>
+          </DialogHeader>
+          <div class="grid gap-4 py-4">
+            <div class="grid gap-2">
+              <Label for="note-content">Note Content</Label>
+              <Textarea
+                id="note-content"
+                v-model="noteDialog.content"
+                placeholder="Enter note content..."
+                class="min-h-[120px]"
+                :disabled="loading"
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" @click="cancelNoteDialog"> Cancel </Button>
+            <Button @click="saveNote" :disabled="!noteDialog.content.trim()">
+              {{ noteDialog.mode === 'add' ? 'Add Note' : 'Save Changes' }}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <!-- Delete Confirmation Dialog -->
+      <Dialog v-model:open="deleteDialog.open">
+        <DialogContent class="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle class="flex items-center gap-2 text-red-600">
+              <Trash2 class="w-5 h-5" />
+              Delete Note
+            </DialogTitle>
+          </DialogHeader>
+          <div class="py-4">
+            <p class="text-sm text-muted-foreground mb-4">
+              Are you sure you want to delete this note? This action cannot be undone.
+            </p>
+            <div class="bg-gray-50 rounded-lg p-3 border-l-4 border-red-200">
+              <p class="text-sm font-medium text-gray-700 mb-1">Note content:</p>
+              <p class="text-sm text-gray-600 line-clamp-3">
+                {{ deleteDialog.noteContent }}
+              </p>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" @click="cancelDeleteNote"> Cancel </Button>
+            <Button variant="destructive" @click="confirmDeleteNote">
+              <Trash2 class="w-4 h-4 mr-2" />
+              Delete Note
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   </div>
 </template>
@@ -203,6 +263,14 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from '@/components/ui/dialog'
+import { Textarea } from '@/components/ui/textarea'
 import { Badge } from '@/components/ui/badge'
 import { Label } from '@/components/ui/label'
 import { User, Phone, Heart, FileText, Plus, Edit, Eye, Trash2 } from 'lucide-vue-next'
@@ -298,6 +366,21 @@ const error = ref(null)
 const patient = ref(null)
 const treatmentPlans = ref([])
 const notes = ref([])
+
+// Note dialog state
+const noteDialog = ref({
+  open: false,
+  mode: 'add', // 'add' or 'edit'
+  noteId: null,
+  content: '',
+})
+
+// Delete confirmation dialog state
+const deleteDialog = ref({
+  open: false,
+  noteId: null,
+  noteContent: '',
+})
 
 // Mock API functions (replace these with real API calls)
 const fetchPatient = async (patientId) => {
@@ -427,30 +510,86 @@ const deletePlan = (planId) => {
 
 // Note action handlers
 const addNote = () => {
-  console.log('Add new note for patient:', route.params.id)
-  // TODO: Open dialog to add new note
-  // For now, we'll add a mock note
-  const newNote = {
-    id: `note-${Date.now()}`,
-    content: 'New note added by user...',
-    createdAt: new Date().toISOString(),
-    createdBy: 'Current User',
+  noteDialog.value = {
+    open: true,
+    mode: 'add',
+    noteId: null,
+    content: '',
   }
-  notes.value.unshift(newNote)
 }
 
 const editNote = (note) => {
-  console.log('Edit note:', note.id)
-  // TODO: Open dialog to edit note content
-  // For now, just log the action
+  noteDialog.value = {
+    open: true,
+    mode: 'edit',
+    noteId: note.id,
+    content: note.content,
+  }
+}
+
+const saveNote = () => {
+  const content = noteDialog.value.content.trim()
+
+  if (!content) return
+
+  if (noteDialog.value.mode === 'add') {
+    // Add new note
+    const newNote = {
+      id: `note-${Date.now()}`,
+      content: content,
+      createdAt: new Date().toISOString(),
+      createdBy: 'Current User',
+    }
+    notes.value.unshift(newNote)
+  } else {
+    // Edit existing note
+    const noteIndex = notes.value.findIndex((note) => note.id === noteDialog.value.noteId)
+    if (noteIndex !== -1) {
+      notes.value[noteIndex] = {
+        ...notes.value[noteIndex],
+        content: content,
+        updatedAt: new Date().toISOString(),
+      }
+    }
+  }
+
+  // Close dialog and reset
+  cancelNoteDialog()
+}
+
+const cancelNoteDialog = () => {
+  noteDialog.value = {
+    open: false,
+    mode: 'add',
+    noteId: null,
+    content: '',
+  }
 }
 
 const deleteNote = (noteId) => {
-  console.log('Delete note:', noteId)
-  // Show confirmation and delete
-  const noteIndex = notes.value.findIndex((note) => note.id === noteId)
+  const note = notes.value.find((n) => n.id === noteId)
+  if (note) {
+    deleteDialog.value = {
+      open: true,
+      noteId: noteId,
+      noteContent: note.content,
+    }
+  }
+}
+
+const confirmDeleteNote = () => {
+  const noteIndex = notes.value.findIndex((note) => note.id === deleteDialog.value.noteId)
   if (noteIndex !== -1) {
     notes.value.splice(noteIndex, 1)
+  }
+  cancelDeleteNote()
+}
+
+const cancelDeleteNote = () => {
+  deleteDialog.value = {
+    open: false,
+    noteId: null,
+    noteContent: '',
   }
 }
 
