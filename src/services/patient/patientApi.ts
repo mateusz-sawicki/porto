@@ -10,7 +10,12 @@ interface ApiResponse<T> {
   data: T
   message?: string
   success: boolean
+  error?: string
 }
+
+// Types for API operations
+type CreatePatientData = Omit<Patient, 'id' | 'creationDate' | 'updateDate'>
+type UpdatePatientData = Partial<Omit<Patient, 'id' | 'creationDate'>>
 
 // Mock API implementation
 class MockPatientApi {
@@ -18,6 +23,10 @@ class MockPatientApi {
 
   private delay() {
     return new Promise((resolve) => setTimeout(resolve, 300 + Math.random() * 500))
+  }
+
+  private generateId(): string {
+    return `patient-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
   }
 
   async getPatients(filters?: PatientFilters): Promise<ApiResponse<Patient[]>> {
@@ -53,27 +62,168 @@ class MockPatientApi {
       message: 'Patients retrieved successfully',
     }
   }
+
+  async createPatient(patientData: CreatePatientData): Promise<ApiResponse<Patient>> {
+    await this.delay()
+
+    try {
+      const now = new Date()
+      const newPatient: Patient = {
+        ...patientData,
+        id: this.generateId(),
+        creationDate: now,
+        updateDate: now,
+      }
+
+      // Add to mock data
+      this.mockPatients.unshift(newPatient)
+
+      return {
+        data: newPatient,
+        success: true,
+        message: 'Patient created successfully',
+      }
+    } catch (error) {
+      return {
+        data: {} as Patient,
+        success: false,
+        error: 'Failed to create patient',
+      }
+    }
+  }
+
+  async updatePatient(id: string, patientData: UpdatePatientData): Promise<ApiResponse<Patient>> {
+    await this.delay()
+
+    try {
+      const patientIndex = this.mockPatients.findIndex((p) => p.id === id)
+
+      if (patientIndex === -1) {
+        return {
+          data: {} as Patient,
+          success: false,
+          error: 'Patient not found',
+        }
+      }
+
+      const updatedPatient: Patient = {
+        ...this.mockPatients[patientIndex],
+        ...patientData,
+        updateDate: new Date(),
+      }
+
+      // Update in mock data
+      this.mockPatients[patientIndex] = updatedPatient
+
+      return {
+        data: updatedPatient,
+        success: true,
+        message: 'Patient updated successfully',
+      }
+    } catch (error) {
+      return {
+        data: {} as Patient,
+        success: false,
+        error: 'Failed to update patient',
+      }
+    }
+  }
+
+  async deletePatient(id: string): Promise<ApiResponse<null>> {
+    await this.delay()
+
+    try {
+      const patientIndex = this.mockPatients.findIndex((p) => p.id === id)
+
+      if (patientIndex === -1) {
+        return {
+          data: null,
+          success: false,
+          error: 'Patient not found',
+        }
+      }
+
+      // Remove from mock data
+      this.mockPatients.splice(patientIndex, 1)
+
+      return {
+        data: null,
+        success: true,
+        message: 'Patient deleted successfully',
+      }
+    } catch (error) {
+      return {
+        data: null,
+        success: false,
+        error: 'Failed to delete patient',
+      }
+    }
+  }
+
+  async getPatientById(id: string): Promise<ApiResponse<Patient>> {
+    await this.delay()
+
+    try {
+      const patient = this.mockPatients.find((p) => p.id === id)
+
+      if (!patient) {
+        return {
+          data: {} as Patient,
+          success: false,
+          error: 'Patient not found',
+        }
+      }
+
+      return {
+        data: patient,
+        success: true,
+        message: 'Patient retrieved successfully',
+      }
+    } catch (error) {
+      return {
+        data: {} as Patient,
+        success: false,
+        error: 'Failed to retrieve patient',
+      }
+    }
+  }
 }
 
 // Real API implementation (ready for production)
 class RealPatientApi {
   private async request<T>(endpoint: string, options: RequestInit = {}): Promise<ApiResponse<T>> {
-    const response = await fetch(`${API_BASE_URL}${endpoint}`, {
-      headers: {
-        'Content-Type': 'application/json',
-        // Add authentication headers here
-        // 'Authorization': `Bearer ${getAuthToken()}`,
-        ...options.headers,
-      },
-      ...options,
-    })
+    try {
+      const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+        headers: {
+          'Content-Type': 'application/json',
+          // Add authentication headers here
+          // 'Authorization': `Bearer ${getAuthToken()}`,
+          ...options.headers,
+        },
+        ...options,
+      })
 
-    if (!response.ok) {
-      const error = await response.json().catch(() => ({ message: 'Network error' }))
-      throw new Error(error.message || `HTTP ${response.status}`)
+      const data = await response.json()
+
+      if (!response.ok) {
+        return {
+          data: {} as T,
+          success: false,
+          error: data.message || `HTTP ${response.status}`,
+        }
+      }
+
+      return {
+        ...data,
+        success: true,
+      }
+    } catch (error) {
+      return {
+        data: {} as T,
+        success: false,
+        error: error instanceof Error ? error.message : 'Network error',
+      }
     }
-
-    return response.json()
   }
 
   async getPatients(filters?: PatientFilters): Promise<ApiResponse<Patient[]>> {
@@ -89,6 +239,30 @@ class RealPatientApi {
     const query = queryParams.toString()
     return this.request<Patient[]>(`/patients${query ? `?${query}` : ''}`)
   }
+
+  async createPatient(patientData: CreatePatientData): Promise<ApiResponse<Patient>> {
+    return this.request<Patient>('/patients', {
+      method: 'POST',
+      body: JSON.stringify(patientData),
+    })
+  }
+
+  async updatePatient(id: string, patientData: UpdatePatientData): Promise<ApiResponse<Patient>> {
+    return this.request<Patient>(`/patients/${id}`, {
+      method: 'PATCH',
+      body: JSON.stringify(patientData),
+    })
+  }
+
+  async deletePatient(id: string): Promise<ApiResponse<null>> {
+    return this.request<null>(`/patients/${id}`, {
+      method: 'DELETE',
+    })
+  }
+
+  async getPatientById(id: string): Promise<ApiResponse<Patient>> {
+    return this.request<Patient>(`/patients/${id}`)
+  }
 }
 
 // Export the appropriate API instance
@@ -96,6 +270,9 @@ export const patientApi = USE_MOCK_DATA ? new MockPatientApi() : new RealPatient
 
 // Export for testing or direct usage
 export { MockPatientApi, RealPatientApi }
+
+// Export types
+export type { CreatePatientData, UpdatePatientData }
 
 // Environment info
 export const isUsingMockData = USE_MOCK_DATA

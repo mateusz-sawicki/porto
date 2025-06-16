@@ -140,6 +140,103 @@ export function usePatients() {
     }
   }
 
+  async function addPatient(
+    patientData: Omit<Patient, 'id' | 'creationDate' | 'updateDate'>,
+  ): Promise<Patient | null> {
+    loading.value = true
+    error.value = null
+
+    try {
+      const response = await patientApi.createPatient(patientData)
+
+      if (response.success) {
+        // Convert date strings to Date objects if needed
+        const newPatient: Patient = {
+          ...response.data,
+          creationDate: new Date(response.data.creationDate),
+          updateDate: new Date(response.data.updateDate),
+        }
+
+        // Add to local array at the beginning (newest first)
+        patients.value.unshift(newPatient)
+
+        return newPatient
+      } else {
+        throw new Error(response.error || 'Failed to create patient')
+      }
+    } catch (err) {
+      error.value = err instanceof Error ? err.message : 'Failed to create patient'
+      console.error('Error creating patient:', err)
+      return null
+    } finally {
+      loading.value = false
+    }
+  }
+
+  async function updatePatient(
+    id: string,
+    patientData: Partial<Omit<Patient, 'id' | 'creationDate'>>,
+  ): Promise<Patient | null> {
+    loading.value = true
+    error.value = null
+
+    try {
+      const response = await patientApi.updatePatient(id, patientData)
+
+      if (response.success) {
+        // Convert date strings to Date objects if needed
+        const updatedPatient: Patient = {
+          ...response.data,
+          creationDate: new Date(response.data.creationDate),
+          updateDate: new Date(response.data.updateDate),
+        }
+
+        // Update in local array
+        const index = patients.value.findIndex((p) => p.id === id)
+        if (index !== -1) {
+          patients.value[index] = updatedPatient
+        }
+
+        return updatedPatient
+      } else {
+        throw new Error(response.error || 'Failed to update patient')
+      }
+    } catch (err) {
+      error.value = err instanceof Error ? err.message : 'Failed to update patient'
+      console.error('Error updating patient:', err)
+      return null
+    } finally {
+      loading.value = false
+    }
+  }
+
+  async function deletePatient(id: string): Promise<boolean> {
+    loading.value = true
+    error.value = null
+
+    try {
+      const response = await patientApi.deletePatient(id)
+
+      if (response.success) {
+        // Remove from local array
+        const index = patients.value.findIndex((p) => p.id === id)
+        if (index !== -1) {
+          patients.value.splice(index, 1)
+        }
+
+        return true
+      } else {
+        throw new Error(response.error || 'Failed to delete patient')
+      }
+    } catch (err) {
+      error.value = err instanceof Error ? err.message : 'Failed to delete patient'
+      console.error('Error deleting patient:', err)
+      return false
+    } finally {
+      loading.value = false
+    }
+  }
+
   function getPatientById(id: string): Patient | undefined {
     return patients.value.find((p) => p.id === id)
   }
@@ -186,6 +283,9 @@ export function usePatients() {
 
     // Methods
     fetchPatients,
+    addPatient,
+    updatePatient,
+    deletePatient,
     getPatientById,
     clearFilters,
     setSorting,
