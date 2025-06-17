@@ -287,10 +287,7 @@
               </div>
               <div class="grid gap-2">
                 <Label for="gender">Gender</Label>
-                <Select
-                  :model-value="editPatientDialog.gender"
-                  @update:model-value="editPatientDialog.gender = $event"
-                >
+                <Select v-model="editPatientDialog.gender">
                   <SelectTrigger>
                     <SelectValue placeholder="Select gender" />
                   </SelectTrigger>
@@ -331,13 +328,65 @@
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      <!-- New Treatment Plan Dialog -->
+      <Dialog v-model:open="treatmentPlanDialog.open">
+        <DialogContent class="sm:max-w-[500px]">
+          <DialogHeader>
+            <DialogTitle class="flex items-center gap-2">
+              <Plus class="w-5 h-5" />
+              New Treatment Plan
+            </DialogTitle>
+          </DialogHeader>
+          <div class="grid gap-4 py-4">
+            <div class="grid gap-2">
+              <Label for="treatment-plan-name">Treatment Plan Name</Label>
+              <Input
+                id="treatment-plan-name"
+                v-model="treatmentPlanDialog.name"
+                placeholder="Enter treatment plan name"
+                :disabled="treatmentPlanDialog.isCreating"
+              />
+            </div>
+            <div class="flex items-center space-x-2">
+              <Checkbox
+                id="is-child"
+                :checked="treatmentPlanDialog.isChild"
+                @update:checked="(checked: boolean) => (treatmentPlanDialog.isChild = checked)"
+                :disabled="treatmentPlanDialog.isCreating"
+              />
+              <Label
+                for="is-child"
+                class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+              >
+                Is Child?
+              </Label>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              @click="cancelTreatmentPlan"
+              :disabled="treatmentPlanDialog.isCreating"
+            >
+              Cancel
+            </Button>
+            <Button
+              @click="saveTreatmentPlan"
+              :disabled="!treatmentPlanDialog.name.trim() || treatmentPlanDialog.isCreating"
+            >
+              {{ treatmentPlanDialog.isCreating ? 'Creating...' : 'Create Treatment Plan' }}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, onMounted, computed } from 'vue'
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import {
@@ -357,6 +406,7 @@ import {
 } from '@/components/ui/dialog'
 import { Textarea } from '@/components/ui/textarea'
 import { Input } from '@/components/ui/input'
+import { Checkbox } from '@/components/ui/checkbox'
 import {
   Select,
   SelectContent,
@@ -368,8 +418,41 @@ import { Badge } from '@/components/ui/badge'
 import { Label } from '@/components/ui/label'
 import { User, Phone, Heart, FileText, Plus, Edit, Eye, Trash2 } from 'lucide-vue-next'
 
+// Type definitions
+interface Patient {
+  id: string
+  firstName: string
+  lastName: string
+  dateOfBirth: string
+  gender: string
+  phone: string
+  email: string
+  createdAt: string
+  updatedAt: string
+}
+
+interface TreatmentPlan {
+  id: string
+  name: string
+  condition: string
+  provider: string
+  startDate: string
+  endDate: string | null
+  status: string
+  progress: number
+  description: string
+}
+
+interface Note {
+  id: string
+  content: string
+  createdAt: string
+  createdBy: string
+  updatedAt?: string
+}
+
 // Mock Data - Single patient for development
-const mockPatient = {
+const mockPatient: Patient = {
   id: '123e4567-e89b-12d3-a456-426614174000',
   firstName: 'Sarah',
   lastName: 'Johnson',
@@ -381,7 +464,7 @@ const mockPatient = {
   updatedAt: '2024-06-10T14:22:00Z',
 }
 
-const mockTreatmentPlans = [
+const mockTreatmentPlans: TreatmentPlan[] = [
   {
     id: 'tp-001',
     name: 'Post-Surgery Recovery Protocol',
@@ -428,7 +511,7 @@ const mockTreatmentPlans = [
   },
 ]
 
-const mockNotes = [
+const mockNotes: Note[] = [
   {
     id: 'note-001',
     content:
@@ -454,24 +537,25 @@ const mockNotes = [
 
 // Reactive state
 const route = useRoute()
+const router = useRouter()
 const loading = ref(true)
-const error = ref(null)
-const patient = ref(null)
-const treatmentPlans = ref([])
-const notes = ref([])
+const error = ref<string | null>(null)
+const patient = ref<Patient | null>(null)
+const treatmentPlans = ref<TreatmentPlan[]>([])
+const notes = ref<Note[]>([])
 
 // Note dialog state
 const noteDialog = ref({
   open: false,
-  mode: 'add', // 'add' or 'edit'
-  noteId: null,
+  mode: 'add' as 'add' | 'edit',
+  noteId: null as string | null,
   content: '',
 })
 
 // Delete confirmation dialog state
 const deleteDialog = ref({
   open: false,
-  noteId: null,
+  noteId: null as string | null,
   noteContent: '',
 })
 
@@ -480,14 +564,22 @@ const editPatientDialog = ref({
   open: false,
   firstName: '',
   lastName: '',
-  dateOfBirth: '', // Keep as string for easier handling
+  dateOfBirth: '',
   gender: '',
   phone: '',
   email: '',
 })
 
+// Treatment plan dialog state
+const treatmentPlanDialog = ref({
+  open: false,
+  name: '',
+  isChild: false,
+  isCreating: false,
+})
+
 // Mock API functions (replace these with real API calls)
-const fetchPatient = async (patientId) => {
+const fetchPatient = async (patientId: string): Promise<Patient> => {
   // Simulate API call delay
   await new Promise((resolve) => setTimeout(resolve, 800))
 
@@ -495,7 +587,7 @@ const fetchPatient = async (patientId) => {
   return mockPatient
 }
 
-const fetchTreatmentPlans = async (patientId) => {
+const fetchTreatmentPlans = async (patientId: string): Promise<TreatmentPlan[]> => {
   // Simulate API call delay
   await new Promise((resolve) => setTimeout(resolve, 500))
 
@@ -503,12 +595,44 @@ const fetchTreatmentPlans = async (patientId) => {
   return mockTreatmentPlans
 }
 
-const fetchNotes = async (patientId) => {
+const fetchNotes = async (patientId: string): Promise<Note[]> => {
   // Simulate API call delay
   await new Promise((resolve) => setTimeout(resolve, 300))
 
   // Always return the same mock notes for development
   return mockNotes
+}
+
+// Mock API for creating treatment plan
+const createTreatmentPlanApi = async (
+  patientId: string,
+  planData: { name: string; isChild: boolean },
+) => {
+  // Simulate API call delay
+  await new Promise((resolve) => setTimeout(resolve, 1000))
+
+  // Generate a mock plan ID
+  const planId = `tp-${Date.now()}`
+
+  console.log('Creating treatment plan:', {
+    patientId,
+    planId,
+    planData,
+  })
+
+  // Simulate success response
+  return {
+    success: true,
+    planId,
+    data: {
+      id: planId,
+      name: planData.name,
+      isChild: planData.isChild,
+      patientId,
+      createdAt: new Date().toISOString(),
+      status: 'Draft',
+    },
+  }
 }
 
 // Load patient data
@@ -517,7 +641,7 @@ const fetchPatientData = async () => {
     loading.value = true
     error.value = null
 
-    const patientId = route.params.id
+    const patientId = route.params.id as string
 
     // Fetch patient, treatment plans, and notes in parallel
     const [patientData, treatmentPlansData, notesData] = await Promise.all([
@@ -530,7 +654,7 @@ const fetchPatientData = async () => {
     treatmentPlans.value = treatmentPlansData
     notes.value = notesData
   } catch (err) {
-    error.value = err.message || 'Failed to load patient data'
+    error.value = (err as Error).message || 'Failed to load patient data'
     console.error('Error fetching patient data:', err)
   } finally {
     loading.value = false
@@ -538,7 +662,7 @@ const fetchPatientData = async () => {
 }
 
 // Helper functions
-const formatDate = (dateString) => {
+const formatDate = (dateString: string) => {
   return new Date(dateString).toLocaleDateString('en-US', {
     year: 'numeric',
     month: 'long',
@@ -546,7 +670,7 @@ const formatDate = (dateString) => {
   })
 }
 
-const formatDateTime = (dateString) => {
+const formatDateTime = (dateString: string) => {
   return new Date(dateString).toLocaleDateString('en-US', {
     year: 'numeric',
     month: 'short',
@@ -556,7 +680,7 @@ const formatDateTime = (dateString) => {
   })
 }
 
-const calculateAge = (dateOfBirth) => {
+const calculateAge = (dateOfBirth: string) => {
   const today = new Date()
   const birthDate = new Date(dateOfBirth)
   let age = today.getFullYear() - birthDate.getFullYear()
@@ -569,7 +693,7 @@ const calculateAge = (dateOfBirth) => {
   return age
 }
 
-const getStatusVariant = (status) => {
+const getStatusVariant = (status: string) => {
   switch (status.toLowerCase()) {
     case 'active':
       return 'default'
@@ -584,12 +708,14 @@ const getStatusVariant = (status) => {
 
 // Action handlers
 const editPatient = () => {
+  if (!patient.value) return
+
   // Populate dialog with current patient data
   editPatientDialog.value = {
     open: true,
     firstName: patient.value.firstName,
     lastName: patient.value.lastName,
-    dateOfBirth: patient.value.dateOfBirth, // Keep as string
+    dateOfBirth: patient.value.dateOfBirth,
     gender: patient.value.gender,
     phone: patient.value.phone,
     email: patient.value.email,
@@ -597,21 +723,65 @@ const editPatient = () => {
 }
 
 const createTreatmentPlan = () => {
-  console.log('Create new treatment plan for patient:', route.params.id)
-  // Navigate to create treatment plan form
+  treatmentPlanDialog.value = {
+    open: true,
+    name: '',
+    isChild: false,
+    isCreating: false,
+  }
 }
 
-const viewPlan = (planId) => {
+// Treatment plan handlers
+const saveTreatmentPlan = async () => {
+  if (!treatmentPlanDialog.value.name.trim()) return
+
+  treatmentPlanDialog.value.isCreating = true
+
+  try {
+    const patientId = route.params.id as string
+    const planData = {
+      name: treatmentPlanDialog.value.name,
+      isChild: treatmentPlanDialog.value.isChild,
+    }
+
+    const response = await createTreatmentPlanApi(patientId, planData)
+
+    if (response.success) {
+      // Close dialog
+      cancelTreatmentPlan()
+
+      // Navigate to treatment plan creation page
+      await router.push(`/patient/${patientId}/treatment-plan/${response.planId}`)
+    }
+  } catch (error) {
+    console.error('Failed to create treatment plan:', error)
+    // Show error message to user
+    alert('Failed to create treatment plan. Please try again.')
+  } finally {
+    treatmentPlanDialog.value.isCreating = false
+  }
+}
+
+const cancelTreatmentPlan = () => {
+  treatmentPlanDialog.value = {
+    open: false,
+    name: '',
+    isChild: false,
+    isCreating: false,
+  }
+}
+
+const viewPlan = (planId: string) => {
   console.log('View treatment plan:', planId)
   // Navigate to treatment plan details
 }
 
-const editPlan = (planId) => {
+const editPlan = (planId: string) => {
   console.log('Edit treatment plan:', planId)
   // Navigate to edit treatment plan form
 }
 
-const deletePlan = (planId) => {
+const deletePlan = (planId: string) => {
   console.log('Delete treatment plan:', planId)
   // Show confirmation dialog and delete
   const planIndex = treatmentPlans.value.findIndex((plan) => plan.id === planId)
@@ -630,7 +800,7 @@ const addNote = () => {
   }
 }
 
-const editNote = (note) => {
+const editNote = (note: Note) => {
   noteDialog.value = {
     open: true,
     mode: 'edit',
@@ -646,7 +816,7 @@ const saveNote = () => {
 
   if (noteDialog.value.mode === 'add') {
     // Add new note
-    const newNote = {
+    const newNote: Note = {
       id: `note-${Date.now()}`,
       content: content,
       createdAt: new Date().toISOString(),
@@ -678,7 +848,7 @@ const cancelNoteDialog = () => {
   }
 }
 
-const deleteNote = (noteId) => {
+const deleteNote = (noteId: string) => {
   const note = notes.value.find((n) => n.id === noteId)
   if (note) {
     deleteDialog.value = {
@@ -707,12 +877,14 @@ const cancelDeleteNote = () => {
 
 // Patient edit handlers
 const savePatientChanges = () => {
+  if (!patient.value) return
+
   // Update patient data
   patient.value = {
     ...patient.value,
     firstName: editPatientDialog.value.firstName,
     lastName: editPatientDialog.value.lastName,
-    dateOfBirth: editPatientDialog.value.dateOfBirth, // Keep as string
+    dateOfBirth: editPatientDialog.value.dateOfBirth,
     gender: editPatientDialog.value.gender,
     phone: editPatientDialog.value.phone,
     email: editPatientDialog.value.email,
@@ -727,7 +899,7 @@ const cancelEditPatient = () => {
     open: false,
     firstName: '',
     lastName: '',
-    dateOfBirth: '', // Reset to empty string
+    dateOfBirth: '',
     gender: '',
     phone: '',
     email: '',
