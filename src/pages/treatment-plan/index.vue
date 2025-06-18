@@ -43,7 +43,6 @@
                 isLoading ? 'cursor-wait' : 'cursor-pointer',
               ]"
             >
-              >
               <CheckCircle v-if="currentStep > step.id" class="h-4 w-4" />
               <component v-else :is="step.icon" class="h-4 w-4" />
             </button>

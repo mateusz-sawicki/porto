@@ -9,6 +9,7 @@ import AppSidebar from '@/components/layout/sidebar/AppSidebar.vue'
 import { SidebarInset, SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar'
 import { RouterView } from 'vue-router'
 import AppHeader from '@/components/layout/header/AppHeader.vue'
+import ContentLayout from './ContentLayout.vue'
 </script>
 
 <template>
@@ -16,7 +17,9 @@ import AppHeader from '@/components/layout/header/AppHeader.vue'
     <AppSidebar />
     <SidebarInset>
       <AppHeader />
-      <RouterView />
+      <ContentLayout>
+        <RouterView />
+      </ContentLayout>
     </SidebarInset>
   </SidebarProvider>
 </template>
