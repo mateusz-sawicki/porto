@@ -233,6 +233,7 @@ function resetFilters() {
           {{ table.getPageCount() }}
         </div>
         <div class="flex items-center space-x-2">
+          <!--TODO: CHANGE THOSE SVG BUTTONS TO ICONS-->
           <Button
             variant="outline"
             class="hidden h-8 w-8 p-0 lg:flex"
