@@ -197,8 +197,7 @@
               <div class="text-center space-y-4">
                 <User class="w-16 h-16 mx-auto text-gray-400" />
                 <div>
-                  <h4 class="text-lg font-medium text-gray-600">Odontogram Chart</h4>
-                  <p class="text-sm text-gray-500">Interactive dental chart coming soon</p>
+                  <Odontogram />
                 </div>
               </div>
             </Card>
@@ -679,6 +678,7 @@ import {
   Camera,
   Save,
 } from 'lucide-vue-next'
+import Odontogram from '@/components/odontogram/Odontogram.vue'
 
 // Types
 interface FormData {
