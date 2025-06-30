@@ -116,6 +116,18 @@ const { assignedProcedures, showTooltip } = useInteractiveSvg({
 }
 
 .schematic-svg :deep(path:hover) {
-  fill: var(--blue-200) !important;
+  fill: var(--primary) !important;
+}
+
+/* 🎯 THEME-ADAPTIVE STYLES FOR SELECTED SEGMENTS */
+.schematic-svg :deep(path.selected) {
+  fill: var(--primary) !important;
+  stroke: var(--primary-foreground) !important;
+  stroke-width: 1px !important;
+}
+
+/* 🎯 SELECTED HOVER STATE */
+.schematic-svg :deep(path.selected:hover) {
+  fill: var(--primary/90) !important;
 }
 </style>
