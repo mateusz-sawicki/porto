@@ -1,12 +1,10 @@
-<!-- components/ToothContainer.vue -->
+<!-- components/ToothContainer.vue - Fixed Layout to Match React/Mantine Original -->
 <template>
   <Popover :open="showTooltip">
     <PopoverTrigger asChild>
       <div
-        class="relative w-[90px] h-[280px] flex items-center justify-between transition-colors duration-200 cursor-pointer outline-2 outline-offset-[-1px] outline-border hover:bg-muted"
-        :class="{
-          'outline-red-500 z-[2] bg-red-500/20': isSelected,
-        }"
+        class="tooth-wrapper"
+        :class="{ selected: isSelected }"
         @click="handleToothClick"
         @mouseenter="hoveredTooth = tooth.number"
         @mouseleave="hoveredTooth = null"
@@ -14,8 +12,11 @@
         <!-- Extraction Overlay -->
         <ExtractionOverlay v-if="extraction" />
 
-        <!-- Tooth Content -->
-        <div class="h-[280px] flex items-center justify-center">
+        <!-- Main Group Container (equivalent to Mantine's Group with h={280}) -->
+        <div
+          class="tooth-group"
+          :class="{ 'tooth-group--bottom': direction === ToothContainerDirection.Bottom }"
+        >
           <template v-if="direction === ToothContainerDirection.Top">
             <ToothLabel
               :toothNumber="tooth.number"
@@ -150,3 +151,64 @@ const handleToothClick = () => {
   emit('tooth-click')
 }
 </script>
+
+<style scoped>
+/* Fixed layout to match React/Mantine ToothContainer */
+.tooth-wrapper {
+  /* Main container behaves like Mantine's Stack - vertical flex */
+  outline: 2px solid var(--border);
+  outline-offset: -1px;
+  width: 90px;
+  height: 280px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.2s ease;
+  position: relative;
+  cursor: pointer;
+}
+
+.tooth-wrapper:hover {
+  background-color: var(--muted);
+}
+
+.selected {
+  outline: 2px solid var(--destructive);
+  outline-offset: -1px;
+  z-index: 2;
+  background-color: var(--destructive) / 0.2;
+}
+
+/* Group container that mimics Mantine's Group with h={280} - adaptive layout */
+.tooth-group {
+  display: flex;
+  flex-direction: column; /* Default for Top direction - Schematic at end */
+  align-items: center;
+  justify-content: start;
+  height: 280px;
+  width: 100%;
+  gap: 4px;
+}
+
+.tooth-group--bottom {
+  flex-direction: column; /* Bottom direction keeps same flex direction but template order changes */
+  justify-content: end;
+}
+
+/* Ensure the extraction overlay covers the entire tooth wrapper */
+.tooth-wrapper > :first-child {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 1;
+}
+
+/* Ensure the tooth group is above the extraction overlay */
+.tooth-group {
+  z-index: 2;
+  position: relative;
+}
+</style>

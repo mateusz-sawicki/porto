@@ -14,13 +14,12 @@
     />
 
     <!-- Dental Chart -->
-    <Card class="mt-4 p-5" :style="{ width: `${containerWidth + quadrantGap + 40}px` }">
-      <div :style="{ width: `${containerWidth + quadrantGap}px` }">
+    <Card class="mt-4 p-5">
+      <div>
         <!-- Upper row - Q1 and Q2 -->
         <div
           class="flex mb-2"
           :style="{
-            gap: `${quadrantGap}px`,
             marginLeft: `${upperRowLeftMargin}px`,
           }"
         >
@@ -52,7 +51,6 @@
         <div
           class="flex"
           :style="{
-            gap: `${quadrantGap}px`,
             marginLeft: `${lowerRowLeftMargin}px`,
           }"
         >

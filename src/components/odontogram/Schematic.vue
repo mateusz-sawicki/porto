@@ -109,13 +109,13 @@ const { assignedProcedures, showTooltip } = useInteractiveSvg({
 /* 🎯 THESE STYLES MAKE YOUR SCHEMATIC SVG INTERACTIVE */
 .schematic-svg :deep(path) {
   fill: transparent;
-  stroke: hsl(var(--border));
+  stroke: var(--border);
   stroke-width: 0.35px;
   transition: fill 0.2s ease;
   cursor: pointer;
 }
 
 .schematic-svg :deep(path:hover) {
-  fill: hsl(var(--blue-200)) !important;
+  fill: var(--blue-200) !important;
 }
 </style>

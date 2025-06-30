@@ -59,17 +59,20 @@ interface Emits {
 const props = defineProps<Props>()
 const emit = defineEmits<Emits>()
 
+// Use the original ref approach but with better handling
 const svgRef = ref<HTMLElement>()
 
 const marginDirection = computed(() => {
-  const marginValue = '30px'
+  const marginValue = '15px'
   return props.direction === ToothContainerDirection.Bottom
     ? { marginTop: marginValue }
     : { marginBottom: marginValue }
 })
+
 const ToothSvgComponent = computed(() => {
   return getToothSvgComponent(props.number) // Gets SVG for tooth "11", "16", etc.
 })
+
 // Interactive SVG logic
 const normalizeSegment = (id: string): string => {
   if (id.includes('root')) return `${props.number}_root`
@@ -100,7 +103,7 @@ const procedureColors = computed(() => {
 })
 
 const { assignedProcedures, showTooltip } = useInteractiveSvg({
-  svgRef,
+  svgRef: svgRef, // Back to original ref
   normalizeSegment,
   assignments,
   procedureColors,
@@ -125,5 +128,11 @@ const { assignedProcedures, showTooltip } = useInteractiveSvg({
 
 .tooth-svg :deep(g.root:hover path) {
   fill: hsl(var(--blue-200)) !important;
+}
+
+.tooth-svg :deep(path.selected) {
+  fill: hsl(var(--primary)) !important;
+  stroke: hsl(var(--primary-foreground));
+  stroke-width: 2;
 }
 </style>

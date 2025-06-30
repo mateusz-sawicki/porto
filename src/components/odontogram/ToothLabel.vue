@@ -7,7 +7,7 @@
       </div>
     </DropdownMenuTrigger>
 
-    <DropdownMenuContent align="start" @click.stop>
+    <DropdownMenuContent>
       <DropdownMenuItem v-if="!isExtra" @click="$emit('add-extra-before')">
         Dodaj ząb nadliczbowy przed ({{ generateExtraToothNumber(toothNumber, 'before') }})
       </DropdownMenuItem>
