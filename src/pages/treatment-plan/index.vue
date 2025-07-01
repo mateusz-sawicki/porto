@@ -1,6 +1,6 @@
 <template>
   <div class="min-h-screen bg-gray-50 p-6">
-    <div class="max-w-6xl mx-auto">
+    <div class="mx-auto">
       <!-- Header -->
       <div class="mb-8">
         <div class="flex items-center justify-between">
@@ -187,20 +187,15 @@
           </div>
 
           <!-- Step 2: Odontogram -->
-          <div v-else-if="currentStep === 2" class="space-y-6">
+          <div v-else-if="currentStep === 2" class="space-y-6 overflow-hidden">
             <div class="text-center mb-6">
               <h3 class="text-2xl font-bold mb-2">Odontogram</h3>
-              <p class="text-muted-foreground">Dental chart will be implemented here</p>
             </div>
 
-            <Card class="min-h-[400px] flex items-center justify-center">
-              <div class="text-center space-y-4">
-                <User class="w-16 h-16 mx-auto text-gray-400" />
-                <div>
-                  <Odontogram />
-                </div>
-              </div>
-            </Card>
+            <!-- Just use the component - it handles everything internally -->
+            <div class="w-full overflow-hidden">
+              <Odontogram />
+            </div>
           </div>
 
           <!-- Step 3: Measurements -->

@@ -115,24 +115,42 @@ const { assignedProcedures, showTooltip } = useInteractiveSvg({
 <style scoped>
 .tooth-svg :deep(path) {
   fill: transparent;
-  stroke: black;
+  stroke: var(--border);
+  stroke-width: 1px;
   cursor: pointer;
   transition: fill 0.2s ease;
 }
 
-.tooth-svg :deep(.root:hover path),
-.tooth-svg :deep(.root:hover),
-.tooth-svg :deep(.crown:hover) {
-  fill: hsl(var(--blue-200)) !important;
+/* 🎯 HOVER FOR ROOT PARTS - handles both individual paths and paths in groups */
+.tooth-svg :deep(path[id*='root']:hover),
+.tooth-svg :deep(g[id*='root']:hover path) {
+  fill: var(--destructive) !important; /* Red-ish for root */
 }
 
-.tooth-svg :deep(g.root:hover path) {
-  fill: hsl(var(--blue-200)) !important;
+/* 🎯 HOVER FOR CROWN PARTS */
+.tooth-svg :deep(path[id*='crown']:hover) {
+  fill: var(--primary) !important; /* Primary color for crown */
 }
 
+/* 🎯 SELECTED STATES */
 .tooth-svg :deep(path.selected) {
-  fill: hsl(var(--primary)) !important;
-  stroke: hsl(var(--primary-foreground));
-  stroke-width: 2;
+  fill: var(--primary) !important;
+  stroke: var(--primary-foreground) !important;
+  stroke-width: 2px !important;
+}
+
+/* 🎯 SELECTED HOVER STATES */
+.tooth-svg :deep(path[id*='root'].selected:hover),
+.tooth-svg :deep(g[id*='root'] path.selected:hover) {
+  fill: var(--destructive/90) !important;
+}
+
+.tooth-svg :deep(path[id*='crown'].selected:hover) {
+  fill: var(--primary/90) !important;
+}
+
+/* 🎯 SPECIFIC HOVER FOR ROOT GROUP (for molars) */
+.tooth-svg :deep(g[id*='root']:hover) {
+  cursor: pointer;
 }
 </style>
