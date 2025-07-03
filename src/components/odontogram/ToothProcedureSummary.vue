@@ -64,6 +64,26 @@
                   class="w-4 h-4 rounded-sm flex-shrink-0"
                   :style="{ backgroundColor: procedure.visual.value }"
                 />
+                <div
+                  v-else-if="procedure.visual.visualType === 'Icon'"
+                  class="w-4 h-4 flex items-center justify-center text-xs font-bold flex-shrink-0"
+                >
+                  {{ procedure.visual.value }}
+                </div>
+                <div
+                  v-else-if="procedure.visual.visualType === 'GumShape'"
+                  class="w-4 h-4 rounded-full border flex-shrink-0"
+                  :style="{ borderColor: procedure.visual.value }"
+                />
+                <div
+                  v-else-if="procedure.visual.visualType === 'ToothShape'"
+                  class="w-4 h-4 rounded-sm border flex-shrink-0"
+                  :style="{ borderColor: procedure.visual.value }"
+                />
+                <div
+                  v-else-if="procedure.visual.visualType === 'Pattern'"
+                  class="w-4 h-4 rounded-sm bg-gray-200 flex-shrink-0"
+                />
                 <div class="flex-1 min-w-0">
                   <p class="font-medium text-sm">{{ procedure.name }}</p>
                   <p v-if="procedure.description" class="text-xs text-muted-foreground">
@@ -122,7 +142,7 @@ interface Procedure {
   name: string
   description?: string
   visual: {
-    visualType: 'Color' | 'Pattern'
+    visualType: 'Color' | 'Pattern' | 'Icon' | 'GumShape' | 'ToothShape'
     value: string
   }
 }
