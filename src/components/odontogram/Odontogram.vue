@@ -1,99 +1,106 @@
 <!-- components/Odontogram.vue -->
 <template>
   <div class="w-full">
-    <!-- Controls -->
-    <OdontogramControls
-      :selectedProcedure="selectedProcedure"
-      :palette="procedurePalette"
-      :targetMap="procedureTargetMap"
-      :search="search"
-      :isProcedureMissing="isProcedureMissing"
-      @select="handleProcedureSelect"
-      @clear="setSelectedProcedure(null)"
-      @search-change="setSearch"
-    />
-
-    <!-- Dental Chart with ScrollArea - FIXED VIEWPORT WIDTH -->
-    <ScrollArea
-      ref="scrollAreaRef"
-      :class="`h-[600px] mx-auto`"
-      :style="{ width: `${BASE_VIEWPORT_WIDTH}px`, maxWidth: '100%' }"
-      orientation="horizontal"
-    >
-      <div
-        class="odontogram-content"
-        :style="{
-          width: `${totalContainerWidth}px`,
-          minWidth: `${totalContainerWidth}px`,
-          maxWidth: `${totalContainerWidth}px`,
-        }"
-      >
-        <!-- Upper row - Q1 and Q2 with fixed center line -->
-        <div
-          class="flex mb-2"
-          :style="{
-            gap: `${quadrantGap}px`,
-            marginLeft: `${upperRowLeftMargin}px`,
-          }"
+    <!-- Side-by-side layout: Chart LEFT, Controls RIGHT -->
+    <div class="flex gap-6">
+      <!-- Dental Chart on LEFT - Fixed 1490px width -->
+      <div class="flex-shrink-0">
+        <ScrollArea
+          ref="scrollAreaRef"
+          class="h-[600px]"
+          style="width: 1490px"
+          orientation="horizontal"
         >
-          <Quadrant
-            :teeth="q1teeth"
-            :selectedSegments="selectedSegments"
-            :selectedToothNumbers="selectedToothNumbers"
-            :direction="ToothContainerDirection.Top"
-            side="left"
-            @segment-click="handleSegmentClick"
-            @tooth-click="handleToothClick"
-            @remove-tooth="handleRemoveTooth"
-            @add-extra-tooth="handleAddExtraTooth"
-          />
-          <Quadrant
-            :teeth="q2teeth"
-            :selectedSegments="selectedSegments"
-            :selectedToothNumbers="selectedToothNumbers"
-            :direction="ToothContainerDirection.Top"
-            side="right"
-            @segment-click="handleSegmentClick"
-            @tooth-click="handleToothClick"
-            @remove-tooth="handleRemoveTooth"
-            @add-extra-tooth="handleAddExtraTooth"
-          />
-        </div>
+          <div
+            class="odontogram-content"
+            :style="{
+              width: `${totalContainerWidth}px`,
+              minWidth: `${totalContainerWidth}px`,
+              maxWidth: `${totalContainerWidth}px`,
+            }"
+          >
+            <!-- Upper row - Q1 and Q2 with fixed center line -->
+            <div
+              class="flex mb-2"
+              :style="{
+                gap: `${quadrantGap}px`,
+                marginLeft: `${upperRowLeftMargin}px`,
+              }"
+            >
+              <Quadrant
+                :teeth="q1teeth"
+                :selectedSegments="selectedSegments"
+                :selectedToothNumbers="selectedToothNumbers"
+                :direction="ToothContainerDirection.Top"
+                side="left"
+                @segment-click="handleSegmentClick"
+                @tooth-click="handleToothClick"
+                @remove-tooth="handleRemoveTooth"
+                @add-extra-tooth="handleAddExtraTooth"
+              />
+              <Quadrant
+                :teeth="q2teeth"
+                :selectedSegments="selectedSegments"
+                :selectedToothNumbers="selectedToothNumbers"
+                :direction="ToothContainerDirection.Top"
+                side="right"
+                @segment-click="handleSegmentClick"
+                @tooth-click="handleToothClick"
+                @remove-tooth="handleRemoveTooth"
+                @add-extra-tooth="handleAddExtraTooth"
+              />
+            </div>
 
-        <!-- Lower row - Q4 and Q3 with fixed center line -->
-        <div
-          class="flex"
-          :style="{
-            gap: `${quadrantGap}px`,
-            marginLeft: `${lowerRowLeftMargin}px`,
-          }"
-        >
-          <Quadrant
-            :teeth="q4teeth"
-            :selectedSegments="selectedSegments"
-            :selectedToothNumbers="selectedToothNumbers"
-            :direction="ToothContainerDirection.Bottom"
-            side="left"
-            @segment-click="handleSegmentClick"
-            @tooth-click="handleToothClick"
-            @remove-tooth="handleRemoveTooth"
-            @add-extra-tooth="handleAddExtraTooth"
-          />
-          <Quadrant
-            :teeth="q3teeth"
-            :selectedSegments="selectedSegments"
-            :selectedToothNumbers="selectedToothNumbers"
-            :direction="ToothContainerDirection.Bottom"
-            side="right"
-            @segment-click="handleSegmentClick"
-            @tooth-click="handleToothClick"
-            @remove-tooth="handleRemoveTooth"
-            @add-extra-tooth="handleAddExtraTooth"
-          />
-        </div>
+            <!-- Lower row - Q4 and Q3 with fixed center line -->
+            <div
+              class="flex"
+              :style="{
+                gap: `${quadrantGap}px`,
+                marginLeft: `${lowerRowLeftMargin}px`,
+              }"
+            >
+              <Quadrant
+                :teeth="q4teeth"
+                :selectedSegments="selectedSegments"
+                :selectedToothNumbers="selectedToothNumbers"
+                :direction="ToothContainerDirection.Bottom"
+                side="left"
+                @segment-click="handleSegmentClick"
+                @tooth-click="handleToothClick"
+                @remove-tooth="handleRemoveTooth"
+                @add-extra-tooth="handleAddExtraTooth"
+              />
+              <Quadrant
+                :teeth="q3teeth"
+                :selectedSegments="selectedSegments"
+                :selectedToothNumbers="selectedToothNumbers"
+                :direction="ToothContainerDirection.Bottom"
+                side="right"
+                @segment-click="handleSegmentClick"
+                @tooth-click="handleToothClick"
+                @remove-tooth="handleRemoveTooth"
+                @add-extra-tooth="handleAddExtraTooth"
+              />
+            </div>
+          </div>
+          <ScrollBar orientation="horizontal" />
+        </ScrollArea>
       </div>
-      <ScrollBar orientation="horizontal" />
-    </ScrollArea>
+
+      <!-- Controls on RIGHT -->
+      <div class="flex-1 min-w-0">
+        <OdontogramControls
+          :selectedProcedure="selectedProcedure"
+          :palette="procedurePalette"
+          :targetMap="procedureTargetMap"
+          :search="search"
+          :isProcedureMissing="isProcedureMissing"
+          @select="handleProcedureSelect"
+          @clear="setSelectedProcedure(null)"
+          @search-change="setSearch"
+        />
+      </div>
+    </div>
   </div>
 </template>
 
@@ -132,11 +139,6 @@ const TOOTH_WIDTH = 90
 const quadrantGap = 10
 const paperPadding = 20
 
-// Calculate initial/base viewport width (for standard tooth configuration)
-const STANDARD_TEETH_PER_QUADRANT = 8 // Standard adult teeth per quadrant
-const BASE_VIEWPORT_WIDTH =
-  STANDARD_TEETH_PER_QUADRANT * TOOTH_WIDTH * 2 + quadrantGap + paperPadding * 2
-
 // ScrollArea reference
 const scrollAreaRef = ref<InstanceType<typeof ScrollArea> | null>(null)
 
@@ -147,43 +149,34 @@ const q3Width = computed(() => q3teeth.value.length * TOOTH_WIDTH)
 const q4Width = computed(() => q4teeth.value.length * TOOTH_WIDTH)
 
 /*
- * DYNAMIC CENTER LINE APPROACH WITH STABILITY:
- * - Center line position adapts to ensure all teeth fit within container bounds
- * - Prioritizes minimal movement when teeth are added
- * - Container grows appropriately to accommodate all teeth
- * - All quadrants remain properly positioned relative to center line
+ * ALIGNED QUADRANT APPROACH:
+ * - Left quadrants (Q1, Q4) use same width (max of both)
+ * - Right quadrants (Q2, Q3) use same width (max of both)
+ * - This keeps the center gap perfectly aligned between upper and lower rows
+ * - Q1 and Q4 are right-aligned within their allocated space
+ * - Q2 and Q3 are left-aligned within their allocated space
  */
 
-// Base center line position (preferred position when possible)
-const BASE_CENTER_LINE = 1000
+// Calculate aligned widths to keep center gaps aligned
+const leftQuadrantWidth = computed(() => Math.max(q1Width.value, q4Width.value))
+const rightQuadrantWidth = computed(() => Math.max(q2Width.value, q3Width.value))
 
-// Calculate how much space each side needs from the center line
-const leftSideNeeded = computed(() => Math.max(q1Width.value, q4Width.value) + quadrantGap / 2)
-const rightSideNeeded = computed(() => Math.max(q2Width.value, q3Width.value) + quadrantGap / 2)
-
-// Calculate actual center line position (may shift if needed for extreme expansions)
-const actualCenterLine = computed(() => {
-  // Minimum position needed to fit left side teeth
-  const minCenterForLeftSide = leftSideNeeded.value + paperPadding
-
-  // Use base position if it accommodates left side, otherwise shift right as needed
-  return Math.max(BASE_CENTER_LINE, minCenterForLeftSide)
-})
-
-// Calculate total container width needed
+// Calculate total container width with aligned quadrants
 const totalContainerWidth = computed(() => {
-  return actualCenterLine.value + rightSideNeeded.value + paperPadding
+  return (
+    paperPadding + leftQuadrantWidth.value + quadrantGap + rightQuadrantWidth.value + paperPadding
+  )
 })
 
-// Position quadrants relative to the actual center line
+// Position quadrants to maintain center alignment
 const upperRowLeftMargin = computed(() => {
-  // Position Q1 so its right edge aligns with (actualCenterLine - gap/2)
-  return actualCenterLine.value - q1Width.value - quadrantGap / 2
+  // Q1 should be right-aligned within the left quadrant space
+  return paperPadding + (leftQuadrantWidth.value - q1Width.value)
 })
 
 const lowerRowLeftMargin = computed(() => {
-  // Position Q4 so its right edge aligns with (actualCenterLine - gap/2)
-  return actualCenterLine.value - q4Width.value - quadrantGap / 2
+  // Q4 should be right-aligned within the left quadrant space
+  return paperPadding + (leftQuadrantWidth.value - q4Width.value)
 })
 
 // Get the actual scrolling viewport from ScrollArea
@@ -194,14 +187,14 @@ const getScrollContainer = () => {
   return null
 }
 
-// Center the odontogram on the actual center line
+// Center the odontogram content
 const centerOdontogram = () => {
   const container = getScrollContainer()
   if (container) {
-    // The actual center line position within the total container (including padding)
-    const absoluteCenterPosition = paperPadding + actualCenterLine.value
+    // Center based on the actual content width
+    const contentCenter = totalContainerWidth.value / 2
     const viewportCenter = container.clientWidth / 2
-    const scrollToPosition = absoluteCenterPosition - viewportCenter
+    const scrollToPosition = contentCenter - viewportCenter
 
     container.scrollTo({
       left: Math.max(0, scrollToPosition),
@@ -241,7 +234,7 @@ const handleKeyDown = (e: KeyboardEvent) => {
 
 // Auto-center when teeth change
 watch(
-  [teeth, totalContainerWidth, actualCenterLine],
+  [teeth, totalContainerWidth],
   async () => {
     await nextTick()
     setTimeout(() => {
@@ -253,12 +246,15 @@ watch(
 
 // Debug logging (remove in production)
 watch(
-  [actualCenterLine, leftSideNeeded, rightSideNeeded, totalContainerWidth],
-  ([centerLine, leftNeeded, rightNeeded, containerWidth]) => {
+  [q1Width, q2Width, q3Width, q4Width, leftQuadrantWidth, rightQuadrantWidth, totalContainerWidth],
+  ([q1W, q2W, q3W, q4W, leftW, rightW, containerWidth]) => {
     console.log('Odontogram Layout Debug:', {
-      actualCenterLine: centerLine,
-      leftSideNeeded: leftNeeded,
-      rightSideNeeded: rightNeeded,
+      q1Width: q1W,
+      q2Width: q2W,
+      q3Width: q3W,
+      q4Width: q4W,
+      leftQuadrantWidth: leftW,
+      rightQuadrantWidth: rightW,
       totalContainerWidth: containerWidth,
       upperRowLeftMargin: upperRowLeftMargin.value,
       lowerRowLeftMargin: lowerRowLeftMargin.value,

@@ -186,11 +186,183 @@
             </div>
           </div>
 
-          <!-- Step 2: Odontogram -->
-          <div v-else-if="currentStep === 2" class="space-y-6 overflow-hidden">
-            <!-- Just use the component - it handles everything internally -->
-            <div class="w-full overflow-hidden">
-              <Odontogram />
+          <!-- Step 2: Odontogram - REORGANIZED LAYOUT -->
+          <div v-else-if="currentStep === 2" class="space-y-6">
+            <!-- Odontogram Component (chart + controls) -->
+            <Odontogram />
+
+            <!-- Additional Dental Information Sections -->
+            <div class="space-y-4 mt-8">
+              <h4 class="text-lg font-semibold mb-4">Additional Dental Information</h4>
+
+              <!-- Dental History Accordion -->
+              <div class="border rounded-lg">
+                <button
+                  @click="toggleAccordion('dentalHistory')"
+                  class="w-full flex items-center justify-between p-4 text-left font-semibold hover:bg-gray-50"
+                >
+                  <span class="text-base">Dental History & Previous Treatments</span>
+                  <ChevronRight
+                    :class="[
+                      'w-5 h-5 transition-transform',
+                      accordionOpen.dentalHistory ? 'rotate-90' : '',
+                    ]"
+                  />
+                </button>
+                <div v-if="accordionOpen.dentalHistory" class="p-4 border-t bg-gray-50">
+                  <div class="space-y-4">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div class="space-y-2">
+                        <Label for="lastCleaning">Last Dental Cleaning</Label>
+                        <Input id="lastCleaning" type="date" placeholder="Select date" />
+                      </div>
+                      <div class="space-y-2">
+                        <Label for="lastXray">Last X-Ray</Label>
+                        <Input id="lastXray" type="date" placeholder="Select date" />
+                      </div>
+                    </div>
+                    <div class="space-y-2">
+                      <Label for="previousTreatments">Previous Dental Treatments</Label>
+                      <Textarea
+                        id="previousTreatments"
+                        placeholder="List any previous dental work, surgeries, or treatments..."
+                        class="min-h-[80px]"
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Oral Health Status Accordion -->
+              <div class="border rounded-lg">
+                <button
+                  @click="toggleAccordion('oralHealth')"
+                  class="w-full flex items-center justify-between p-4 text-left font-semibold hover:bg-gray-50"
+                >
+                  <span class="text-base">Current Oral Health Status</span>
+                  <ChevronRight
+                    :class="[
+                      'w-5 h-5 transition-transform',
+                      accordionOpen.oralHealth ? 'rotate-90' : '',
+                    ]"
+                  />
+                </button>
+                <div v-if="accordionOpen.oralHealth" class="p-4 border-t bg-gray-50">
+                  <div class="space-y-4">
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                      <div class="space-y-2">
+                        <Label for="gumCondition">Gum Condition</Label>
+                        <Select>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select condition" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="healthy">Healthy</SelectItem>
+                            <SelectItem value="gingivitis">Gingivitis</SelectItem>
+                            <SelectItem value="periodontitis">Periodontitis</SelectItem>
+                            <SelectItem value="severe">Severe Disease</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div class="space-y-2">
+                        <Label for="plaqueBuild">Plaque Build-up</Label>
+                        <Select>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select level" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="minimal">Minimal</SelectItem>
+                            <SelectItem value="moderate">Moderate</SelectItem>
+                            <SelectItem value="heavy">Heavy</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div class="space-y-2">
+                        <Label for="overallHealth">Overall Oral Health</Label>
+                        <Select>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Rate condition" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="excellent">Excellent</SelectItem>
+                            <SelectItem value="good">Good</SelectItem>
+                            <SelectItem value="fair">Fair</SelectItem>
+                            <SelectItem value="poor">Poor</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
+                    <div class="space-y-2">
+                      <Label for="symptoms">Current Symptoms or Concerns</Label>
+                      <Textarea
+                        id="symptoms"
+                        placeholder="Describe any pain, sensitivity, bleeding, or other symptoms..."
+                        class="min-h-[80px]"
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Treatment Planning Notes Accordion -->
+              <div class="border rounded-lg">
+                <button
+                  @click="toggleAccordion('treatmentNotes')"
+                  class="w-full flex items-center justify-between p-4 text-left font-semibold hover:bg-gray-50"
+                >
+                  <span class="text-base">Treatment Planning Notes</span>
+                  <ChevronRight
+                    :class="[
+                      'w-5 h-5 transition-transform',
+                      accordionOpen.treatmentNotes ? 'rotate-90' : '',
+                    ]"
+                  />
+                </button>
+                <div v-if="accordionOpen.treatmentNotes" class="p-4 border-t bg-gray-50">
+                  <div class="space-y-4">
+                    <div class="space-y-2">
+                      <Label for="treatmentGoals">Treatment Goals</Label>
+                      <Textarea
+                        id="treatmentGoals"
+                        placeholder="Outline the main objectives for this treatment plan..."
+                        class="min-h-[80px]"
+                      />
+                    </div>
+                    <div class="space-y-2">
+                      <Label for="specialConsiderations">Special Considerations</Label>
+                      <Textarea
+                        id="specialConsiderations"
+                        placeholder="Note any allergies, medical conditions, or special requirements..."
+                        class="min-h-[80px]"
+                      />
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div class="space-y-2">
+                        <Label for="estimatedSessions">Estimated Sessions</Label>
+                        <Input
+                          id="estimatedSessions"
+                          type="number"
+                          placeholder="Number of visits"
+                        />
+                      </div>
+                      <div class="space-y-2">
+                        <Label for="urgencyLevel">Treatment Urgency</Label>
+                        <Select>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select urgency" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="routine">Routine</SelectItem>
+                            <SelectItem value="soon">Schedule Soon</SelectItem>
+                            <SelectItem value="urgent">Urgent</SelectItem>
+                            <SelectItem value="emergency">Emergency</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
 
