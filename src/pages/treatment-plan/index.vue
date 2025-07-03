@@ -78,7 +78,7 @@
           </div>
         </div>
       </div>
-      <!-- jeżeli nie w assesments to w podsumowaniu nie wyświetlamy pola (backend) -->
+
       <!-- Main Content -->
       <Card class="mb-8">
         <CardHeader>
@@ -128,21 +128,6 @@
               </div>
 
               <div class="space-y-2">
-                <Label for="priority">Priority Level</Label>
-                <Select v-model="formData.priority">
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select priority" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="low">Low</SelectItem>
-                    <SelectItem value="medium">Medium</SelectItem>
-                    <SelectItem value="high">High</SelectItem>
-                    <SelectItem value="urgent">Urgent</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div class="space-y-2">
                 <Label for="estimatedDuration">Estimated Duration</Label>
                 <Select v-model="formData.estimatedDuration">
                   <SelectTrigger>
@@ -186,184 +171,16 @@
             </div>
           </div>
 
-          <!-- Step 2: Odontogram - REORGANIZED LAYOUT -->
+          <!-- Step 2: Odontogram -->
           <div v-else-if="currentStep === 2" class="space-y-6">
             <!-- Odontogram Component (chart + controls) -->
             <Odontogram />
 
-            <!-- Additional Dental Information Sections -->
-            <div class="space-y-4 mt-8">
-              <h4 class="text-lg font-semibold mb-4">Additional Dental Information</h4>
-
-              <!-- Dental History Accordion -->
-              <div class="border rounded-lg">
-                <button
-                  @click="toggleAccordion('dentalHistory')"
-                  class="w-full flex items-center justify-between p-4 text-left font-semibold hover:bg-gray-50"
-                >
-                  <span class="text-base">Dental History & Previous Treatments</span>
-                  <ChevronRight
-                    :class="[
-                      'w-5 h-5 transition-transform',
-                      accordionOpen.dentalHistory ? 'rotate-90' : '',
-                    ]"
-                  />
-                </button>
-                <div v-if="accordionOpen.dentalHistory" class="p-4 border-t bg-gray-50">
-                  <div class="space-y-4">
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div class="space-y-2">
-                        <Label for="lastCleaning">Last Dental Cleaning</Label>
-                        <Input id="lastCleaning" type="date" placeholder="Select date" />
-                      </div>
-                      <div class="space-y-2">
-                        <Label for="lastXray">Last X-Ray</Label>
-                        <Input id="lastXray" type="date" placeholder="Select date" />
-                      </div>
-                    </div>
-                    <div class="space-y-2">
-                      <Label for="previousTreatments">Previous Dental Treatments</Label>
-                      <Textarea
-                        id="previousTreatments"
-                        placeholder="List any previous dental work, surgeries, or treatments..."
-                        class="min-h-[80px]"
-                      />
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <!-- Oral Health Status Accordion -->
-              <div class="border rounded-lg">
-                <button
-                  @click="toggleAccordion('oralHealth')"
-                  class="w-full flex items-center justify-between p-4 text-left font-semibold hover:bg-gray-50"
-                >
-                  <span class="text-base">Current Oral Health Status</span>
-                  <ChevronRight
-                    :class="[
-                      'w-5 h-5 transition-transform',
-                      accordionOpen.oralHealth ? 'rotate-90' : '',
-                    ]"
-                  />
-                </button>
-                <div v-if="accordionOpen.oralHealth" class="p-4 border-t bg-gray-50">
-                  <div class="space-y-4">
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                      <div class="space-y-2">
-                        <Label for="gumCondition">Gum Condition</Label>
-                        <Select>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select condition" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="healthy">Healthy</SelectItem>
-                            <SelectItem value="gingivitis">Gingivitis</SelectItem>
-                            <SelectItem value="periodontitis">Periodontitis</SelectItem>
-                            <SelectItem value="severe">Severe Disease</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
-                      <div class="space-y-2">
-                        <Label for="plaqueBuild">Plaque Build-up</Label>
-                        <Select>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select level" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="minimal">Minimal</SelectItem>
-                            <SelectItem value="moderate">Moderate</SelectItem>
-                            <SelectItem value="heavy">Heavy</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
-                      <div class="space-y-2">
-                        <Label for="overallHealth">Overall Oral Health</Label>
-                        <Select>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Rate condition" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="excellent">Excellent</SelectItem>
-                            <SelectItem value="good">Good</SelectItem>
-                            <SelectItem value="fair">Fair</SelectItem>
-                            <SelectItem value="poor">Poor</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
-                    </div>
-                    <div class="space-y-2">
-                      <Label for="symptoms">Current Symptoms or Concerns</Label>
-                      <Textarea
-                        id="symptoms"
-                        placeholder="Describe any pain, sensitivity, bleeding, or other symptoms..."
-                        class="min-h-[80px]"
-                      />
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <!-- Treatment Planning Notes Accordion -->
-              <div class="border rounded-lg">
-                <button
-                  @click="toggleAccordion('treatmentNotes')"
-                  class="w-full flex items-center justify-between p-4 text-left font-semibold hover:bg-gray-50"
-                >
-                  <span class="text-base">Treatment Planning Notes</span>
-                  <ChevronRight
-                    :class="[
-                      'w-5 h-5 transition-transform',
-                      accordionOpen.treatmentNotes ? 'rotate-90' : '',
-                    ]"
-                  />
-                </button>
-                <div v-if="accordionOpen.treatmentNotes" class="p-4 border-t bg-gray-50">
-                  <div class="space-y-4">
-                    <div class="space-y-2">
-                      <Label for="treatmentGoals">Treatment Goals</Label>
-                      <Textarea
-                        id="treatmentGoals"
-                        placeholder="Outline the main objectives for this treatment plan..."
-                        class="min-h-[80px]"
-                      />
-                    </div>
-                    <div class="space-y-2">
-                      <Label for="specialConsiderations">Special Considerations</Label>
-                      <Textarea
-                        id="specialConsiderations"
-                        placeholder="Note any allergies, medical conditions, or special requirements..."
-                        class="min-h-[80px]"
-                      />
-                    </div>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div class="space-y-2">
-                        <Label for="estimatedSessions">Estimated Sessions</Label>
-                        <Input
-                          id="estimatedSessions"
-                          type="number"
-                          placeholder="Number of visits"
-                        />
-                      </div>
-                      <div class="space-y-2">
-                        <Label for="urgencyLevel">Treatment Urgency</Label>
-                        <Select>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select urgency" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="routine">Routine</SelectItem>
-                            <SelectItem value="soon">Schedule Soon</SelectItem>
-                            <SelectItem value="urgent">Urgent</SelectItem>
-                            <SelectItem value="emergency">Emergency</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
+            <!-- Procedures Summary -->
+            <ToothProceduresSummary
+              :teeth-with-procedures="teethWithProcedures"
+              @remove-procedure="handleRemoveProcedure"
+            />
           </div>
 
           <!-- Step 3: Measurements -->
@@ -663,10 +480,10 @@
                     </p>
                   </div>
                   <div>
-                    <Label class="text-sm font-medium text-muted-foreground">Priority</Label>
-                    <Badge :variant="getPriorityVariant(formData.priority)">
-                      {{ formData.priority || 'Not specified' }}
-                    </Badge>
+                    <Label class="text-sm font-medium text-muted-foreground">Duration</Label>
+                    <p class="font-medium">
+                      {{ formData.estimatedDuration?.replace('-', ' ') || 'Not specified' }}
+                    </p>
                   </div>
                 </div>
                 <div>
@@ -681,13 +498,73 @@
               <CardHeader>
                 <CardTitle class="flex items-center gap-2">
                   <User class="w-5 h-5" />
-                  Odontogram
+                  Odontogram Procedures
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <p class="text-muted-foreground">
-                  Dental chart data will be displayed here when implemented
-                </p>
+                <div v-if="teethWithProcedures.length === 0" class="text-muted-foreground">
+                  No procedures selected on the dental chart
+                </div>
+                <div v-else class="space-y-3">
+                  <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
+                    <div class="text-center">
+                      <div class="text-2xl font-bold text-primary">
+                        {{ teethWithProcedures.length }}
+                      </div>
+                      <div class="text-xs text-muted-foreground">Teeth with procedures</div>
+                    </div>
+                    <div class="text-center">
+                      <div class="text-2xl font-bold text-primary">
+                        {{
+                          teethWithProcedures.reduce(
+                            (total, tooth) => total + tooth.procedures.length,
+                            0,
+                          )
+                        }}
+                      </div>
+                      <div class="text-xs text-muted-foreground">Total procedures</div>
+                    </div>
+                  </div>
+                  <div class="space-y-2">
+                    <div
+                      v-for="tooth in teethWithProcedures"
+                      :key="tooth.toothNumber"
+                      class="border rounded-lg p-3"
+                    >
+                      <div class="font-medium mb-2">Tooth {{ tooth.toothNumber }}</div>
+                      <div class="space-y-1">
+                        <div
+                          v-for="procedure in tooth.procedures"
+                          :key="procedure.name"
+                          class="flex items-center gap-2 text-sm"
+                        >
+                          <!-- Visual indicator based on type -->
+                          <div
+                            v-if="procedure.visual.visualType === 'Color'"
+                            class="w-3 h-3 rounded-sm"
+                            :style="{ backgroundColor: procedure.visual.value }"
+                          />
+                          <div
+                            v-else-if="procedure.visual.visualType === 'Icon'"
+                            class="w-3 h-3 flex items-center justify-center text-xs font-bold"
+                          >
+                            {{ procedure.visual.value }}
+                          </div>
+                          <div
+                            v-else-if="procedure.visual.visualType === 'GumShape'"
+                            class="w-3 h-3 rounded-full border"
+                            :style="{ borderColor: procedure.visual.value }"
+                          />
+                          <div v-else class="w-3 h-3 rounded-sm bg-gray-200" />
+                          <span>{{ procedure.name }}</span>
+                          <span v-if="procedure.description" class="text-muted-foreground"
+                            >- {{ procedure.description }}</span
+                          >
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
               </CardContent>
             </Card>
 
@@ -813,7 +690,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed, provide } from 'vue'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -826,7 +703,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { Badge } from '@/components/ui/badge'
 import {
   ChevronLeft,
   ChevronRight,
@@ -842,13 +718,32 @@ import {
   Save,
 } from 'lucide-vue-next'
 import Odontogram from '@/components/odontogram/Odontogram.vue'
+import ToothProceduresSummary from '@/components/odontogram/ToothProcedureSummary.vue'
+import { useOdontogram } from '@/composables/odontogram/useOdontogram'
+import type {
+  ToothProcedureAssignment,
+  SchemaProcedureAssignment,
+} from '@/types/odontogram/odontogram'
 
 // Types
+interface Procedure {
+  name: string
+  description?: string
+  visual: {
+    visualType: 'Color' | 'Pattern' | 'Icon' | 'GumShape' | 'ToothShape'
+    value: string
+  }
+}
+
+interface ToothWithProcedures {
+  toothNumber: string
+  procedures: Procedure[]
+}
+
 interface FormData {
   planName: string
   patientType: string
   treatmentCategory: string
-  priority: string
   estimatedDuration: string
   assignedProvider: string
   description: string
@@ -897,7 +792,6 @@ const formData = ref<FormData>({
   planName: '',
   patientType: '',
   treatmentCategory: '',
-  priority: '',
   estimatedDuration: '',
   assignedProvider: '',
   description: '',
@@ -927,6 +821,53 @@ const uploadedFiles = ref({
 const accordionOpen = ref<Record<string, boolean>>({
   medicalReports: false,
   treatmentImages: false,
+})
+
+// Use odontogram composable to sync with chart data
+const odontogram = useOdontogram()
+provide('odontogram', odontogram)
+
+// Compute actual procedures from teeth data (not selectedSegments)
+const teethWithProcedures = computed<ToothWithProcedures[]>(() => {
+  const result: ToothWithProcedures[] = []
+
+  odontogram.teeth.value.forEach((tooth) => {
+    const procedures: Procedure[] = []
+
+    // Add tooth procedures (Tooth, Crown, Root)
+    tooth.toothProcedures.forEach((assignment) => {
+      procedures.push({
+        name: assignment.procedure.name,
+        description: `${assignment.toothPart}${assignment.position ? ` (${assignment.position})` : ''}`,
+        visual: {
+          visualType: assignment.procedure.visual.visualType,
+          value: assignment.procedure.visual.value,
+        },
+      })
+    })
+
+    // Add schema procedures (Mesial, Distal, Buccal, Lingual)
+    tooth.schemaProcedures.forEach((assignment) => {
+      procedures.push({
+        name: assignment.procedure.name,
+        description: `${assignment.surface} surface`,
+        visual: {
+          visualType: assignment.procedure.visual.visualType,
+          value: assignment.procedure.visual.value,
+        },
+      })
+    })
+
+    // Only include teeth that have procedures
+    if (procedures.length > 0) {
+      result.push({
+        toothNumber: tooth.number,
+        procedures,
+      })
+    }
+  })
+
+  return result
 })
 
 // Static data
@@ -1053,10 +994,14 @@ const getStepData = (stepNumber: number): any => {
         planName: formData.value.planName,
         patientType: formData.value.patientType,
         treatmentCategory: formData.value.treatmentCategory,
-        priority: formData.value.priority,
         estimatedDuration: formData.value.estimatedDuration,
         assignedProvider: formData.value.assignedProvider,
         description: formData.value.description,
+      }
+    case 2:
+      return {
+        teeth: odontogram.teeth.value,
+        teethWithProcedures: teethWithProcedures.value,
       }
     case 3:
       return {
@@ -1105,22 +1050,41 @@ const removeFile = (category: string, index: number) => {
   uploadedFiles.value[category as keyof typeof uploadedFiles.value].splice(index, 1)
 }
 
-const getPriorityVariant = (priority: string): 'default' | 'destructive' | 'secondary' => {
-  switch (priority) {
-    case 'urgent':
-      return 'destructive'
-    case 'high':
-      return 'default'
-    default:
-      return 'secondary'
-  }
-}
-
 const createTreatmentPlan = () => {
   console.log('Creating treatment plan with data:', {
     formData: formData.value,
     uploadedFiles: uploadedFiles.value,
+    teeth: odontogram.teeth.value,
+    teethWithProcedures: teethWithProcedures.value,
   })
   // Handle treatment plan creation
+}
+
+const handleRemoveProcedure = (toothNumber: string, procedure: Procedure) => {
+  const tooth = odontogram.teeth.value.find((t) => t.number === toothNumber)
+  if (!tooth) return
+
+  // Remove from toothProcedures if it matches
+  const toothProcIndex = tooth.toothProcedures.findIndex(
+    (assignment) =>
+      assignment.procedure.name === procedure.name &&
+      assignment.procedure.visual.value === procedure.visual.value,
+  )
+
+  if (toothProcIndex !== -1) {
+    tooth.toothProcedures.splice(toothProcIndex, 1)
+    return
+  }
+
+  // Remove from schemaProcedures if it matches
+  const schemaProcIndex = tooth.schemaProcedures.findIndex(
+    (assignment) =>
+      assignment.procedure.name === procedure.name &&
+      assignment.procedure.visual.value === procedure.visual.value,
+  )
+
+  if (schemaProcIndex !== -1) {
+    tooth.schemaProcedures.splice(schemaProcIndex, 1)
+  }
 }
 </script>

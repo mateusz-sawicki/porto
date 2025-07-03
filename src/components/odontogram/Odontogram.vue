@@ -105,12 +105,15 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref, onMounted, onUnmounted, nextTick, watch } from 'vue'
+import { computed, ref, onMounted, onUnmounted, nextTick, watch, inject } from 'vue'
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area'
-import { useOdontogram } from '@/composables/odontogram/useOdontogram'
 import { ToothContainerDirection } from '@/types/odontogram/odontogram'
 import OdontogramControls from '@/components/odontogram/OdontogramControls.vue'
 import Quadrant from '@/components/odontogram/Quadrant.vue'
+import type { useOdontogram } from '@/composables/odontogram/useOdontogram'
+
+const odontogram = inject<ReturnType<typeof useOdontogram>>('odontogram')
+if (!odontogram) throw new Error('Odontogram composable not provided!')
 
 const {
   selectedProcedure,
@@ -132,7 +135,7 @@ const {
   handleProcedureSelect,
   setSelectedProcedure,
   setSearch,
-} = useOdontogram()
+} = odontogram
 
 // Constants
 const TOOTH_WIDTH = 90
