@@ -13,90 +13,92 @@
       @search-change="setSearch"
     />
 
-    <!-- Dental Chart with ScrollArea -->
-    <Card class="w-full">
-      <ScrollArea ref="scrollAreaRef" class="w-500 h-[600px] self-center" orientation="horizontal">
+    <!-- Dental Chart with ScrollArea - FIXED VIEWPORT WIDTH -->
+    <ScrollArea
+      ref="scrollAreaRef"
+      :class="`h-[600px] mx-auto`"
+      :style="{ width: `${BASE_VIEWPORT_WIDTH}px`, maxWidth: '100%' }"
+      orientation="horizontal"
+    >
+      <div
+        class="odontogram-content"
+        :style="{
+          width: `${totalContainerWidth}px`,
+          minWidth: `${totalContainerWidth}px`,
+          maxWidth: `${totalContainerWidth}px`,
+        }"
+      >
+        <!-- Upper row - Q1 and Q2 with fixed center line -->
         <div
-          class="odontogram-content"
+          class="flex mb-2"
           :style="{
-            width: `${totalContainerWidth}px`,
-            minWidth: `${totalContainerWidth}px`,
-            maxWidth: `${totalContainerWidth}px`,
+            gap: `${quadrantGap}px`,
+            marginLeft: `${upperRowLeftMargin}px`,
           }"
         >
-          <!-- Upper row - Q1 and Q2 with fixed center line -->
-          <div
-            class="flex mb-2"
-            :style="{
-              gap: `${quadrantGap}px`,
-              marginLeft: `${upperRowLeftMargin}px`,
-            }"
-          >
-            <Quadrant
-              :teeth="q1teeth"
-              :selectedSegments="selectedSegments"
-              :selectedToothNumbers="selectedToothNumbers"
-              :direction="ToothContainerDirection.Top"
-              side="left"
-              @segment-click="handleSegmentClick"
-              @tooth-click="handleToothClick"
-              @remove-tooth="handleRemoveTooth"
-              @add-extra-tooth="handleAddExtraTooth"
-            />
-            <Quadrant
-              :teeth="q2teeth"
-              :selectedSegments="selectedSegments"
-              :selectedToothNumbers="selectedToothNumbers"
-              :direction="ToothContainerDirection.Top"
-              side="right"
-              @segment-click="handleSegmentClick"
-              @tooth-click="handleToothClick"
-              @remove-tooth="handleRemoveTooth"
-              @add-extra-tooth="handleAddExtraTooth"
-            />
-          </div>
-
-          <!-- Lower row - Q4 and Q3 with fixed center line -->
-          <div
-            class="flex"
-            :style="{
-              gap: `${quadrantGap}px`,
-              marginLeft: `${lowerRowLeftMargin}px`,
-            }"
-          >
-            <Quadrant
-              :teeth="q4teeth"
-              :selectedSegments="selectedSegments"
-              :selectedToothNumbers="selectedToothNumbers"
-              :direction="ToothContainerDirection.Bottom"
-              side="left"
-              @segment-click="handleSegmentClick"
-              @tooth-click="handleToothClick"
-              @remove-tooth="handleRemoveTooth"
-              @add-extra-tooth="handleAddExtraTooth"
-            />
-            <Quadrant
-              :teeth="q3teeth"
-              :selectedSegments="selectedSegments"
-              :selectedToothNumbers="selectedToothNumbers"
-              :direction="ToothContainerDirection.Bottom"
-              side="right"
-              @segment-click="handleSegmentClick"
-              @tooth-click="handleToothClick"
-              @remove-tooth="handleRemoveTooth"
-              @add-extra-tooth="handleAddExtraTooth"
-            />
-          </div>
+          <Quadrant
+            :teeth="q1teeth"
+            :selectedSegments="selectedSegments"
+            :selectedToothNumbers="selectedToothNumbers"
+            :direction="ToothContainerDirection.Top"
+            side="left"
+            @segment-click="handleSegmentClick"
+            @tooth-click="handleToothClick"
+            @remove-tooth="handleRemoveTooth"
+            @add-extra-tooth="handleAddExtraTooth"
+          />
+          <Quadrant
+            :teeth="q2teeth"
+            :selectedSegments="selectedSegments"
+            :selectedToothNumbers="selectedToothNumbers"
+            :direction="ToothContainerDirection.Top"
+            side="right"
+            @segment-click="handleSegmentClick"
+            @tooth-click="handleToothClick"
+            @remove-tooth="handleRemoveTooth"
+            @add-extra-tooth="handleAddExtraTooth"
+          />
         </div>
-        <ScrollBar orientation="horizontal" />
-      </ScrollArea>
-    </Card>
+
+        <!-- Lower row - Q4 and Q3 with fixed center line -->
+        <div
+          class="flex"
+          :style="{
+            gap: `${quadrantGap}px`,
+            marginLeft: `${lowerRowLeftMargin}px`,
+          }"
+        >
+          <Quadrant
+            :teeth="q4teeth"
+            :selectedSegments="selectedSegments"
+            :selectedToothNumbers="selectedToothNumbers"
+            :direction="ToothContainerDirection.Bottom"
+            side="left"
+            @segment-click="handleSegmentClick"
+            @tooth-click="handleToothClick"
+            @remove-tooth="handleRemoveTooth"
+            @add-extra-tooth="handleAddExtraTooth"
+          />
+          <Quadrant
+            :teeth="q3teeth"
+            :selectedSegments="selectedSegments"
+            :selectedToothNumbers="selectedToothNumbers"
+            :direction="ToothContainerDirection.Bottom"
+            side="right"
+            @segment-click="handleSegmentClick"
+            @tooth-click="handleToothClick"
+            @remove-tooth="handleRemoveTooth"
+            @add-extra-tooth="handleAddExtraTooth"
+          />
+        </div>
+      </div>
+      <ScrollBar orientation="horizontal" />
+    </ScrollArea>
   </div>
 </template>
 
 <script setup lang="ts">
 import { computed, ref, onMounted, onUnmounted, nextTick, watch } from 'vue'
-import { Card } from '@/components/ui/card'
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area'
 import { useOdontogram } from '@/composables/odontogram/useOdontogram'
 import { ToothContainerDirection } from '@/types/odontogram/odontogram'
@@ -129,6 +131,11 @@ const {
 const TOOTH_WIDTH = 90
 const quadrantGap = 10
 const paperPadding = 20
+
+// Calculate initial/base viewport width (for standard tooth configuration)
+const STANDARD_TEETH_PER_QUADRANT = 8 // Standard adult teeth per quadrant
+const BASE_VIEWPORT_WIDTH =
+  STANDARD_TEETH_PER_QUADRANT * TOOTH_WIDTH * 2 + quadrantGap + paperPadding * 2
 
 // ScrollArea reference
 const scrollAreaRef = ref<InstanceType<typeof ScrollArea> | null>(null)

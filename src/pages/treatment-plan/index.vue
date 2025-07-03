@@ -188,10 +188,6 @@
 
           <!-- Step 2: Odontogram -->
           <div v-else-if="currentStep === 2" class="space-y-6 overflow-hidden">
-            <div class="text-center mb-6">
-              <h3 class="text-2xl font-bold mb-2">Odontogram</h3>
-            </div>
-
             <!-- Just use the component - it handles everything internally -->
             <div class="w-full overflow-hidden">
               <Odontogram />
