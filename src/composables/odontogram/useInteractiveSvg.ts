@@ -174,6 +174,52 @@ export function useInteractiveSvg({
 
       const pathGroups = groupPathsBySegment(element)
 
+      // Check if any tooth part has an implant procedure
+      const hasImplantProcedure = Object.values(assignments.value).some((assigned: any[]) =>
+        assigned?.some((proc: any) => proc.behavior === 'Implant')
+      )
+
+      // Handle implant display
+      if (hasImplantProcedure) {
+        // Hide only root paths (keep crown visible)
+        const rootPaths = element.querySelectorAll('path[id*="root"]')
+        
+        rootPaths.forEach((path) => {
+          ;(path as HTMLElement).style.display = 'none'
+        })
+
+        // Show implant group
+        const implantGroups = element.querySelectorAll('g[id*="implant"]')
+        implantGroups.forEach((group) => {
+          ;(group as HTMLElement).style.display = 'block'
+          ;(group as HTMLElement).style.visibility = 'visible'
+          ;(group as HTMLElement).style.opacity = '1'
+        })
+
+        // Style implant paths
+        const implantPaths = element.querySelectorAll('g[id*="implant"] path')
+        implantPaths.forEach((path) => {
+          ;(path as HTMLElement).style.display = 'block'
+          ;(path as HTMLElement).style.fill = '#9a9a9a'
+          ;(path as HTMLElement).style.stroke = '#000000'
+          ;(path as HTMLElement).style.strokeWidth = '1px'
+          ;(path as HTMLElement).style.cursor = 'pointer'
+        })
+      } else {
+        // Show root paths and hide implant group
+        const rootPaths = element.querySelectorAll('path[id*="root"]')
+        
+        rootPaths.forEach((path) => {
+          ;(path as HTMLElement).style.display = 'inline'
+        })
+
+        // Hide implant group
+        const implantGroups = element.querySelectorAll('g[id*="implant"]')
+        implantGroups.forEach((group) => {
+          ;(group as HTMLElement).style.display = 'none'
+        })
+      }
+
       Object.entries(pathGroups).forEach(([fullId, group]) => {
         const isSelected = selectedSegments.value.includes(fullId)
         const assigned = assignments.value[fullId]

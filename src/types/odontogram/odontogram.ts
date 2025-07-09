@@ -19,7 +19,7 @@ export interface SchemaProcedureAssignment {
 export interface Procedure {
   name: string // Dynamic from API
   visual: ProcedureVisual
-  behavior: 'None' | 'CrossOutTooth' | 'HideTooth' | 'RootOnly' | 'EmphasizeSurface'
+  behavior: 'None' | 'CrossOutTooth' | 'HideTooth' | 'RootOnly' | 'EmphasizeSurface' | 'Implant'
 }
 
 export interface ProcedureVisual {

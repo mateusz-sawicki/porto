@@ -66,6 +66,7 @@ export function useOdontogram() {
       Wypełnienie: ['Mesial', 'Distal', 'Buccal', 'Lingual', 'Incisal'],
       Próchnica: ['Root', 'Mesial', 'Distal', 'Buccal', 'Lingual', 'Incisal'],
       Recesja: 'Tooth',
+      Implant: 'Tooth',
     }),
   )
 
@@ -100,6 +101,11 @@ export function useOdontogram() {
       name: 'Recesja',
       behavior: 'None',
       visual: { visualType: 'GumShape', value: '#000000' },
+    },
+    {
+      name: 'Implant',
+      behavior: 'Implant',
+      visual: { visualType: 'Color', value: '#9a9a9a' },
     },
   ])
 

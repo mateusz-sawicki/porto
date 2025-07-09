@@ -73,6 +73,8 @@ const ToothSvgComponent = computed(() => {
   return getToothSvgComponent(props.number) // Gets SVG for tooth "11", "16", etc.
 })
 
+
+
 // Interactive SVG logic
 const normalizeSegment = (id: string): string => {
   if (id.includes('root')) return `${props.number}_root`
@@ -110,6 +112,8 @@ const { assignedProcedures, showTooltip } = useInteractiveSvg({
   selectedSegments: computed(() => props.selectedSegments),
   onSegmentClick: (segmentId: string) => emit('segment-click', segmentId),
 })
+
+
 </script>
 
 <style scoped>
@@ -153,4 +157,6 @@ const { assignedProcedures, showTooltip } = useInteractiveSvg({
 .tooth-svg :deep(g[id*='root']:hover) {
   cursor: pointer;
 }
+
+
 </style>
