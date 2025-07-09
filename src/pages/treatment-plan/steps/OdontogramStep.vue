@@ -1,13 +1,15 @@
 <template>
   <div class="space-y-6">
-    <!-- Odontogram Component (chart + controls) -->
-    <Odontogram />
+    <div class="grid grid-cols-1 gap-6">
+      <!-- Odontogram Component (chart + controls) -->
+      <Odontogram />
 
-    <!-- Procedures Summary -->
-    <ToothProceduresSummary
-      :teeth-with-procedures="teethWithProcedures"
-      @remove-procedure="handleRemoveProcedure"
-    />
+      <!-- Procedures Summary -->
+      <ToothProceduresSummary
+        :teeth-with-procedures="teethWithProcedures"
+        @remove-procedure="handleRemoveProcedure"
+      />
+    </div>
   </div>
 </template>
 
@@ -43,4 +45,4 @@ const emit = defineEmits<Emits>()
 const handleRemoveProcedure = (toothNumber: string, procedure: Procedure) => {
   emit('remove-procedure', toothNumber, procedure)
 }
-</script> 
+</script>

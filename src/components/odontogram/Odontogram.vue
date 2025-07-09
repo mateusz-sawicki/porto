@@ -12,8 +12,7 @@
         <div
           class="odontogram-content"
           :style="{
-            width: `${totalContainerWidth}px`,
-            minWidth: `${totalContainerWidth}px`,
+            width: '80vw',
             maxWidth: `${totalContainerWidth}px`,
           }"
         >
