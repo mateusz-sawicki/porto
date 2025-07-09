@@ -191,7 +191,7 @@ export function useInteractiveSvg({
         // Show implant group
         const implantGroups = element.querySelectorAll('g[id*="implant"]')
         implantGroups.forEach((group) => {
-          ;(group as HTMLElement).style.display = 'block'
+          ;(group as HTMLElement).style.setProperty('display', 'block', 'important')
           ;(group as HTMLElement).style.visibility = 'visible'
           ;(group as HTMLElement).style.opacity = '1'
         })

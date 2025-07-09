@@ -158,5 +158,10 @@ const { assignedProcedures, showTooltip } = useInteractiveSvg({
   cursor: pointer;
 }
 
+/* 🎯 HIDE IMPLANT GROUPS BY DEFAULT */
+.tooth-svg :deep(g[id*='implant']) {
+  display: none !important;
+}
+
 
 </style>
