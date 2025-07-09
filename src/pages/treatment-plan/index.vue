@@ -25,56 +25,68 @@
 
       <!-- Stepper -->
       <div class="mb-8">
-        <div class="flex items-start w-full">
+        <div class="flex flex-col md:flex-row items-start w-full">
           <div
             v-for="(step, index) in steps"
             :key="step.id"
-            class="flex flex-col items-center flex-1 relative"
+            class="flex md:flex-col items-center w-full md:flex-1 relative mb-4 md:mb-0"
           >
-            <!-- Step circle -->
-            <button
-              @click="goToStep(step.id)"
-              :disabled="isLoading"
-              :class="[
-                'flex h-10 w-10 items-center justify-center rounded-full border-2 text-sm font-medium transition-colors mb-4 relative z-10',
-                currentStep >= step.id
-                  ? 'border-primary bg-primary text-primary-foreground hover:bg-primary/90'
-                  : 'border-muted-foreground/20 bg-background text-muted-foreground hover:border-primary/50 hover:text-primary',
-                isLoading ? 'cursor-wait' : 'cursor-pointer',
-              ]"
-            >
-              <CheckCircle v-if="currentStep > step.id" class="h-4 w-4" />
-              <component v-else :is="step.icon" class="h-4 w-4" />
-            </button>
+            <!-- Mobile/Tablet horizontal layout -->
+            <div class="flex items-center w-full md:flex-col md:items-center">
+              <!-- Step circle -->
+              <button
+                @click="goToStep(step.id)"
+                :disabled="isLoading"
+                :class="[
+                  'flex h-10 w-10 items-center justify-center rounded-full border-2 text-sm font-medium transition-colors relative z-10 flex-shrink-0',
+                  currentStep >= step.id
+                    ? 'border-primary bg-primary text-primary-foreground hover:bg-primary/90'
+                    : 'border-muted-foreground/20 bg-background text-muted-foreground hover:border-primary/50 hover:text-primary',
+                  isLoading ? 'cursor-wait' : 'cursor-pointer',
+                ]"
+              >
+                <CheckCircle v-if="currentStep > step.id" class="h-4 w-4" />
+                <component v-else :is="step.icon" class="h-4 w-4" />
+              </button>
 
-            <!-- Connector line -->
+              <!-- Step labels -->
+              <div class="ml-4 md:ml-0 md:mt-4 text-left md:text-center flex-grow">
+                <div
+                  :class="[
+                    'text-sm font-medium',
+                    currentStep >= step.id ? 'text-primary' : 'text-muted-foreground',
+                  ]"
+                >
+                  {{ step.title }}
+                </div>
+                <div
+                  :class="[
+                    'text-xs mt-1',
+                    currentStep >= step.id ? 'text-primary/70' : 'text-muted-foreground/70',
+                  ]"
+                >
+                  Step {{ step.id }} of {{ steps.length }}
+                </div>
+              </div>
+            </div>
+
+            <!-- Mobile/Tablet Connector line (Vertical) -->
             <div
               v-if="index < steps.length - 1"
               :class="[
-                'absolute top-5 left-1/2 h-0.5 w-full z-0',
+                'absolute left-5 top-10 w-0.5 h-8 z-0 md:hidden',
                 currentStep > step.id ? 'bg-primary' : 'bg-muted',
               ]"
             />
 
-            <!-- Step labels -->
-            <div class="text-center">
-              <div
-                :class="[
-                  'text-sm font-medium',
-                  currentStep >= step.id ? 'text-primary' : 'text-muted-foreground',
-                ]"
-              >
-                {{ step.title }}
-              </div>
-              <div
-                :class="[
-                  'text-xs mt-1',
-                  currentStep >= step.id ? 'text-primary/70' : 'text-muted-foreground/70',
-                ]"
-              >
-                Step {{ step.id }} of {{ steps.length }}
-              </div>
-            </div>
+            <!-- Desktop Connector line (Horizontal) -->
+            <div
+              v-if="index < steps.length - 1"
+              :class="[
+                'hidden md:block absolute top-5 left-1/2 h-0.5 w-full z-0',
+                currentStep > step.id ? 'bg-primary' : 'bg-muted',
+              ]"
+            />
           </div>
         </div>
       </div>
