@@ -1,94 +1,93 @@
 <!-- components/Odontogram.vue -->
 <template>
-  <div class="w-full">
-    <!-- Side-by-side layout: Chart LEFT, Controls RIGHT -->
-    <div class="flex gap-6">
-      <!-- Dental Chart on LEFT - Fixed 1490px width -->
-      <div class="flex-shrink-0">
-        <ScrollArea
-          ref="scrollAreaRef"
-          class="h-[600px]"
-          style="width: 1490px"
-          orientation="horizontal"
+  <div class="w-full space-y-6">
+    <!-- Dental Chart - Centered -->
+    <div class="flex justify-center">
+      <ScrollArea
+        ref="scrollAreaRef"
+        class="h-[600px]"
+        style="width: 1490px"
+        orientation="horizontal"
+      >
+        <div
+          class="odontogram-content"
+          :style="{
+            width: `${totalContainerWidth}px`,
+            minWidth: `${totalContainerWidth}px`,
+            maxWidth: `${totalContainerWidth}px`,
+          }"
         >
+          <!-- Upper row - Q1 and Q2 with fixed center line -->
           <div
-            class="odontogram-content"
+            class="flex mb-2"
             :style="{
-              width: `${totalContainerWidth}px`,
-              minWidth: `${totalContainerWidth}px`,
-              maxWidth: `${totalContainerWidth}px`,
+              gap: `${quadrantGap}px`,
+              marginLeft: `${upperRowLeftMargin}px`,
             }"
           >
-            <!-- Upper row - Q1 and Q2 with fixed center line -->
-            <div
-              class="flex mb-2"
-              :style="{
-                gap: `${quadrantGap}px`,
-                marginLeft: `${upperRowLeftMargin}px`,
-              }"
-            >
-              <Quadrant
-                :teeth="q1teeth"
-                :selectedSegments="selectedSegments"
-                :selectedToothNumbers="selectedToothNumbers"
-                :direction="ToothContainerDirection.Top"
-                side="left"
-                @segment-click="handleSegmentClick"
-                @tooth-click="handleToothClick"
-                @remove-tooth="handleRemoveTooth"
-                @add-extra-tooth="handleAddExtraTooth"
-              />
-              <Quadrant
-                :teeth="q2teeth"
-                :selectedSegments="selectedSegments"
-                :selectedToothNumbers="selectedToothNumbers"
-                :direction="ToothContainerDirection.Top"
-                side="right"
-                @segment-click="handleSegmentClick"
-                @tooth-click="handleToothClick"
-                @remove-tooth="handleRemoveTooth"
-                @add-extra-tooth="handleAddExtraTooth"
-              />
-            </div>
-
-            <!-- Lower row - Q4 and Q3 with fixed center line -->
-            <div
-              class="flex"
-              :style="{
-                gap: `${quadrantGap}px`,
-                marginLeft: `${lowerRowLeftMargin}px`,
-              }"
-            >
-              <Quadrant
-                :teeth="q4teeth"
-                :selectedSegments="selectedSegments"
-                :selectedToothNumbers="selectedToothNumbers"
-                :direction="ToothContainerDirection.Bottom"
-                side="left"
-                @segment-click="handleSegmentClick"
-                @tooth-click="handleToothClick"
-                @remove-tooth="handleRemoveTooth"
-                @add-extra-tooth="handleAddExtraTooth"
-              />
-              <Quadrant
-                :teeth="q3teeth"
-                :selectedSegments="selectedSegments"
-                :selectedToothNumbers="selectedToothNumbers"
-                :direction="ToothContainerDirection.Bottom"
-                side="right"
-                @segment-click="handleSegmentClick"
-                @tooth-click="handleToothClick"
-                @remove-tooth="handleRemoveTooth"
-                @add-extra-tooth="handleAddExtraTooth"
-              />
-            </div>
+            <Quadrant
+              :teeth="q1teeth"
+              :selectedSegments="selectedSegments"
+              :selectedToothNumbers="selectedToothNumbers"
+              :direction="ToothContainerDirection.Top"
+              side="left"
+              @segment-click="handleSegmentClick"
+              @tooth-click="handleToothClick"
+              @remove-tooth="handleRemoveTooth"
+              @add-extra-tooth="handleAddExtraTooth"
+            />
+            <Quadrant
+              :teeth="q2teeth"
+              :selectedSegments="selectedSegments"
+              :selectedToothNumbers="selectedToothNumbers"
+              :direction="ToothContainerDirection.Top"
+              side="right"
+              @segment-click="handleSegmentClick"
+              @tooth-click="handleToothClick"
+              @remove-tooth="handleRemoveTooth"
+              @add-extra-tooth="handleAddExtraTooth"
+            />
           </div>
-          <ScrollBar orientation="horizontal" />
-        </ScrollArea>
-      </div>
 
-      <!-- Controls on RIGHT -->
-      <div class="flex-1 min-w-0">
+          <!-- Lower row - Q4 and Q3 with fixed center line -->
+          <div
+            class="flex"
+            :style="{
+              gap: `${quadrantGap}px`,
+              marginLeft: `${lowerRowLeftMargin}px`,
+            }"
+          >
+            <Quadrant
+              :teeth="q4teeth"
+              :selectedSegments="selectedSegments"
+              :selectedToothNumbers="selectedToothNumbers"
+              :direction="ToothContainerDirection.Bottom"
+              side="left"
+              @segment-click="handleSegmentClick"
+              @tooth-click="handleToothClick"
+              @remove-tooth="handleRemoveTooth"
+              @add-extra-tooth="handleAddExtraTooth"
+            />
+            <Quadrant
+              :teeth="q3teeth"
+              :selectedSegments="selectedSegments"
+              :selectedToothNumbers="selectedToothNumbers"
+              :direction="ToothContainerDirection.Bottom"
+              side="right"
+              @segment-click="handleSegmentClick"
+              @tooth-click="handleToothClick"
+              @remove-tooth="handleRemoveTooth"
+              @add-extra-tooth="handleAddExtraTooth"
+            />
+          </div>
+        </div>
+        <ScrollBar orientation="horizontal" />
+      </ScrollArea>
+    </div>
+
+    <!-- Controls underneath - Centered with max width -->
+    <div class="flex justify-center">
+      <div class="w-full max-w-2xl">
         <OdontogramControls
           :selectedProcedure="selectedProcedure"
           :palette="procedurePalette"
