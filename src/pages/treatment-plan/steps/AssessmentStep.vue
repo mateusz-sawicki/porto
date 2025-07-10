@@ -1,6 +1,6 @@
 <template>
   <div class="space-y-8">
-    <div
+    <!-- <div
       v-for="question in assessmentQuestions"
       :key="question.key"
       class="space-y-4 p-4 border rounded-lg"
@@ -42,8 +42,8 @@
           placeholder="Enter additional details..."
           class="min-h-[80px]"
         />
-      </div>
-    </div>
+      </div> 
+    </div>-->
   </div>
 </template>
 
@@ -83,4 +83,4 @@ const updateField = (field: keyof AssessmentData, value: string) => {
   const updatedData = { ...props.formData, [field]: value }
   emit('update:formData', updatedData)
 }
-</script> 
+</script>

@@ -1,7 +1,7 @@
 <template>
   <div class="space-y-6">
     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-      <div class="space-y-2">
+      <!-- <div class="space-y-2">
         <Label for="planName">Treatment Plan Name</Label>
         <Input 
           id="planName" 
@@ -83,7 +83,7 @@
         @update:model-value="updateField('description', $event)"
         placeholder="Provide detailed description of the treatment plan..."
         class="min-h-[120px]"
-      />
+      /> -->
     </div>
   </div>
 </template>
@@ -124,4 +124,4 @@ const updateField = (field: keyof BasicInformationData, value: string) => {
   const updatedData = { ...props.formData, [field]: value }
   emit('update:formData', updatedData)
 }
-</script> 
+</script>

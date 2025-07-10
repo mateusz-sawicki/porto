@@ -15,7 +15,24 @@
             <div v-if="lastSaved" class="text-sm text-gray-500">
               Last saved: {{ lastSaved.toLocaleTimeString() }}
             </div>
-            <Button @click="saveTreatmentPlan" :disabled="isSaving" class="flex items-center gap-2">
+
+            <!-- Remove Treatment Plan Button -->
+            <Button
+              @click="showRemoveConfirmation = true"
+              :disabled="isLoading || isSaving || isRemoving"
+              variant="destructive"
+              size="sm"
+              class="flex items-center gap-2"
+            >
+              <Trash2 class="w-4 h-4" />
+              Remove Plan
+            </Button>
+
+            <Button
+              @click="saveTreatmentPlan"
+              :disabled="isSaving || isRemoving"
+              class="flex items-center gap-2"
+            >
               <CheckCircle class="w-4 h-4" />
               {{ isSaving ? 'Saving...' : 'Save Treatment Plan' }}
             </Button>
@@ -36,13 +53,13 @@
               <!-- Step circle -->
               <button
                 @click="goToStep(step.id)"
-                :disabled="isLoading"
+                :disabled="isLoading || isRemoving"
                 :class="[
                   'flex h-10 w-10 items-center justify-center rounded-full border-2 text-sm font-medium transition-colors relative z-10 flex-shrink-0',
                   currentStep >= step.id
                     ? 'border-primary bg-primary text-primary-foreground hover:bg-primary/90'
                     : 'border-muted-foreground/20 bg-background text-muted-foreground hover:border-primary/50 hover:text-primary',
-                  isLoading ? 'cursor-wait' : 'cursor-pointer',
+                  isLoading || isRemoving ? 'cursor-wait' : 'cursor-pointer',
                 ]"
               >
                 <CheckCircle v-if="currentStep > step.id" class="h-4 w-4" />
@@ -154,7 +171,7 @@
         <Button
           variant="outline"
           @click="prevStep"
-          :disabled="currentStep === 1 || isLoading"
+          :disabled="currentStep === 1 || isLoading || isRemoving"
           class="flex items-center gap-2"
         >
           <ChevronLeft class="w-4 h-4" />
@@ -162,7 +179,12 @@
         </Button>
 
         <div class="flex items-center gap-2">
-          <Button @click="saveProgress" :disabled="isLoading" variant="outline" size="sm">
+          <Button
+            @click="saveProgress"
+            :disabled="isLoading || isRemoving"
+            variant="outline"
+            size="sm"
+          >
             <Save class="w-4 h-4 mr-2" />
             {{ isLoading ? 'Saving...' : 'Save Progress' }}
           </Button>
@@ -170,26 +192,71 @@
           <Button
             v-if="currentStep < steps.length"
             @click="nextStep"
-            :disabled="isLoading"
+            :disabled="isLoading || isRemoving"
             class="flex items-center gap-2"
           >
             Next
             <ChevronRight class="w-4 h-4" />
           </Button>
-          <Button v-else @click="createTreatmentPlan" class="flex items-center gap-2">
+          <Button
+            v-else
+            @click="createTreatmentPlan"
+            :disabled="isRemoving"
+            class="flex items-center gap-2"
+          >
             <CheckCircle class="w-4 h-4" />
             Create Treatment Plan
           </Button>
         </div>
       </div>
     </div>
+
+    <!-- Remove Confirmation Dialog -->
+    <AlertDialog :open="showRemoveConfirmation" @update:open="showRemoveConfirmation = $event">
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle class="flex items-center gap-2">
+            <AlertTriangle class="w-5 h-5 text-destructive" />
+            Remove Treatment Plan
+          </AlertDialogTitle>
+          <AlertDialogDescription>
+            Are you sure you want to remove this treatment plan? This action cannot be undone and
+            all data will be permanently deleted.
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel :disabled="isRemoving">Cancel</AlertDialogCancel>
+          <AlertDialogAction
+            @click="removeTreatmentPlan"
+            :disabled="isRemoving"
+            variant="destructive"
+            class="flex items-center gap-2"
+          >
+            <Trash2 v-if="!isRemoving" class="w-4 h-4" />
+            <Loader2 v-else class="w-4 h-4 animate-spin" />
+            {{ isRemoving ? 'Removing...' : 'Remove Plan' }}
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, computed, provide } from 'vue'
+import { ref, computed, provide, withDefaults, defineProps } from 'vue'
+import { useRouter } from 'vue-router'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog'
 import {
   ChevronLeft,
   ChevronRight,
@@ -201,6 +268,9 @@ import {
   FileCheck,
   Camera,
   Save,
+  Trash2,
+  AlertTriangle,
+  Loader2,
 } from 'lucide-vue-next'
 import { useOdontogram } from '@/composables/odontogram/useOdontogram'
 import BasicInformationStep from './steps/BasicInformationStep.vue'
@@ -242,10 +312,24 @@ interface MeasurementItem {
   unit: string
 }
 
+// Props (if patient ID is passed as prop)
+interface Props {
+  patientId?: string
+}
+
+const props = withDefaults(defineProps<Props>(), {
+  patientId: '',
+})
+
+// Router for navigation
+const router = useRouter()
+
 // Reactive state
 const currentStep = ref(1)
 const isLoading = ref(false)
 const isSaving = ref(false)
+const isRemoving = ref(false)
+const showRemoveConfirmation = ref(false)
 const lastSaved = ref<Date | null>(null)
 
 // Separate data objects for each step
@@ -379,6 +463,15 @@ const mockApi = {
       savedAt: new Date().toISOString(),
     }
   },
+
+  async removeTreatmentPlan(planId?: string): Promise<{ success: boolean; removedAt: string }> {
+    await new Promise((resolve) => setTimeout(resolve, 1000))
+    console.log('Removing treatment plan:', planId || 'current-plan')
+    return {
+      success: true,
+      removedAt: new Date().toISOString(),
+    }
+  },
 }
 
 // Methods
@@ -387,6 +480,7 @@ const goToStep = async (stepNumber: number) => {
     stepNumber < 1 ||
     stepNumber > steps.length ||
     isLoading.value ||
+    isRemoving.value ||
     stepNumber === currentStep.value
   )
     return
@@ -397,21 +491,21 @@ const goToStep = async (stepNumber: number) => {
 }
 
 const nextStep = async () => {
-  if (currentStep.value < steps.length && !isLoading.value) {
+  if (currentStep.value < steps.length && !isLoading.value && !isRemoving.value) {
     await saveProgress() // Auto-save when moving to next step
     currentStep.value++
   }
 }
 
 const prevStep = async () => {
-  if (currentStep.value > 1 && !isLoading.value) {
+  if (currentStep.value > 1 && !isLoading.value && !isRemoving.value) {
     await saveProgress() // Auto-save when moving to previous step
     currentStep.value--
   }
 }
 
 const saveProgress = async () => {
-  if (isLoading.value) return
+  if (isLoading.value || isRemoving.value) return
 
   isLoading.value = true
   try {
@@ -427,7 +521,7 @@ const saveProgress = async () => {
 }
 
 const saveTreatmentPlan = async () => {
-  if (isSaving.value) return
+  if (isSaving.value || isRemoving.value) return
 
   isSaving.value = true
   try {
@@ -448,6 +542,92 @@ const saveTreatmentPlan = async () => {
   } finally {
     isSaving.value = false
   }
+}
+
+const removeTreatmentPlan = async () => {
+  if (isRemoving.value) return
+
+  isRemoving.value = true
+  try {
+    await mockApi.removeTreatmentPlan()
+
+    // Reset all form data
+    resetAllData()
+
+    // Close dialog and show success message
+    showRemoveConfirmation.value = false
+    alert('Treatment plan removed successfully!')
+
+    // Navigate back to patient details page
+    // Option 1: Use patient ID prop or route params
+    if (props.patientId) {
+      // If patient ID is available, navigate to specific patient
+      await router.push(`/patients/${props.patientId}`)
+    } else {
+      // Try to get patient ID from current route params
+      const currentPatientId =
+        router.currentRoute.value.params.patientId || router.currentRoute.value.params.id
+      if (currentPatientId) {
+        await router.push(`/patients/${currentPatientId}`)
+      } else {
+        // Fallback: navigate to patients list or dashboard
+        await router.push('/patients')
+      }
+    }
+
+    // Option 2: Alternative - use browser back navigation
+    // router.back()
+
+    // Option 3: Alternative - navigate to a specific route
+    // await router.push('/dashboard')
+  } catch (error) {
+    console.error('Failed to remove treatment plan:', error)
+    alert('Failed to remove treatment plan. Please try again.')
+  } finally {
+    isRemoving.value = false
+  }
+}
+
+const resetAllData = () => {
+  // Reset all form data to initial state
+  basicInfoData.value = {
+    planName: '',
+    patientType: '',
+    treatmentCategory: '',
+    estimatedDuration: '',
+    assignedProvider: '',
+    description: '',
+  }
+
+  measurementsData.value = {
+    dosage: '',
+    frequency: '',
+    duration: '',
+    weight: '',
+    height: '',
+    targetValue: '',
+    currentValue: '',
+    maximumValue: '',
+  }
+
+  assessmentData.value = {
+    question1: '',
+    question1Details: '',
+    question2: '',
+    question2Details: '',
+    question3: '',
+    question3Details: '',
+    question4: '',
+    question4Details: '',
+  }
+
+  uploadedFiles.value = {
+    medicalReports: [],
+    treatmentImages: [],
+  }
+
+  // Reset odontogram data
+  odontogram.resetAllTeeth()
 }
 
 const getStepData = (stepNumber: number): any => {

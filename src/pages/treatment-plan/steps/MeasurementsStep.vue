@@ -1,7 +1,7 @@
 <template>
   <div class="space-y-6">
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-      <div class="space-y-2">
+      <!-- <div class="space-y-2">
         <Label for="dosage">Dosage (mg)</Label>
         <Input
           id="dosage"
@@ -91,7 +91,7 @@
           @update:model-value="updateField('maximumValue', $event)"
           placeholder="Maximum allowed"
         />
-      </div>
+      </div> -->
     </div>
   </div>
 </template>
@@ -126,4 +126,4 @@ const updateField = (field: keyof MeasurementsData, value: string) => {
   const updatedData = { ...props.formData, [field]: value }
   emit('update:formData', updatedData)
 }
-</script> 
+</script>

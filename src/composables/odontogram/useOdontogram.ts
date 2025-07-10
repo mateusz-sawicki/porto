@@ -234,6 +234,65 @@ export function useOdontogram() {
     selectedSegments.value = []
   }
 
+  // Reset all teeth data to initial state
+  const resetAllTeeth = () => {
+    // Clear all procedures from existing teeth
+    teeth.value.forEach((tooth) => {
+      tooth.toothProcedures = []
+      tooth.schemaProcedures = []
+    })
+
+    // Reset to original 32 permanent teeth (in case extra teeth were added)
+    teeth.value = [
+      // Quadrant 1 (Upper Right)
+      { number: '18', toothProcedures: [], schemaProcedures: [] },
+      { number: '17', toothProcedures: [], schemaProcedures: [] },
+      { number: '16', toothProcedures: [], schemaProcedures: [] },
+      { number: '15', toothProcedures: [], schemaProcedures: [] },
+      { number: '14', toothProcedures: [], schemaProcedures: [] },
+      { number: '13', toothProcedures: [], schemaProcedures: [] },
+      { number: '12', toothProcedures: [], schemaProcedures: [] },
+      { number: '11', toothProcedures: [], schemaProcedures: [] },
+      // Quadrant 2 (Upper Left)
+      { number: '21', toothProcedures: [], schemaProcedures: [] },
+      { number: '22', toothProcedures: [], schemaProcedures: [] },
+      { number: '23', toothProcedures: [], schemaProcedures: [] },
+      { number: '24', toothProcedures: [], schemaProcedures: [] },
+      { number: '25', toothProcedures: [], schemaProcedures: [] },
+      { number: '26', toothProcedures: [], schemaProcedures: [] },
+      { number: '27', toothProcedures: [], schemaProcedures: [] },
+      { number: '28', toothProcedures: [], schemaProcedures: [] },
+      // Quadrant 4 (Lower Right)
+      { number: '48', toothProcedures: [], schemaProcedures: [] },
+      { number: '47', toothProcedures: [], schemaProcedures: [] },
+      { number: '46', toothProcedures: [], schemaProcedures: [] },
+      { number: '45', toothProcedures: [], schemaProcedures: [] },
+      { number: '44', toothProcedures: [], schemaProcedures: [] },
+      { number: '43', toothProcedures: [], schemaProcedures: [] },
+      { number: '42', toothProcedures: [], schemaProcedures: [] },
+      { number: '41', toothProcedures: [], schemaProcedures: [] },
+      // Quadrant 3 (Lower Left)
+      { number: '31', toothProcedures: [], schemaProcedures: [] },
+      { number: '32', toothProcedures: [], schemaProcedures: [] },
+      { number: '33', toothProcedures: [], schemaProcedures: [] },
+      { number: '34', toothProcedures: [], schemaProcedures: [] },
+      { number: '35', toothProcedures: [], schemaProcedures: [] },
+      { number: '36', toothProcedures: [], schemaProcedures: [] },
+      { number: '37', toothProcedures: [], schemaProcedures: [] },
+      { number: '38', toothProcedures: [], schemaProcedures: [] },
+    ]
+
+    // Clear all selections and reset state
+    selectedProcedure.value = null
+    selectedSegments.value = []
+    selectedToothNumbers.value = []
+    isDeleteMode.value = false
+    isProcedureMissing.value = false
+    search.value = ''
+
+    console.log('All teeth data has been reset to initial state')
+  }
+
   return {
     selectedProcedure,
     search,
@@ -253,6 +312,7 @@ export function useOdontogram() {
     handleRemoveTooth,
     handleAddExtraTooth,
     handleProcedureSelect,
+    resetAllTeeth,
     setSelectedProcedure: (procedure: Procedure | null) => (selectedProcedure.value = procedure),
     setSearch: (value: string) => (search.value = value),
     setIsProcedureMissing: (value: boolean) => (isProcedureMissing.value = value),
