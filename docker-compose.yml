@@ -2,6 +2,6 @@ services:
   vue-app:
     build: .
     ports:
-      - '3000:80'
+      - '6969:80'
     environment:
       - NODE_ENV=production
