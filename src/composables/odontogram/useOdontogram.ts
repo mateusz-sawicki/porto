@@ -1,6 +1,5 @@
 // composables/useOdontogram.ts
-import { ref, computed, watch } from 'vue'
-import { useDark } from '@vueuse/core'
+import { ref, computed } from 'vue'
 import type { ToothData, Procedure, ProcedureTargetMap } from '@/types/odontogram/odontogram'
 import { ExtraToothDirection } from '@/types/odontogram/odontogram'
 
@@ -11,21 +10,6 @@ export function useOdontogram() {
   const selectedToothNumbers = ref<string[]>([])
   const isDeleteMode = ref(false)
   const isProcedureMissing = ref(false)
-  const isDark = useDark()
-
-  // Reactive amalgamat procedure that updates with theme
-  const amalgamatProcedure = ref<Procedure>({
-    name: 'Amalgamat',
-    behavior: 'None',
-    visual: { visualType: 'Color', value: isDark.value ? '#ffffff' : '#000000' },
-  })
-
-  // Force reactivity by watching theme changes
-  watch(isDark, (newValue) => {
-    console.log('Theme changed to:', newValue ? 'dark' : 'light')
-    // Update amalgamat procedure color when theme changes
-    amalgamatProcedure.value.visual.value = newValue ? '#ffffff' : '#000000'
-  })
 
   // Initial teeth data (32 permanent teeth)
   const teeth = ref<ToothData[]>([
@@ -80,27 +64,19 @@ export function useOdontogram() {
       'Leczenie kanałowe': 'Root',
       Ekstrakcja: 'Tooth',
       Wypełnienie: ['Mesial', 'Distal', 'Buccal', 'Lingual', 'Incisal'],
-      'Wypełnienie do wymiany': ['Mesial', 'Distal', 'Buccal', 'Lingual', 'Incisal'],
-      Amalgamat: ['Mesial', 'Distal', 'Buccal', 'Lingual', 'Incisal'],
       Próchnica: ['Root', 'Mesial', 'Distal', 'Buccal', 'Lingual', 'Incisal'],
       Recesja: 'Tooth',
       Implant: 'Tooth',
     }),
   )
 
-  // Static procedure palette with reactive amalgamat procedure
+  // Static procedure palette
   const procedurePalette = computed<Procedure[]>(() => [
     {
       name: 'Wypełnienie',
       behavior: 'None',
-      visual: { visualType: 'Color', value: '#eab308' }, // Changed to yellow
+      visual: { visualType: 'Color', value: '#3b82f6' },
     },
-    {
-      name: 'Wypełnienie do wymiany',
-      behavior: 'None',
-      visual: { visualType: 'Color', value: '#3b82f6' }, // Blue
-    },
-    amalgamatProcedure.value, // Use the reactive amalgamat procedure
     {
       name: 'Ekstrakcja',
       behavior: 'CrossOutTooth',
