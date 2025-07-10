@@ -36,36 +36,38 @@
             placeholder="Szukaj procedury..."
             @update:model-value="handleSearchChange"
           />
-          <CommandEmpty>Nie znaleziono procedury.</CommandEmpty>
-          <CommandGroup class="max-h-[300px] overflow-y-auto">
-            <CommandItem
-              v-for="procedure in filteredProcedures"
-              :key="procedure.name"
-              :value="procedure.name"
-              @select="() => handleProcedureSelect(procedure)"
-              class="flex items-center justify-between"
-            >
-              <div class="flex items-center gap-2 flex-1 min-w-0">
-                <div
-                  v-if="procedure.visual.visualType === 'Color'"
-                  class="w-3 h-3 rounded-sm flex-shrink-0"
-                  :style="{ backgroundColor: procedure.visual.value }"
+          <CommandList>
+            <CommandEmpty>Nie znaleziono procedury.</CommandEmpty>
+            <CommandGroup>
+              <CommandItem
+                v-for="procedure in filteredProcedures"
+                :key="procedure.name"
+                :value="procedure.name"
+                @select="() => handleProcedureSelect(procedure)"
+                class="flex items-center justify-between"
+              >
+                <div class="flex items-center gap-2 flex-1 min-w-0">
+                  <div
+                    v-if="procedure.visual.visualType === 'Color'"
+                    class="w-3 h-3 rounded-sm flex-shrink-0"
+                    :style="{ backgroundColor: procedure.visual.value }"
+                  />
+                  <span class="text-sm truncate">{{ procedure.name }}</span>
+                </div>
+                <span class="text-xs text-muted-foreground whitespace-nowrap ml-4 flex-shrink-0">
+                  [{{ getTargetText(procedure.name) }}]
+                </span>
+                <Check
+                  :class="
+                    cn(
+                      'ml-2 h-4 w-4',
+                      selectedProcedure?.name === procedure.name ? 'opacity-100' : 'opacity-0',
+                    )
+                  "
                 />
-                <span class="text-sm truncate">{{ procedure.name }}</span>
-              </div>
-              <span class="text-xs text-muted-foreground whitespace-nowrap ml-4 flex-shrink-0">
-                [{{ getTargetText(procedure.name) }}]
-              </span>
-              <Check
-                :class="
-                  cn(
-                    'ml-2 h-4 w-4',
-                    selectedProcedure?.name === procedure.name ? 'opacity-100' : 'opacity-0',
-                  )
-                "
-              />
-            </CommandItem>
-          </CommandGroup>
+              </CommandItem>
+            </CommandGroup>
+          </CommandList>
         </Command>
       </PopoverContent>
     </Popover>
@@ -102,6 +104,7 @@ import {
   CommandGroup,
   CommandInput,
   CommandItem,
+  CommandList,
 } from '@/components/ui/command'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { cn } from '@/lib/utils'
