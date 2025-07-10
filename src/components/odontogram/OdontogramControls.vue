@@ -2,70 +2,73 @@
 <template>
   <div class="w-full space-y-4">
     <!-- Procedure Selection -->
-    <div ref="containerRef" class="relative w-full">
-      <div
-        v-if="selectedProcedure?.visual.visualType === 'Color'"
-        class="absolute left-3 top-1/2 z-10 w-3 h-3 rounded-sm transform -translate-y-1/2"
-        :style="{ backgroundColor: selectedProcedure.visual.value }"
-      />
-
-      <Input
-        v-model="searchValue"
-        @input="handleSearchChange"
-        @focus="isOpen = true"
-        @keydown="handleKeyDown"
-        placeholder="Wybierz procedurę"
-        :class="
-          cn(
-            'w-full',
-            selectedProcedure?.visual.visualType === 'Color' && 'pl-8',
-            isProcedureMissing && 'border-red-500 animate-pulse',
-          )
-        "
-      />
-
-      <div class="absolute right-3 top-1/2 transform -translate-y-1/2 flex items-center">
-        <!-- Clear button - show when there's text in input OR a procedure is selected -->
+    <Popover v-model:open="open">
+      <PopoverTrigger as-child>
         <Button
-          v-if="searchValue || selectedProcedure"
-          variant="ghost"
-          size="sm"
-          @click.stop="handleClearInput"
-          class="h-auto p-1 hover:bg-transparent"
-        >
-          <X class="h-4 w-4 text-gray-500" />
-        </Button>
-        <ChevronDown v-else class="h-4 w-4 text-gray-500" />
-      </div>
-
-      <!-- Dropdown -->
-      <div
-        v-if="isOpen && filteredProcedures.length > 0"
-        class="absolute top-full left-0 right-0 z-50 mt-1 bg-popover border rounded-md shadow-lg max-h-48 overflow-y-auto"
-      >
-        <div
-          v-for="(procedure, index) in filteredProcedures"
-          :key="procedure.name"
-          @click="() => handleProcedureSelect(procedure)"
-          :class="[
-            'flex items-center justify-between px-3 py-2 cursor-pointer hover:bg-accent hover:text-accent-foreground transition-colors',
-            highlightedIndex === index && 'bg-accent text-accent-foreground',
-          ]"
+          variant="outline"
+          role="combobox"
+          :aria-expanded="open"
+          :class="
+            cn(
+              'w-full justify-between',
+              selectedProcedure?.visual.visualType === 'Color' && 'pl-8',
+              isProcedureMissing && 'border-red-500 animate-pulse',
+            )
+          "
         >
           <div class="flex items-center gap-2 flex-1 min-w-0">
             <div
-              v-if="procedure.visual.visualType === 'Color'"
+              v-if="selectedProcedure?.visual.visualType === 'Color'"
               class="w-3 h-3 rounded-sm flex-shrink-0"
-              :style="{ backgroundColor: procedure.visual.value }"
+              :style="{ backgroundColor: selectedProcedure.visual.value }"
             />
-            <span class="text-sm truncate">{{ procedure.name }}</span>
+            <span class="truncate text-left">
+              {{ selectedProcedure ? selectedProcedure.name : 'Wybierz procedurę' }}
+            </span>
           </div>
-          <span class="text-xs text-muted-foreground whitespace-nowrap ml-4 flex-shrink-0">
-            [{{ getTargetText(procedure.name) }}]
-          </span>
-        </div>
-      </div>
-    </div>
+          <ChevronsUpDown class="ml-2 h-4 w-4 shrink-0 opacity-50" />
+        </Button>
+      </PopoverTrigger>
+      <PopoverContent class="w-full p-0" :style="{ width: triggerWidth }">
+        <Command>
+          <CommandInput
+            v-model:model-value="searchValue"
+            placeholder="Szukaj procedury..."
+            @update:model-value="handleSearchChange"
+          />
+          <CommandEmpty>Nie znaleziono procedury.</CommandEmpty>
+          <CommandGroup class="max-h-[300px] overflow-y-auto">
+            <CommandItem
+              v-for="procedure in filteredProcedures"
+              :key="procedure.name"
+              :value="procedure.name"
+              @select="() => handleProcedureSelect(procedure)"
+              class="flex items-center justify-between"
+            >
+              <div class="flex items-center gap-2 flex-1 min-w-0">
+                <div
+                  v-if="procedure.visual.visualType === 'Color'"
+                  class="w-3 h-3 rounded-sm flex-shrink-0"
+                  :style="{ backgroundColor: procedure.visual.value }"
+                />
+                <span class="text-sm truncate">{{ procedure.name }}</span>
+              </div>
+              <span class="text-xs text-muted-foreground whitespace-nowrap ml-4 flex-shrink-0">
+                [{{ getTargetText(procedure.name) }}]
+              </span>
+              <Check
+                :class="
+                  cn(
+                    'ml-2 h-4 w-4',
+                    selectedProcedure?.name === procedure.name ? 'opacity-100' : 'opacity-0',
+                  )
+                "
+              />
+            </CommandItem>
+          </CommandGroup>
+        </Command>
+      </PopoverContent>
+    </Popover>
 
     <!-- Selected Procedure Display -->
     <div v-if="selectedProcedure" class="w-full p-3 bg-muted rounded-md">
@@ -90,10 +93,17 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch, onMounted, onUnmounted } from 'vue'
-import { X, ChevronDown } from 'lucide-vue-next'
+import { ref, computed, watch, onMounted, nextTick } from 'vue'
+import { Check, ChevronsUpDown } from 'lucide-vue-next'
 import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+} from '@/components/ui/command'
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { cn } from '@/lib/utils'
 import type { Procedure } from '@/types/odontogram/odontogram'
 
@@ -115,10 +125,9 @@ const props = defineProps<Props>()
 const emit = defineEmits<Emits>()
 
 // State
-const containerRef = ref<HTMLElement>()
-const isOpen = ref(false)
+const open = ref(false)
 const searchValue = ref('')
-const highlightedIndex = ref(-1)
+const triggerWidth = ref('400px')
 
 // Computed
 const filteredProcedures = computed(() => {
@@ -134,87 +143,39 @@ const getTargetText = (procedureName: string) => {
   return Array.isArray(target) ? target.join(', ') : target
 }
 
-const handleSearchChange = (event: Event) => {
-  const value = (event.target as HTMLInputElement).value
+const handleSearchChange = (value: string) => {
   searchValue.value = value
   emit('search-change', value)
-  isOpen.value = true
-  highlightedIndex.value = -1
 }
 
 const handleProcedureSelect = (procedure: Procedure) => {
   emit('select', procedure)
-  // Clear the input after selection
   searchValue.value = ''
   emit('search-change', '')
-  isOpen.value = false
-  highlightedIndex.value = -1
+  open.value = false
 }
 
 const handleClear = () => {
   emit('clear')
   searchValue.value = ''
   emit('search-change', '')
-  isOpen.value = false
-  highlightedIndex.value = -1
+  open.value = false
 }
 
-const handleClearInput = () => {
-  // Clear both the input and any selected procedure
-  emit('clear')
-  searchValue.value = ''
-  emit('search-change', '')
-  isOpen.value = false
-  highlightedIndex.value = -1
+// Calculate trigger width for popover positioning
+const updateTriggerWidth = () => {
+  nextTick(() => {
+    const trigger = document.querySelector('[role="combobox"]') as HTMLElement
+    if (trigger) {
+      triggerWidth.value = `${trigger.offsetWidth}px`
+    }
+  })
 }
-
-const handleKeyDown = (event: KeyboardEvent) => {
-  if (!isOpen.value) return
-
-  switch (event.key) {
-    case 'ArrowDown':
-      event.preventDefault()
-      highlightedIndex.value = Math.min(
-        highlightedIndex.value + 1,
-        filteredProcedures.value.length - 1,
-      )
-      break
-    case 'ArrowUp':
-      event.preventDefault()
-      highlightedIndex.value = Math.max(highlightedIndex.value - 1, -1)
-      break
-    case 'Enter':
-      event.preventDefault()
-      if (highlightedIndex.value >= 0 && filteredProcedures.value[highlightedIndex.value]) {
-        handleProcedureSelect(filteredProcedures.value[highlightedIndex.value])
-      }
-      break
-    case 'Escape':
-      event.preventDefault()
-      isOpen.value = false
-      highlightedIndex.value = -1
-      break
-  }
-}
-
-const handleClickOutside = (event: Event) => {
-  if (containerRef.value && !containerRef.value.contains(event.target as Node)) {
-    isOpen.value = false
-    highlightedIndex.value = -1
-  }
-}
-
-// Reset highlighted index when filtered procedures change
-watch(filteredProcedures, () => {
-  highlightedIndex.value = -1
-})
 
 // Watchers
 watch(
   () => props.selectedProcedure,
   (newProcedure) => {
-    // Don't automatically fill the input when a procedure is selected
-    // Keep input clear for next search
     if (!newProcedure) {
       searchValue.value = ''
     }
@@ -231,12 +192,18 @@ watch(
   },
 )
 
-// Lifecycle
-onMounted(() => {
-  document.addEventListener('click', handleClickOutside)
+// Reset search when popover closes
+watch(open, (isOpen) => {
+  if (!isOpen) {
+    searchValue.value = ''
+    emit('search-change', '')
+  } else {
+    updateTriggerWidth()
+  }
 })
 
-onUnmounted(() => {
-  document.removeEventListener('click', handleClickOutside)
+// Lifecycle
+onMounted(() => {
+  updateTriggerWidth()
 })
 </script>
