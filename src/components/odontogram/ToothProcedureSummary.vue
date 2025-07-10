@@ -167,12 +167,33 @@ const emit = defineEmits<Emits>()
 const accordionOpen = ref<Record<string, boolean>>({})
 
 // Computed
+// Replace the existing sortedTeethWithProcedures computed property with this:
 const sortedTeethWithProcedures = computed(() => {
   return [...props.teethWithProcedures].sort((a, b) => {
-    // Extract numeric part for proper sorting
-    const aNum = parseInt(a.toothNumber.replace(/[^\d]/g, ''))
-    const bNum = parseInt(b.toothNumber.replace(/[^\d]/g, ''))
-    return aNum - bNum
+    const getSortOrder = (toothNumber: string): number => {
+      const num = parseInt(toothNumber)
+
+      // Handle invalid numbers
+      if (isNaN(num)) return 999
+
+      const quadrant = Math.floor(num / 10)
+      const position = num % 10
+
+      switch (quadrant) {
+        case 1: // Upper right: 18 -> 11 (reverse order)
+          return 8 - position + 0 // 0-7
+        case 2: // Upper left: 21 -> 28 (normal order)
+          return position - 1 + 8 // 8-15
+        case 3: // Lower left: 38 -> 31 (reverse order)
+          return 8 - position + 16 // 16-23
+        case 4: // Lower right: 41 -> 48 (normal order)
+          return position - 1 + 24 // 24-31
+        default:
+          return 999 // Invalid quadrant
+      }
+    }
+
+    return getSortOrder(a.toothNumber) - getSortOrder(b.toothNumber)
   })
 })
 

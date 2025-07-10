@@ -20,7 +20,7 @@ interface Props {
 
 const props = withDefaults(defineProps<Props>(), {
   width: 88,
-  height: 85,
+  height: 90,
   hasCutout: false,
 })
 

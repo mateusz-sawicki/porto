@@ -6,8 +6,8 @@
         class="flex h-[125px] scale-[1.2] max-w-[75px]"
         :class="[
           direction === ToothContainerDirection.Top
-            ? 'flex-row items-end justify-end'
-            : 'flex-col items-start justify-start',
+            ? 'flex-row items-end justify-end mt-2'
+            : 'flex-col items-start justify-start mb-2',
         ]"
       >
         <!-- 🎯 THIS IS WHERE YOUR SVG GETS RENDERED -->
@@ -73,8 +73,6 @@ const ToothSvgComponent = computed(() => {
   return getToothSvgComponent(props.number) // Gets SVG for tooth "11", "16", etc.
 })
 
-
-
 // Interactive SVG logic
 const normalizeSegment = (id: string): string => {
   if (id.includes('root')) return `${props.number}_root`
@@ -112,8 +110,6 @@ const { assignedProcedures, showTooltip } = useInteractiveSvg({
   selectedSegments: computed(() => props.selectedSegments),
   onSegmentClick: (segmentId: string) => emit('segment-click', segmentId),
 })
-
-
 </script>
 
 <style scoped>
@@ -162,6 +158,4 @@ const { assignedProcedures, showTooltip } = useInteractiveSvg({
 .tooth-svg :deep(g[id*='implant']) {
   display: none !important;
 }
-
-
 </style>
