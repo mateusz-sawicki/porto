@@ -5,17 +5,14 @@
       <div
         class="tooth-wrapper"
         :class="{ selected: isSelected }"
-        @click="handleToothClick"
-        @mouseenter="hoveredTooth = tooth.number"
-        @mouseleave="hoveredTooth = null"
+        @click="isExtracted ? null : handleToothClick"
+        @mouseenter="isExtracted ? null : (hoveredTooth = tooth.number)"
+        @mouseleave="isExtracted ? null : (hoveredTooth = null)"
       >
-        <!-- Extraction Overlay -->
-        <ExtractionOverlay v-if="extraction" />
-
         <!-- Main Group Container (equivalent to Mantine's Group with h={280}) -->
         <div
           class="tooth-group"
-          :class="{ 'tooth-group--bottom': direction === ToothContainerDirection.Bottom }"
+          :class="[{ 'tooth-group--bottom': direction === ToothContainerDirection.Bottom }, isExtracted ? 'opacity-50 pointer-events-none' : '']"
         >
           <template v-if="direction === ToothContainerDirection.Top">
             <ToothLabel
@@ -41,14 +38,15 @@
               :toothProcedures="tooth.toothProcedures"
               :selectedSegments="selectedSegments"
               :direction="direction"
-              @segment-click="$emit('segment-click', $event)"
+              @segment-click="isExtracted ? undefined : $emit('segment-click', $event)"
             />
+            <ExtractionOverlay v-if="extraction" />
             <Schematic
               :number="tooth.number"
               :schemaProcedures="tooth.schemaProcedures"
               :selectedSegments="selectedSegments"
               :direction="direction"
-              @segment-click="$emit('segment-click', $event)"
+              @segment-click="isExtracted ? undefined : $emit('segment-click', $event)"
             />
           </template>
           <template v-else>
@@ -57,7 +55,7 @@
               :schemaProcedures="tooth.schemaProcedures"
               :selectedSegments="selectedSegments"
               :direction="direction"
-              @segment-click="$emit('segment-click', $event)"
+              @segment-click="isExtracted ? undefined : $emit('segment-click', $event)"
             />
             <GumOverlay :direction="direction" :hasCutout="hasExposedToothProcedure" />
             <Tooth
@@ -65,8 +63,9 @@
               :toothProcedures="tooth.toothProcedures"
               :selectedSegments="selectedSegments"
               :direction="direction"
-              @segment-click="$emit('segment-click', $event)"
+              @segment-click="isExtracted ? undefined : $emit('segment-click', $event)"
             />
+            <ExtractionOverlay v-if="extraction" />
             <ToothLabel
               :toothNumber="tooth.number"
               :isExtra="isExtra"
@@ -143,6 +142,8 @@ const hasExposedToothProcedure = computed(() =>
   ),
 )
 
+const isExtracted = computed(() => !!extraction.value)
+
 const showTooltip = computed(
   () => hoveredTooth.value === props.tooth.number && assignedToothLevelProcedures.value.length > 0,
 )
@@ -153,7 +154,6 @@ const handleToothClick = () => {
 </script>
 
 <style scoped>
-/* Fixed layout to match React/Mantine ToothContainer */
 .tooth-wrapper {
   /* Main container behaves like Mantine's Stack - vertical flex */
   outline: 2px solid var(--border);
@@ -168,11 +168,6 @@ const handleToothClick = () => {
   position: relative;
   cursor: pointer;
 }
-
-.tooth-wrapper:hover {
-  background-color: var(--muted);
-}
-
 .selected {
   outline: 2px solid var(--destructive);
   outline-offset: -1px;
