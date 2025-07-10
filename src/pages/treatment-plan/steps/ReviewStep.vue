@@ -1,11 +1,10 @@
 <template>
   <div class="space-y-8">
-    <div class="text-center mb-6">
+    <!-- <div class="text-center mb-6">
       <h3 class="text-2xl font-bold mb-2">Treatment Plan Summary</h3>
       <p class="text-muted-foreground">Review all information before proceeding</p>
     </div>
 
-    <!-- Basic Information Summary -->
     <Card>
       <CardHeader>
         <CardTitle class="flex items-center gap-2">
@@ -45,7 +44,6 @@
       </CardContent>
     </Card>
 
-    <!-- Odontogram Summary -->
     <Card>
       <CardHeader>
         <CardTitle class="flex items-center gap-2">
@@ -90,7 +88,6 @@
                   :key="procedure.name"
                   class="flex items-center gap-2 text-sm"
                 >
-                  <!-- Visual indicator based on type -->
                   <div
                     v-if="procedure.visual.visualType === 'Color'"
                     class="w-3 h-3 rounded-sm"
@@ -120,7 +117,6 @@
       </CardContent>
     </Card>
 
-    <!-- Measurements Summary -->
     <Card>
       <CardHeader>
         <CardTitle class="flex items-center gap-2">
@@ -142,7 +138,6 @@
       </CardContent>
     </Card>
 
-    <!-- Assessment Summary -->
     <Card>
       <CardHeader>
         <CardTitle class="flex items-center gap-2">
@@ -173,7 +168,6 @@
       </CardContent>
     </Card>
 
-    <!-- Documents Summary -->
     <Card>
       <CardHeader>
         <CardTitle class="flex items-center gap-2">
@@ -199,7 +193,7 @@
           </div>
         </div>
       </CardContent>
-    </Card>
+    </Card> -->
   </div>
 </template>
 
@@ -291,4 +285,4 @@ const measurementItems = computed((): MeasurementItem[] => [
   { label: 'Current Value', value: props.measurements.currentValue, unit: '' },
   { label: 'Maximum Value', value: props.measurements.maximumValue, unit: '' },
 ])
-</script> 
+</script>
