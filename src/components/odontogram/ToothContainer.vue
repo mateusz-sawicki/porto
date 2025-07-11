@@ -6,6 +6,7 @@
         class="tooth-wrapper"
         :class="{
           selected: isSelected,
+          'tooth-wrapper--hidden': hideTooth,
         }"
         @click="handleToothClick"
         @mouseenter="hoveredTooth = tooth.number"
@@ -39,20 +40,22 @@
             <!-- Single wrapper for all tooth components -->
             <div class="tooth-components-wrapper" :class="{ 'extraction-blocked': !!extraction }">
               <GumOverlay :direction="direction" :hasCutout="hasExposedToothProcedure" />
-              <Tooth
-                :number="tooth.number"
-                :toothProcedures="tooth.toothProcedures"
-                :selectedSegments="extraction ? [] : selectedSegments"
-                :direction="direction"
-                @segment-click="handleSegmentClick"
-              />
-              <Schematic
-                :number="tooth.number"
-                :schemaProcedures="tooth.schemaProcedures"
-                :selectedSegments="extraction ? [] : selectedSegments"
-                :direction="direction"
-                @segment-click="handleSegmentClick"
-              />
+              <template v-if="!hideTooth">
+                <Tooth
+                  :number="tooth.number"
+                  :toothProcedures="tooth.toothProcedures"
+                  :selectedSegments="extraction ? [] : selectedSegments"
+                  :direction="direction"
+                  @segment-click="handleSegmentClick"
+                />
+                <Schematic
+                  :number="tooth.number"
+                  :schemaProcedures="tooth.schemaProcedures"
+                  :selectedSegments="extraction ? [] : selectedSegments"
+                  :direction="direction"
+                  @segment-click="handleSegmentClick"
+                />
+              </template>
               <!-- Single hover blocker for all components -->
               <div v-if="extraction" class="hover-blocker"></div>
             </div>
@@ -60,21 +63,23 @@
           <template v-else>
             <!-- Single wrapper for all tooth components -->
             <div class="tooth-components-wrapper" :class="{ 'extraction-blocked': !!extraction }">
-              <Schematic
-                :number="tooth.number"
-                :schemaProcedures="tooth.schemaProcedures"
-                :selectedSegments="extraction ? [] : selectedSegments"
-                :direction="direction"
-                @segment-click="handleSegmentClick"
-              />
               <GumOverlay :direction="direction" :hasCutout="hasExposedToothProcedure" />
-              <Tooth
-                :number="tooth.number"
-                :toothProcedures="tooth.toothProcedures"
-                :selectedSegments="extraction ? [] : selectedSegments"
-                :direction="direction"
-                @segment-click="handleSegmentClick"
-              />
+              <template v-if="!hideTooth">
+                <Schematic
+                  :number="tooth.number"
+                  :schemaProcedures="tooth.schemaProcedures"
+                  :selectedSegments="extraction ? [] : selectedSegments"
+                  :direction="direction"
+                  @segment-click="handleSegmentClick"
+                />
+                <Tooth
+                  :number="tooth.number"
+                  :toothProcedures="tooth.toothProcedures"
+                  :selectedSegments="extraction ? [] : selectedSegments"
+                  :direction="direction"
+                  @segment-click="handleSegmentClick"
+                />
+              </template>
               <!-- Single hover blocker for all components -->
               <div v-if="extraction" class="hover-blocker"></div>
             </div>
@@ -157,14 +162,20 @@ const hasExposedToothProcedure = computed(() =>
   ),
 )
 
+const hideTooth = computed(() =>
+  assignedToothLevelProcedures.value.some(
+    (a) => a.procedure.behavior === 'HideTooth'
+  )
+)
+
 const showTooltip = computed(
   () => hoveredTooth.value === props.tooth.number && assignedToothLevelProcedures.value.length > 0,
 )
 
 const handleToothClick = () => {
-  // Prevent tooth selection when extracted, but still allow the click event to bubble
+  // Prevent tooth selection when extracted or hidden, but still allow the click event to bubble
   // This way ToothLabel interactions still work
-  if (!extraction.value) {
+  if (!extraction.value && !hideTooth.value) {
     emit('tooth-click')
   }
 }
@@ -255,5 +266,12 @@ const handleSegmentClick = (segmentId: string) => {
   cursor: not-allowed;
   background: transparent;
   pointer-events: all;
+}
+
+.tooth-wrapper--hidden {
+  pointer-events: none;
+}
+.tooth-wrapper--hidden .tooth-label {
+  pointer-events: auto;
 }
 </style>

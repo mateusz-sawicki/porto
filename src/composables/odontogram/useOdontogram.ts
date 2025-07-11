@@ -67,6 +67,7 @@ export function useOdontogram() {
       Próchnica: ['Root', 'Mesial', 'Distal', 'Buccal', 'Lingual', 'Incisal'],
       Recesja: 'Tooth',
       Implant: 'Tooth',
+      'brak zęba': 'Tooth', // Added missing tooth procedure
     }),
   )
 
@@ -106,6 +107,11 @@ export function useOdontogram() {
       name: 'Implant',
       behavior: 'Implant',
       visual: { visualType: 'Color', value: '#9a9a9a' },
+    },
+    {
+      name: 'brak zęba',
+      behavior: 'HideTooth',
+      visual: { visualType: 'Icon', value: 'Ø' }, // Use a suitable icon for missing tooth
     },
   ])
 
@@ -164,6 +170,12 @@ export function useOdontogram() {
   }
 
   const handleProcedureSelect = (procedure: Procedure) => {
+    // Prevent adding any procedure to a tooth that already has 'brak zęba' (HideTooth)
+    const isHideToothAssigned = (tooth: ToothData) =>
+      tooth.toothProcedures.some(
+        (a) => a.procedure.behavior === 'HideTooth'
+      )
+
     const target = getProcedureTarget(procedure.name)
     if (!target) {
       console.warn(`No target mapping found for procedure: ${procedure.name}`)
@@ -177,7 +189,7 @@ export function useOdontogram() {
     selectedToothNumbers.value.forEach((number) => {
       const tooth = teeth.value.find((t) => t.number === number)
       if (!tooth) return
-
+      if (isHideToothAssigned(tooth) && procedure.behavior !== 'HideTooth') return // Block if 'brak zęba' is present
       if (
         !tooth.toothProcedures.some(
           (a) => a.toothPart.toLowerCase() === targets[0] && a.procedure.name === procedure.name,
@@ -198,7 +210,7 @@ export function useOdontogram() {
 
       const tooth = teeth.value.find((t) => t.number === number)
       if (!tooth) return
-
+      if (isHideToothAssigned(tooth) && procedure.behavior !== 'HideTooth') return // Block if 'brak zęba' is present
       if (['crown', 'root', 'tooth'].includes(partLower) && targets.includes(partLower)) {
         if (
           !tooth.toothProcedures.some(
