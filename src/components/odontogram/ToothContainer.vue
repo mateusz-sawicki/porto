@@ -1,21 +1,22 @@
-<!-- components/ToothContainer.vue - Fixed Layout to Match React/Mantine Original -->
+<!-- components/ToothContainer.vue - Restored Original Layout with Fixed Extraction Overlay -->
 <template>
   <Popover :open="showTooltip">
     <PopoverTrigger asChild>
       <div
         class="tooth-wrapper"
-        :class="{ selected: isSelected }"
+        :class="{
+          selected: isSelected,
+        }"
         @click="handleToothClick"
         @mouseenter="hoveredTooth = tooth.number"
         @mouseleave="hoveredTooth = null"
       >
-        <!-- Extraction Overlay -->
-        <ExtractionOverlay v-if="extraction" />
-
         <!-- Main Group Container (equivalent to Mantine's Group with h={280}) -->
         <div
           class="tooth-group"
-          :class="{ 'tooth-group--bottom': direction === ToothContainerDirection.Bottom }"
+          :class="{
+            'tooth-group--bottom': direction === ToothContainerDirection.Bottom,
+          }"
         >
           <template v-if="direction === ToothContainerDirection.Top">
             <ToothLabel
@@ -35,38 +36,48 @@
               "
               @remove-tooth="$emit('remove-tooth', tooth.number)"
             />
-            <GumOverlay :direction="direction" :hasCutout="hasExposedToothProcedure" />
-            <Tooth
-              :number="tooth.number"
-              :toothProcedures="tooth.toothProcedures"
-              :selectedSegments="selectedSegments"
-              :direction="direction"
-              @segment-click="$emit('segment-click', $event)"
-            />
-            <Schematic
-              :number="tooth.number"
-              :schemaProcedures="tooth.schemaProcedures"
-              :selectedSegments="selectedSegments"
-              :direction="direction"
-              @segment-click="$emit('segment-click', $event)"
-            />
+            <!-- Single wrapper for all tooth components -->
+            <div class="tooth-components-wrapper" :class="{ 'extraction-blocked': !!extraction }">
+              <GumOverlay :direction="direction" :hasCutout="hasExposedToothProcedure" />
+              <Tooth
+                :number="tooth.number"
+                :toothProcedures="tooth.toothProcedures"
+                :selectedSegments="extraction ? [] : selectedSegments"
+                :direction="direction"
+                @segment-click="handleSegmentClick"
+              />
+              <Schematic
+                :number="tooth.number"
+                :schemaProcedures="tooth.schemaProcedures"
+                :selectedSegments="extraction ? [] : selectedSegments"
+                :direction="direction"
+                @segment-click="handleSegmentClick"
+              />
+              <!-- Single hover blocker for all components -->
+              <div v-if="extraction" class="hover-blocker"></div>
+            </div>
           </template>
           <template v-else>
-            <Schematic
-              :number="tooth.number"
-              :schemaProcedures="tooth.schemaProcedures"
-              :selectedSegments="selectedSegments"
-              :direction="direction"
-              @segment-click="$emit('segment-click', $event)"
-            />
-            <GumOverlay :direction="direction" :hasCutout="hasExposedToothProcedure" />
-            <Tooth
-              :number="tooth.number"
-              :toothProcedures="tooth.toothProcedures"
-              :selectedSegments="selectedSegments"
-              :direction="direction"
-              @segment-click="$emit('segment-click', $event)"
-            />
+            <!-- Single wrapper for all tooth components -->
+            <div class="tooth-components-wrapper" :class="{ 'extraction-blocked': !!extraction }">
+              <Schematic
+                :number="tooth.number"
+                :schemaProcedures="tooth.schemaProcedures"
+                :selectedSegments="extraction ? [] : selectedSegments"
+                :direction="direction"
+                @segment-click="handleSegmentClick"
+              />
+              <GumOverlay :direction="direction" :hasCutout="hasExposedToothProcedure" />
+              <Tooth
+                :number="tooth.number"
+                :toothProcedures="tooth.toothProcedures"
+                :selectedSegments="extraction ? [] : selectedSegments"
+                :direction="direction"
+                @segment-click="handleSegmentClick"
+              />
+              <!-- Single hover blocker for all components -->
+              <div v-if="extraction" class="hover-blocker"></div>
+            </div>
             <ToothLabel
               :toothNumber="tooth.number"
               :isExtra="isExtra"
@@ -86,6 +97,9 @@
             />
           </template>
         </div>
+
+        <!-- Extraction Overlay positioned to cover only tooth components area -->
+        <ExtractionOverlay v-if="extraction" :direction="direction" />
       </div>
     </PopoverTrigger>
 
@@ -148,7 +162,18 @@ const showTooltip = computed(
 )
 
 const handleToothClick = () => {
-  emit('tooth-click')
+  // Prevent tooth selection when extracted, but still allow the click event to bubble
+  // This way ToothLabel interactions still work
+  if (!extraction.value) {
+    emit('tooth-click')
+  }
+}
+
+const handleSegmentClick = (segmentId: string) => {
+  // Prevent segment clicks when extracted
+  if (!extraction.value) {
+    emit('segment-click', segmentId)
+  }
 }
 </script>
 
@@ -180,6 +205,17 @@ const handleToothClick = () => {
   background-color: var(--destructive) / 0.2;
 }
 
+/* Extracted tooth styling - only affects wrapper interaction, not visuals */
+.tooth-wrapper--extracted {
+  cursor: not-allowed;
+}
+
+/* Prevent selection highlighting when extracted */
+.tooth-wrapper--extracted.selected {
+  outline: 2px solid var(--border);
+  background-color: var(--muted) / 0.1;
+}
+
 /* Group container that mimics Mantine's Group with h={280} - adaptive layout */
 .tooth-group {
   display: flex;
@@ -196,19 +232,28 @@ const handleToothClick = () => {
   justify-content: end;
 }
 
-/* Ensure the extraction overlay covers the entire tooth wrapper */
-.tooth-wrapper > :first-child {
+/* Single wrapper for all tooth components */
+.tooth-components-wrapper {
+  position: relative;
+  display: contents; /* Always use contents to not affect layout */
+}
+
+/* Only block interactions, no visual effects */
+.tooth-components-wrapper.extraction-blocked > * {
+  pointer-events: none !important;
+  cursor: not-allowed !important;
+}
+
+/* Invisible overlay that completely blocks mouse events */
+.hover-blocker {
   position: absolute;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
-  z-index: 1;
-}
-
-/* Ensure the tooth group is above the extraction overlay */
-.tooth-group {
-  z-index: 2;
-  position: relative;
+  z-index: 15;
+  cursor: not-allowed;
+  background: transparent;
+  pointer-events: all;
 }
 </style>
