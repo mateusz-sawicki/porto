@@ -68,8 +68,8 @@ const generateExtraToothNumber = (base: string, direction: 'before' | 'after'): 
   background-color: var(--background);
 
   /* Size and spacing - match ToothContainer width */
-  width: 86px;
-  min-height: 28px;
+  width: 88px;
+  min-height: 29px;
 
   /* Layout */
   display: flex;
