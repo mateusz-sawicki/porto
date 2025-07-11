@@ -1,4 +1,4 @@
-<!-- components/ToothContainer.vue - Added Impacted Tooth Translation -->
+<!-- components/ToothContainer.vue - Fixed Impacted Tooth Overflow (Layout Preserved) -->
 <template>
   <Popover :open="showTooltip">
     <PopoverTrigger asChild>
@@ -38,39 +38,44 @@
               "
               @remove-tooth="$emit('remove-tooth', tooth.number)"
             />
-            <!-- Single wrapper for all tooth components -->
+
+            <!-- Single wrapper for all tooth components with clipping -->
             <div class="tooth-components-wrapper" :class="{ 'extraction-blocked': !!extraction }">
               <GumOverlay :direction="direction" :hasCutout="hasExposedToothProcedure" />
               <template v-if="!hideTooth">
                 <template v-if="rootOnly">
-                  <!-- 🎯 Wrapper for Tooth only - impacted tooth translation -->
-                  <div
-                    class="tooth-only-wrapper"
-                    :class="{ 'impacted-tooth--top': isImpactedTooth }"
-                  >
-                    <Tooth
-                      :number="tooth.number"
-                      :toothProcedures="tooth.toothProcedures"
-                      :selectedSegments="extraction ? [] : selectedSegments"
-                      :direction="direction"
-                      only-root
-                      @segment-click="handleSegmentClick"
-                    />
+                  <!-- 🎯 Clipping container specifically for tooth -->
+                  <div class="tooth-clip-container">
+                    <div
+                      class="tooth-only-wrapper"
+                      :class="{ 'impacted-tooth--top': isImpactedTooth }"
+                    >
+                      <Tooth
+                        :number="tooth.number"
+                        :toothProcedures="tooth.toothProcedures"
+                        :selectedSegments="extraction ? [] : selectedSegments"
+                        :direction="direction"
+                        only-root
+                        @segment-click="handleSegmentClick"
+                      />
+                    </div>
                   </div>
                 </template>
                 <template v-else>
-                  <!-- 🎯 Wrapper for Tooth only - impacted tooth translation -->
-                  <div
-                    class="tooth-only-wrapper"
-                    :class="{ 'impacted-tooth--top': isImpactedTooth }"
-                  >
-                    <Tooth
-                      :number="tooth.number"
-                      :toothProcedures="tooth.toothProcedures"
-                      :selectedSegments="extraction ? [] : selectedSegments"
-                      :direction="direction"
-                      @segment-click="handleSegmentClick"
-                    />
+                  <!-- 🎯 Clipping container specifically for tooth -->
+                  <div class="tooth-clip-container">
+                    <div
+                      class="tooth-only-wrapper"
+                      :class="{ 'impacted-tooth--top': isImpactedTooth }"
+                    >
+                      <Tooth
+                        :number="tooth.number"
+                        :toothProcedures="tooth.toothProcedures"
+                        :selectedSegments="extraction ? [] : selectedSegments"
+                        :direction="direction"
+                        @segment-click="handleSegmentClick"
+                      />
+                    </div>
                   </div>
                   <!-- Schematic stays separate - no impacted tooth translation -->
                   <Schematic
@@ -87,24 +92,26 @@
             </div>
           </template>
           <template v-else>
-            <!-- Single wrapper for all tooth components -->
+            <!-- Single wrapper for all tooth components with clipping -->
             <div class="tooth-components-wrapper" :class="{ 'extraction-blocked': !!extraction }">
               <GumOverlay :direction="direction" :hasCutout="hasExposedToothProcedure" />
               <template v-if="!hideTooth">
                 <template v-if="rootOnly">
-                  <!-- 🎯 Wrapper for Tooth only - impacted tooth translation -->
-                  <div
-                    class="tooth-only-wrapper"
-                    :class="{ 'impacted-tooth--bottom': isImpactedTooth }"
-                  >
-                    <Tooth
-                      :number="tooth.number"
-                      :toothProcedures="tooth.toothProcedures"
-                      :selectedSegments="extraction ? [] : selectedSegments"
-                      :direction="direction"
-                      only-root
-                      @segment-click="handleSegmentClick"
-                    />
+                  <!-- 🎯 Clipping container specifically for tooth -->
+                  <div class="tooth-clip-container">
+                    <div
+                      class="tooth-only-wrapper"
+                      :class="{ 'impacted-tooth--bottom': isImpactedTooth }"
+                    >
+                      <Tooth
+                        :number="tooth.number"
+                        :toothProcedures="tooth.toothProcedures"
+                        :selectedSegments="extraction ? [] : selectedSegments"
+                        :direction="direction"
+                        only-root
+                        @segment-click="handleSegmentClick"
+                      />
+                    </div>
                   </div>
                 </template>
                 <template v-else>
@@ -116,24 +123,27 @@
                     :direction="direction"
                     @segment-click="handleSegmentClick"
                   />
-                  <!-- 🎯 Wrapper for Tooth only - impacted tooth translation -->
-                  <div
-                    class="tooth-only-wrapper"
-                    :class="{ 'impacted-tooth--bottom': isImpactedTooth }"
-                  >
-                    <Tooth
-                      :number="tooth.number"
-                      :toothProcedures="tooth.toothProcedures"
-                      :selectedSegments="extraction ? [] : selectedSegments"
-                      :direction="direction"
-                      @segment-click="handleSegmentClick"
-                    />
+                  <!-- 🎯 Clipping container specifically for tooth -->
+                  <div class="tooth-clip-container">
+                    <div
+                      class="tooth-only-wrapper"
+                      :class="{ 'impacted-tooth--bottom': isImpactedTooth }"
+                    >
+                      <Tooth
+                        :number="tooth.number"
+                        :toothProcedures="tooth.toothProcedures"
+                        :selectedSegments="extraction ? [] : selectedSegments"
+                        :direction="direction"
+                        @segment-click="handleSegmentClick"
+                      />
+                    </div>
                   </div>
                 </template>
               </template>
               <!-- Single hover blocker for all components -->
               <div v-if="extraction" class="hover-blocker"></div>
             </div>
+
             <ToothLabel
               :toothNumber="tooth.number"
               :isExtra="isExtra"
@@ -223,7 +233,7 @@ const rootOnly = computed(() =>
   assignedToothLevelProcedures.value.some((a) => a.procedure.behavior === 'RootOnly'),
 )
 
-// 🎯 NEW: Check if tooth has impacted tooth procedure
+// 🎯 Check if tooth has impacted tooth procedure
 const isImpactedTooth = computed(() =>
   assignedToothLevelProcedures.value.some((a) => a.procedure.behavior === 'ImpactedTooth'),
 )
@@ -263,7 +273,6 @@ const handleSegmentClick = (segmentId: string) => {
   transition: background-color 0.2s ease;
   position: relative;
   cursor: pointer;
-  overflow: hidden; /* 🎯 Hide overflowing content like long impacted roots */
 }
 
 .tooth-wrapper:hover {
@@ -297,6 +306,7 @@ const handleSegmentClick = (segmentId: string) => {
   height: 280px;
   width: 100%;
   gap: 4px;
+  /* 🎯 REMOVED: No overflow clipping here to avoid cutting off tooth crowns */
 }
 
 .tooth-group--bottom {
@@ -304,19 +314,21 @@ const handleSegmentClick = (segmentId: string) => {
   justify-content: end;
 }
 
-/* Single wrapper for all tooth components */
+/* Single wrapper for all tooth components - KEEP display: contents for layout */
 .tooth-components-wrapper {
   position: relative;
-  display: contents; /* Always use contents to not affect layout */
+  display: contents; /* 🎯 RESTORED: Keep original layout behavior */
+  /* 🎯 REMOVED: No overflow clipping here */
 }
 
-/* 🎯 NEW: Specific wrapper for Tooth component only */
+/* 🎯 Specific wrapper for Tooth component only */
 .tooth-only-wrapper {
   position: relative;
   transition: transform 0.3s ease; /* Smooth transition for impacted tooth movement */
+  /* 🎯 REMOVED: No overflow clipping here to preserve tooth crowns */
 }
 
-/* 🎯 NEW: Impacted tooth translations - only affects Tooth component */
+/* 🎯 Impacted tooth translations - clipped by parent containers */
 .tooth-only-wrapper.impacted-tooth--top {
   transform: translateY(-40px);
 }
@@ -349,5 +361,17 @@ const handleSegmentClick = (segmentId: string) => {
 }
 .tooth-wrapper--hidden .tooth-label {
   pointer-events: auto;
+}
+
+/* 🎯 NEW: Dedicated clipping container for tooth component */
+.tooth-clip-container {
+  position: relative;
+  width: 100%;
+  height: 140px; /* Increased from 120px to cover full tooth area */
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: -3px; /* Negative margin to eliminate the gap */
 }
 </style>
