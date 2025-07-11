@@ -77,7 +77,7 @@ const generateExtraToothNumber = (base: string, direction: 'before' | 'after'): 
   justify-content: center;
 
   /* Text styling */
-  font-size: 12px;
+  font-size: 16px;
   font-weight: 500;
   color: var(--foreground);
 
