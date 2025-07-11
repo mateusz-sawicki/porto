@@ -41,20 +41,32 @@
             <div class="tooth-components-wrapper" :class="{ 'extraction-blocked': !!extraction }">
               <GumOverlay :direction="direction" :hasCutout="hasExposedToothProcedure" />
               <template v-if="!hideTooth">
-                <Tooth
-                  :number="tooth.number"
-                  :toothProcedures="tooth.toothProcedures"
-                  :selectedSegments="extraction ? [] : selectedSegments"
-                  :direction="direction"
-                  @segment-click="handleSegmentClick"
-                />
-                <Schematic
-                  :number="tooth.number"
-                  :schemaProcedures="tooth.schemaProcedures"
-                  :selectedSegments="extraction ? [] : selectedSegments"
-                  :direction="direction"
-                  @segment-click="handleSegmentClick"
-                />
+                <template v-if="rootOnly">
+                  <Tooth
+                    :number="tooth.number"
+                    :toothProcedures="tooth.toothProcedures"
+                    :selectedSegments="extraction ? [] : selectedSegments"
+                    :direction="direction"
+                    only-root
+                    @segment-click="handleSegmentClick"
+                  />
+                </template>
+                <template v-else>
+                  <Tooth
+                    :number="tooth.number"
+                    :toothProcedures="tooth.toothProcedures"
+                    :selectedSegments="extraction ? [] : selectedSegments"
+                    :direction="direction"
+                    @segment-click="handleSegmentClick"
+                  />
+                  <Schematic
+                    :number="tooth.number"
+                    :schemaProcedures="tooth.schemaProcedures"
+                    :selectedSegments="extraction ? [] : selectedSegments"
+                    :direction="direction"
+                    @segment-click="handleSegmentClick"
+                  />
+                </template>
               </template>
               <!-- Single hover blocker for all components -->
               <div v-if="extraction" class="hover-blocker"></div>
@@ -65,20 +77,32 @@
             <div class="tooth-components-wrapper" :class="{ 'extraction-blocked': !!extraction }">
               <GumOverlay :direction="direction" :hasCutout="hasExposedToothProcedure" />
               <template v-if="!hideTooth">
-                <Schematic
-                  :number="tooth.number"
-                  :schemaProcedures="tooth.schemaProcedures"
-                  :selectedSegments="extraction ? [] : selectedSegments"
-                  :direction="direction"
-                  @segment-click="handleSegmentClick"
-                />
-                <Tooth
-                  :number="tooth.number"
-                  :toothProcedures="tooth.toothProcedures"
-                  :selectedSegments="extraction ? [] : selectedSegments"
-                  :direction="direction"
-                  @segment-click="handleSegmentClick"
-                />
+                <template v-if="rootOnly">
+                  <Tooth
+                    :number="tooth.number"
+                    :toothProcedures="tooth.toothProcedures"
+                    :selectedSegments="extraction ? [] : selectedSegments"
+                    :direction="direction"
+                    only-root
+                    @segment-click="handleSegmentClick"
+                  />
+                </template>
+                <template v-else>
+                  <Schematic
+                    :number="tooth.number"
+                    :schemaProcedures="tooth.schemaProcedures"
+                    :selectedSegments="extraction ? [] : selectedSegments"
+                    :direction="direction"
+                    @segment-click="handleSegmentClick"
+                  />
+                  <Tooth
+                    :number="tooth.number"
+                    :toothProcedures="tooth.toothProcedures"
+                    :selectedSegments="extraction ? [] : selectedSegments"
+                    :direction="direction"
+                    @segment-click="handleSegmentClick"
+                  />
+                </template>
               </template>
               <!-- Single hover blocker for all components -->
               <div v-if="extraction" class="hover-blocker"></div>
@@ -165,6 +189,12 @@ const hasExposedToothProcedure = computed(() =>
 const hideTooth = computed(() =>
   assignedToothLevelProcedures.value.some(
     (a) => a.procedure.behavior === 'HideTooth'
+  )
+)
+
+const rootOnly = computed(() =>
+  assignedToothLevelProcedures.value.some(
+    (a) => a.procedure.behavior === 'RootOnly'
   )
 )
 

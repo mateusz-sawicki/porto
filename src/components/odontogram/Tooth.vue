@@ -17,6 +17,7 @@
           ref="svgRef"
           class="tooth-svg"
           :style="marginDirection"
+          v-bind="onlyRoot ? { onlyRoot: true } : {}"
         />
 
         <!-- Fallback when no SVG available -->
@@ -50,6 +51,7 @@ interface Props {
   toothProcedures: ToothProcedureAssignment[]
   selectedSegments: string[]
   direction: ToothContainerDirection
+  onlyRoot?: boolean // Add prop for only-root
 }
 
 interface Emits {
@@ -156,6 +158,18 @@ const { assignedProcedures, showTooltip } = useInteractiveSvg({
 
 /* 🎯 HIDE IMPLANT GROUPS BY DEFAULT */
 .tooth-svg :deep(g[id*='implant']) {
+  display: none !important;
+}
+
+/* Only show root if onlyRoot is set on the SVG */
+.tooth-svg[onlyRoot] :deep(path[id*='crown']),
+.tooth-svg[onlyRoot] :deep(g[id*='crown']) {
+  display: none !important;
+}
+
+/* Alternative approach - hide all non-root parts */
+.tooth-svg[onlyRoot] :deep(path:not([id*='root'])),
+.tooth-svg[onlyRoot] :deep(g:not([id*='root'])) {
   display: none !important;
 }
 </style>

@@ -68,6 +68,7 @@ export function useOdontogram() {
       Recesja: 'Tooth',
       Implant: 'Tooth',
       'brak zęba': 'Tooth', // Added missing tooth procedure
+      'tylko korzeń': 'Tooth', // Added only root procedure
     }),
   )
 
@@ -112,6 +113,11 @@ export function useOdontogram() {
       name: 'brak zęba',
       behavior: 'HideTooth',
       visual: { visualType: 'Icon', value: 'Ø' }, // Use a suitable icon for missing tooth
+    },
+    {
+      name: 'tylko korzeń',
+      behavior: 'RootOnly',
+      visual: { visualType: 'Icon', value: 'R' }, // Use a suitable icon for only root
     },
   ])
 
