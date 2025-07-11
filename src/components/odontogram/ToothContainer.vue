@@ -1,4 +1,4 @@
-<!-- components/ToothContainer.vue - Restored Original Layout with Fixed Extraction Overlay -->
+<!-- components/ToothContainer.vue - Added Impacted Tooth Translation -->
 <template>
   <Popover :open="showTooltip">
     <PopoverTrigger asChild>
@@ -23,6 +23,7 @@
             <ToothLabel
               :toothNumber="tooth.number"
               :isExtra="isExtra"
+              :direction="direction"
               @add-extra-before="
                 $emit('add-extra-tooth', {
                   base: tooth.number,
@@ -42,23 +43,36 @@
               <GumOverlay :direction="direction" :hasCutout="hasExposedToothProcedure" />
               <template v-if="!hideTooth">
                 <template v-if="rootOnly">
-                  <Tooth
-                    :number="tooth.number"
-                    :toothProcedures="tooth.toothProcedures"
-                    :selectedSegments="extraction ? [] : selectedSegments"
-                    :direction="direction"
-                    only-root
-                    @segment-click="handleSegmentClick"
-                  />
+                  <!-- 🎯 Wrapper for Tooth only - impacted tooth translation -->
+                  <div
+                    class="tooth-only-wrapper"
+                    :class="{ 'impacted-tooth--top': isImpactedTooth }"
+                  >
+                    <Tooth
+                      :number="tooth.number"
+                      :toothProcedures="tooth.toothProcedures"
+                      :selectedSegments="extraction ? [] : selectedSegments"
+                      :direction="direction"
+                      only-root
+                      @segment-click="handleSegmentClick"
+                    />
+                  </div>
                 </template>
                 <template v-else>
-                  <Tooth
-                    :number="tooth.number"
-                    :toothProcedures="tooth.toothProcedures"
-                    :selectedSegments="extraction ? [] : selectedSegments"
-                    :direction="direction"
-                    @segment-click="handleSegmentClick"
-                  />
+                  <!-- 🎯 Wrapper for Tooth only - impacted tooth translation -->
+                  <div
+                    class="tooth-only-wrapper"
+                    :class="{ 'impacted-tooth--top': isImpactedTooth }"
+                  >
+                    <Tooth
+                      :number="tooth.number"
+                      :toothProcedures="tooth.toothProcedures"
+                      :selectedSegments="extraction ? [] : selectedSegments"
+                      :direction="direction"
+                      @segment-click="handleSegmentClick"
+                    />
+                  </div>
+                  <!-- Schematic stays separate - no impacted tooth translation -->
                   <Schematic
                     :number="tooth.number"
                     :schemaProcedures="tooth.schemaProcedures"
@@ -78,16 +92,23 @@
               <GumOverlay :direction="direction" :hasCutout="hasExposedToothProcedure" />
               <template v-if="!hideTooth">
                 <template v-if="rootOnly">
-                  <Tooth
-                    :number="tooth.number"
-                    :toothProcedures="tooth.toothProcedures"
-                    :selectedSegments="extraction ? [] : selectedSegments"
-                    :direction="direction"
-                    only-root
-                    @segment-click="handleSegmentClick"
-                  />
+                  <!-- 🎯 Wrapper for Tooth only - impacted tooth translation -->
+                  <div
+                    class="tooth-only-wrapper"
+                    :class="{ 'impacted-tooth--bottom': isImpactedTooth }"
+                  >
+                    <Tooth
+                      :number="tooth.number"
+                      :toothProcedures="tooth.toothProcedures"
+                      :selectedSegments="extraction ? [] : selectedSegments"
+                      :direction="direction"
+                      only-root
+                      @segment-click="handleSegmentClick"
+                    />
+                  </div>
                 </template>
                 <template v-else>
+                  <!-- Schematic stays separate - no impacted tooth translation -->
                   <Schematic
                     :number="tooth.number"
                     :schemaProcedures="tooth.schemaProcedures"
@@ -95,13 +116,19 @@
                     :direction="direction"
                     @segment-click="handleSegmentClick"
                   />
-                  <Tooth
-                    :number="tooth.number"
-                    :toothProcedures="tooth.toothProcedures"
-                    :selectedSegments="extraction ? [] : selectedSegments"
-                    :direction="direction"
-                    @segment-click="handleSegmentClick"
-                  />
+                  <!-- 🎯 Wrapper for Tooth only - impacted tooth translation -->
+                  <div
+                    class="tooth-only-wrapper"
+                    :class="{ 'impacted-tooth--bottom': isImpactedTooth }"
+                  >
+                    <Tooth
+                      :number="tooth.number"
+                      :toothProcedures="tooth.toothProcedures"
+                      :selectedSegments="extraction ? [] : selectedSegments"
+                      :direction="direction"
+                      @segment-click="handleSegmentClick"
+                    />
+                  </div>
                 </template>
               </template>
               <!-- Single hover blocker for all components -->
@@ -110,6 +137,7 @@
             <ToothLabel
               :toothNumber="tooth.number"
               :isExtra="isExtra"
+              :isSelected="isSelected"
               @add-extra-before="
                 $emit('add-extra-tooth', {
                   base: tooth.number,
@@ -123,6 +151,7 @@
                 })
               "
               @remove-tooth="$emit('remove-tooth', tooth.number)"
+              :direction="direction"
             />
           </template>
         </div>
@@ -187,15 +216,16 @@ const hasExposedToothProcedure = computed(() =>
 )
 
 const hideTooth = computed(() =>
-  assignedToothLevelProcedures.value.some(
-    (a) => a.procedure.behavior === 'HideTooth'
-  )
+  assignedToothLevelProcedures.value.some((a) => a.procedure.behavior === 'HideTooth'),
 )
 
 const rootOnly = computed(() =>
-  assignedToothLevelProcedures.value.some(
-    (a) => a.procedure.behavior === 'RootOnly'
-  )
+  assignedToothLevelProcedures.value.some((a) => a.procedure.behavior === 'RootOnly'),
+)
+
+// 🎯 NEW: Check if tooth has impacted tooth procedure
+const isImpactedTooth = computed(() =>
+  assignedToothLevelProcedures.value.some((a) => a.procedure.behavior === 'ImpactedTooth'),
 )
 
 const showTooltip = computed(
@@ -233,6 +263,7 @@ const handleSegmentClick = (segmentId: string) => {
   transition: background-color 0.2s ease;
   position: relative;
   cursor: pointer;
+  overflow: hidden; /* 🎯 Hide overflowing content like long impacted roots */
 }
 
 .tooth-wrapper:hover {
@@ -277,6 +308,21 @@ const handleSegmentClick = (segmentId: string) => {
 .tooth-components-wrapper {
   position: relative;
   display: contents; /* Always use contents to not affect layout */
+}
+
+/* 🎯 NEW: Specific wrapper for Tooth component only */
+.tooth-only-wrapper {
+  position: relative;
+  transition: transform 0.3s ease; /* Smooth transition for impacted tooth movement */
+}
+
+/* 🎯 NEW: Impacted tooth translations - only affects Tooth component */
+.tooth-only-wrapper.impacted-tooth--top {
+  transform: translateY(-40px);
+}
+
+.tooth-only-wrapper.impacted-tooth--bottom {
+  transform: translateY(40px);
 }
 
 /* Only block interactions, no visual effects */

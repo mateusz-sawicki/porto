@@ -67,8 +67,9 @@ export function useOdontogram() {
       Próchnica: ['Root', 'Mesial', 'Distal', 'Buccal', 'Lingual', 'Incisal'],
       Recesja: 'Tooth',
       Implant: 'Tooth',
-      'brak zęba': 'Tooth', // Added missing tooth procedure
-      'tylko korzeń': 'Tooth', // Added only root procedure
+      'brak zęba': 'Tooth',
+      'tylko korzeń': 'Tooth',
+      'Ząb zatrzymany': 'Tooth', // 🎯 NEW: Impacted tooth targets whole tooth
     }),
   )
 
@@ -112,12 +113,18 @@ export function useOdontogram() {
     {
       name: 'brak zęba',
       behavior: 'HideTooth',
-      visual: { visualType: 'Icon', value: 'Ø' }, // Use a suitable icon for missing tooth
+      visual: { visualType: 'Icon', value: 'Ø' },
     },
     {
       name: 'tylko korzeń',
       behavior: 'RootOnly',
-      visual: { visualType: 'Icon', value: 'R' }, // Use a suitable icon for only root
+      visual: { visualType: 'Icon', value: 'R' },
+    },
+    // 🎯 NEW: Impacted tooth procedure
+    {
+      name: 'Ząb zatrzymany',
+      behavior: 'ImpactedTooth',
+      visual: { visualType: 'Icon', value: '↓' },
     },
   ])
 
@@ -178,9 +185,7 @@ export function useOdontogram() {
   const handleProcedureSelect = (procedure: Procedure) => {
     // Prevent adding any procedure to a tooth that already has 'brak zęba' (HideTooth)
     const isHideToothAssigned = (tooth: ToothData) =>
-      tooth.toothProcedures.some(
-        (a) => a.procedure.behavior === 'HideTooth'
-      )
+      tooth.toothProcedures.some((a) => a.procedure.behavior === 'HideTooth')
 
     const target = getProcedureTarget(procedure.name)
     if (!target) {

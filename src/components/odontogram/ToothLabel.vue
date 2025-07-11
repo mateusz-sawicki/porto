@@ -2,7 +2,14 @@
 <template>
   <DropdownMenu>
     <DropdownMenuTrigger asChild>
-      <div class="w-full cursor-pointer select-none flex items-center justify-center" @click.stop>
+      <div
+        class="tooth-label-button"
+        :class="{
+          'tooth-label-button--top': direction === ToothContainerDirection.Top,
+          'tooth-label-button--bottom': direction === ToothContainerDirection.Bottom,
+        }"
+        @click.stop
+      >
         {{ toothNumber }}
       </div>
     </DropdownMenuTrigger>
@@ -28,10 +35,12 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
+import { ToothContainerDirection } from '@/types/odontogram/odontogram'
 
 interface Props {
   toothNumber: string
   isExtra: boolean
+  direction: ToothContainerDirection
 }
 
 interface Emits {
@@ -48,3 +57,54 @@ const generateExtraToothNumber = (base: string, direction: 'before' | 'after'): 
   return `${base}${suffix}`
 }
 </script>
+
+<style scoped>
+.tooth-label-button {
+  /* High z-index to cover roots */
+  position: relative;
+  z-index: 30;
+
+  /* Match ToothContainer styling */
+  background-color: var(--background);
+
+  /* Size and spacing - match ToothContainer width */
+  width: 86px;
+  min-height: 28px;
+
+  /* Layout */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  /* Text styling */
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--foreground);
+
+  /* Interaction */
+  cursor: pointer;
+  user-select: none;
+
+  /* Visual effects - match ToothContainer transitions */
+  transition: background-color 0.2s ease;
+}
+
+/* 🎯 Position adjustments based on quadrant */
+.tooth-label-button--top {
+  top: 1px;
+}
+
+.tooth-label-button--bottom {
+  top: -1px;
+}
+
+.tooth-label-button:hover {
+  background-color: var(--muted);
+}
+
+/* Optional: If you want active/pressed state similar to selected tooth */
+.tooth-label-button:active {
+  background-color: var(--muted);
+  outline-color: var(--primary);
+}
+</style>

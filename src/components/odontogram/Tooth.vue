@@ -65,7 +65,7 @@ const emit = defineEmits<Emits>()
 const svgRef = ref<HTMLElement>()
 
 const marginDirection = computed(() => {
-  const marginValue = '15px'
+  const marginValue = '20px'
   return props.direction === ToothContainerDirection.Bottom
     ? { marginTop: marginValue }
     : { marginBottom: marginValue }
