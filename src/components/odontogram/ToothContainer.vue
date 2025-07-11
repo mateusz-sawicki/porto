@@ -1,4 +1,4 @@
-<!-- components/ToothContainer.vue - Fixed Impacted Tooth Overflow (Layout Preserved) -->
+<!-- components/ToothContainer.vue - Schematic Moved to End with Margin -->
 <template>
   <Popover :open="showTooltip">
     <PopoverTrigger asChild>
@@ -39,7 +39,7 @@
               @remove-tooth="$emit('remove-tooth', tooth.number)"
             />
 
-            <!-- Single wrapper for all tooth components with clipping -->
+            <!-- Single wrapper for tooth components (Schematic moved out) -->
             <div class="tooth-components-wrapper" :class="{ 'extraction-blocked': !!extraction }">
               <GumOverlay :direction="direction" :hasCutout="hasExposedToothProcedure" />
               <template v-if="!hideTooth">
@@ -77,22 +77,40 @@
                       />
                     </div>
                   </div>
-                  <!-- Schematic stays separate - no impacted tooth translation -->
-                  <Schematic
-                    :number="tooth.number"
-                    :schemaProcedures="tooth.schemaProcedures"
-                    :selectedSegments="extraction ? [] : selectedSegments"
-                    :direction="direction"
-                    @segment-click="handleSegmentClick"
-                  />
                 </template>
               </template>
               <!-- Single hover blocker for all components -->
               <div v-if="extraction" class="hover-blocker"></div>
             </div>
+
+            <!-- 🎯 Schematic moved to end with margin -->
+            <template v-if="!hideTooth && !rootOnly">
+              <div class="schematic-at-end">
+                <Schematic
+                  :number="tooth.number"
+                  :schemaProcedures="tooth.schemaProcedures"
+                  :selectedSegments="extraction ? [] : selectedSegments"
+                  :direction="direction"
+                  @segment-click="handleSegmentClick"
+                />
+              </div>
+            </template>
           </template>
           <template v-else>
-            <!-- Single wrapper for all tooth components with clipping -->
+            <!-- 🎯 Schematic moved to end with margin for bottom direction -->
+            <template v-if="!hideTooth && !rootOnly">
+              <div class="schematic-at-end schematic-at-end--bottom">
+                <Schematic
+                  :number="tooth.number"
+                  :schemaProcedures="tooth.schemaProcedures"
+                  :selectedSegments="extraction ? [] : selectedSegments"
+                  :direction="direction"
+                  @segment-click="handleSegmentClick"
+                />
+              </div>
+            </template>
+
+            <!-- Single wrapper for tooth components (Schematic moved out) -->
             <div class="tooth-components-wrapper" :class="{ 'extraction-blocked': !!extraction }">
               <GumOverlay :direction="direction" :hasCutout="hasExposedToothProcedure" />
               <template v-if="!hideTooth">
@@ -115,14 +133,6 @@
                   </div>
                 </template>
                 <template v-else>
-                  <!-- Schematic stays separate - no impacted tooth translation -->
-                  <Schematic
-                    :number="tooth.number"
-                    :schemaProcedures="tooth.schemaProcedures"
-                    :selectedSegments="extraction ? [] : selectedSegments"
-                    :direction="direction"
-                    @segment-click="handleSegmentClick"
-                  />
                   <!-- 🎯 Clipping container specifically for tooth -->
                   <div class="tooth-clip-container">
                     <div
@@ -373,5 +383,19 @@ const handleSegmentClick = (segmentId: string) => {
   align-items: center;
   justify-content: center;
   margin: -3px; /* Negative margin to eliminate the gap */
+}
+
+/* 🎯 NEW: Schematic positioned at end with margin */
+.schematic-at-end {
+  margin-top: 30px; /* Slight margin to separate from other components */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* 🎯 NEW: Bottom direction schematic with margin */
+.schematic-at-end--bottom {
+  margin-top: 0;
+  margin-bottom: 30px; /* Margin for bottom direction */
 }
 </style>
