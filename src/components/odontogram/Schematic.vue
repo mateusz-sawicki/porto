@@ -2,18 +2,56 @@
 <template>
   <Popover :open="showTooltip">
     <PopoverTrigger asChild>
-      <div class="w-full flex justify-center items-center" :class="marginFromCenter">
-        <!-- 🎯 THIS IS WHERE YOUR SCHEMATIC SVG GETS RENDERED -->
+      <div class="w-full flex justify-center items-center relative" :class="marginFromCenter">
+        <!-- SVG SCHEMATIC RENDERING -->
         <component
           v-if="SchematicSvgComponent"
           :is="SchematicSvgComponent"
           ref="svgRef"
           class="schematic-svg"
         />
-
+        <!-- Overlay Lucide Eye icons at observed surface centers (only if needed) -->
+        <svg
+          v-if="iconPositions.length > 0"
+          class="absolute left-0 top-0 pointer-events-none"
+          :width="svgDimensions.width"
+          :height="svgDimensions.height"
+          :viewBox="svgDimensions.viewBox"
+          style="z-index: 10"
+        >
+          <g v-for="(pos, idx) in iconPositions" :key="pos.surface + idx">
+            <!-- Draw bounding box if available -->
+            <template v-if="pos.bbox">
+              <rect
+                :x="pos.bbox.x"
+                :y="pos.bbox.y"
+                :width="pos.bbox.width"
+                :height="pos.bbox.height"
+                fill="none"
+                stroke="#3b82f6"
+                stroke-width="1.5"
+                stroke-dasharray="4 2"
+                style="pointer-events: none"
+              />
+            </template>
+            <foreignObject :x="pos.x - 10" :y="pos.y - 10" width="20" height="20">
+              <div
+                style="
+                  width: 20px;
+                  height: 20px;
+                  display: flex;
+                  align-items: center;
+                  justify-content: center;
+                "
+              >
+                <Eye class="w-5 h-5 text-blue-600 opacity-80" />
+              </div>
+            </foreignObject>
+          </g>
+        </svg>
         <!-- Fallback when no SVG available -->
         <div
-          v-else
+          v-else-if="!SchematicSvgComponent"
           ref="svgRef"
           class="schematic-svg w-12 h-12 border border-dashed border-gray-400 rounded flex items-center justify-center text-xs text-gray-600"
         >
@@ -21,7 +59,6 @@
         </div>
       </div>
     </PopoverTrigger>
-
     <PopoverContent v-if="assignedProcedures?.length" class="w-auto">
       {{ assignedProcedures.map((p) => p.name).join(', ') }}
     </PopoverContent>
@@ -29,14 +66,14 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted, watch, nextTick } from 'vue'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { ToothContainerDirection } from '@/types/odontogram/odontogram'
 import type { SchemaProcedureAssignment } from '@/types/odontogram/odontogram'
 import { useInteractiveSvg } from '@/composables/odontogram/useInteractiveSvg'
-
-// 🎯 THIS IS THE KEY LINE - IMPORTS FROM YOUR CENTRALIZED SCHEMATIC MAP
 import { getSchematicSvgComponent } from '@/utils/schematicSvgMap'
+import { Eye } from 'lucide-vue-next'
+import { Svg, SVG } from '@svgdotjs/svg.js'
 
 interface Props {
   number: string
@@ -103,6 +140,103 @@ const { assignedProcedures, showTooltip } = useInteractiveSvg({
   selectedSegments: computed(() => props.selectedSegments),
   onSegmentClick: (segmentId: string) => emit('segment-click', segmentId),
 })
+
+// Find observed surfaces for this schematic
+const observedSurfaces = computed(() => {
+  return props.schemaProcedures.filter((a) => a.procedure.name === 'Obserwacja')
+})
+
+// Store icon positions for each observed surface
+const iconPositions = ref<
+  {
+    surface: string
+    x: number
+    y: number
+    bbox?: { x: number; y: number; width: number; height: number }
+  }[]
+>([])
+
+const svgDimensions = ref({ width: 0, height: 0, viewBox: '0 0 0 0' })
+
+function getPathVisualCentroid(path: SVGPathElement) {
+  const len = path.getTotalLength()
+  const samples = 200
+  let sumX = 0,
+    sumY = 0
+  for (let i = 0; i < samples; i++) {
+    const pt = path.getPointAtLength((i / (samples - 1)) * len)
+    sumX += pt.x
+    sumY += pt.y
+  }
+  return { x: sumX / samples, y: sumY / samples }
+}
+
+const updateIconPositions = () => {
+  let svgEl = svgRef.value as any
+  // If using a Vue component, get the underlying SVG element
+  if (svgEl && svgEl.$el) {
+    svgEl = svgEl.$el
+  }
+  // If still not an SVG element, try to find the <svg> inside
+  if (svgEl && svgEl.tagName !== 'svg') {
+    svgEl = svgEl.querySelector && svgEl.querySelector('svg')
+  }
+  if (!svgEl || typeof svgEl.querySelector !== 'function') return
+  const svgjs = SVG(svgEl)
+  const newPositions: {
+    surface: string
+    x: number
+    y: number
+    bbox?: { x: number; y: number; width: number; height: number }
+  }[] = []
+  observedSurfaces.value.forEach((obs) => {
+    // Use just the surface name as the ID
+    const surfaceId = obs.surface.toLowerCase()
+    let el = svgEl.querySelector(`#${surfaceId}`) as SVGGraphicsElement | null
+    console.log(`[Schematic.vue] Searching for #${surfaceId} (surface: ${obs.surface})`, el)
+    // If el is a group, try to find a path inside
+    if (el && el.tagName === 'g') {
+      const pathInGroup = el.querySelector('path') as SVGPathElement | null
+      if (pathInGroup) {
+        el = pathInGroup
+      }
+    }
+    if (el) {
+      const svgjsEl = svgjs.findOne(`#${el.id}`) as Svg
+      if (svgjsEl) {
+        const bbox = svgjsEl.bbox()
+        newPositions.push({
+          surface: obs.surface,
+          x: bbox.cx,
+          y: bbox.cy,
+          bbox: { x: bbox.x, y: bbox.y, width: bbox.width, height: bbox.height },
+        })
+      }
+    }
+  })
+  iconPositions.value = newPositions
+}
+
+function updateSvgDimensions() {
+  let svgEl = svgRef.value as any
+  if (svgEl && svgEl.$el) svgEl = svgEl.$el
+  if (svgEl && svgEl.tagName !== 'svg') svgEl = svgEl.querySelector && svgEl.querySelector('svg')
+  if (!svgEl) return
+  svgDimensions.value.width = svgEl.width?.baseVal?.value || svgEl.getAttribute('width') || 0
+  svgDimensions.value.height = svgEl.height?.baseVal?.value || svgEl.getAttribute('height') || 0
+  svgDimensions.value.viewBox = svgEl.getAttribute('viewBox') || ''
+}
+
+onMounted(() => {
+  nextTick(() => {
+    updateSvgDimensions()
+    updateIconPositions()
+  })
+})
+watch([observedSurfaces, () => props.number], () => nextTick(() => {
+  updateSvgDimensions()
+  updateIconPositions()
+}))
 </script>
 
 <style scoped>

@@ -70,6 +70,7 @@ export function useOdontogram() {
       'brak zęba': 'Tooth',
       'tylko korzeń': 'Tooth',
       'Ząb zatrzymany': 'Tooth', // 🎯 NEW: Impacted tooth targets whole tooth
+      Obserwacja: ['Tooth', 'Crown', 'Root', 'Mesial', 'Distal', 'Buccal', 'Lingual', 'Incisal'], // 🎯 NEW: Observation targets all parts
     }),
   )
 
@@ -125,6 +126,12 @@ export function useOdontogram() {
       name: 'Ząb zatrzymany',
       behavior: 'ImpactedTooth',
       visual: { visualType: 'Icon', value: '↓' },
+    },
+    // 🎯 NEW: Observation procedure
+    {
+      name: 'Obserwacja',
+      behavior: 'None',
+      visual: { visualType: 'Icon', value: '👁' },
     },
   ])
 

@@ -86,6 +86,9 @@
             <!-- 🎯 Schematic moved to end with margin -->
             <template v-if="!hideTooth && !rootOnly">
               <div class="schematic-at-end">
+                <IconOverlay v-if="toothLevelObservation" :direction="direction" position="tooth">
+                  <Eye class="w-5 h-5 text-blue-600 opacity-80" />
+                </IconOverlay>
                 <Schematic
                   :number="tooth.number"
                   :schemaProcedures="tooth.schemaProcedures"
@@ -178,6 +181,14 @@
 
         <!-- Extraction Overlay positioned to cover only tooth components area -->
         <ExtractionOverlay v-if="extraction" :direction="direction" />
+        
+        <!-- Observation Overlays for different parts -->
+        <IconOverlay 
+          v-if="toothLevelObservation" 
+          :direction="direction" 
+          position="tooth">
+          <Eye class="w-5 h-5 text-blue-600 opacity-80" />
+        </IconOverlay>
       </div>
     </PopoverTrigger>
 
@@ -194,9 +205,11 @@ import type { ToothData } from '@/types/odontogram/odontogram'
 import { ToothContainerDirection, ExtraToothDirection } from '@/types/odontogram/odontogram'
 import ExtractionOverlay from './ExtractionOverlay.vue'
 import GumOverlay from './GumOverlay.vue'
+import IconOverlay from './IconOverlay.vue'
 import Tooth from './Tooth.vue'
 import Schematic from './Schematic.vue'
 import ToothLabel from './ToothLabel.vue'
+import { Eye } from 'lucide-vue-next'
 
 interface Props {
   tooth: ToothData
@@ -246,6 +259,31 @@ const rootOnly = computed(() =>
 // 🎯 Check if tooth has impacted tooth procedure
 const isImpactedTooth = computed(() =>
   assignedToothLevelProcedures.value.some((a) => a.procedure.behavior === 'ImpactedTooth'),
+)
+
+// 🎯 Check for observation procedures at different levels
+const toothLevelObservation = computed(() =>
+  assignedToothLevelProcedures.value.find(
+    (a) => a.procedure.name === 'Obserwacja' && a.toothPart === 'Tooth',
+  ),
+)
+
+const crownObservation = computed(() =>
+  props.tooth.toothProcedures.find(
+    (a) => a.procedure.name === 'Obserwacja' && a.toothPart === 'Crown',
+  ),
+)
+
+const rootObservation = computed(() =>
+  props.tooth.toothProcedures.find(
+    (a) => a.procedure.name === 'Obserwacja' && a.toothPart === 'Root',
+  ),
+)
+
+const schematicObservation = computed(() =>
+  props.tooth.schemaProcedures.find(
+    (a) => a.procedure.name === 'Obserwacja',
+  ),
 )
 
 const showTooltip = computed(
