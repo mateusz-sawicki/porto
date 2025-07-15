@@ -71,6 +71,7 @@ export function useOdontogram() {
       'tylko korzeń': 'Tooth',
       'Ząb zatrzymany': 'Tooth', // 🎯 NEW: Impacted tooth targets whole tooth
       Obserwacja: ['Tooth', 'Crown', 'Root', 'Mesial', 'Distal', 'Buccal', 'Lingual', 'Incisal'], // 🎯 NEW: Observation targets all parts
+      Ruchomość: 'Root',
     }),
   )
 
@@ -131,7 +132,13 @@ export function useOdontogram() {
     {
       name: 'Obserwacja',
       behavior: 'None',
-      visual: { visualType: 'Icon', value: '👁' },
+      visual: { visualType: 'Icon', value: 'Eye' }, // Lucide icon name
+    },
+    // Example for future: Ruchomość (mobility) with ArrowLeftRight icon, root only
+    {
+      name: 'Ruchomość',
+      behavior: 'None',
+      visual: { visualType: 'Icon', value: 'ArrowLeftRight' },
     },
   ])
 

@@ -30,7 +30,7 @@
                   justify-content: center;
                 "
               >
-                <Eye class="w-5 h-5 text-blue-600 opacity-80" />
+                <DynamicLucideIcon :icon="pos.icon" class="w-5 h-5 text-blue-600 opacity-80" />
               </div>
             </foreignObject>
           </g>
@@ -58,8 +58,9 @@ import { ToothContainerDirection } from '@/types/odontogram/odontogram'
 import type { SchemaProcedureAssignment } from '@/types/odontogram/odontogram'
 import { useInteractiveSvg } from '@/composables/odontogram/useInteractiveSvg'
 import { getSchematicSvgComponent } from '@/utils/schematicSvgMap'
-import { Eye } from 'lucide-vue-next'
+import * as LucideIcons from 'lucide-vue-next'
 import { Svg, SVG } from '@svgdotjs/svg.js'
+import DynamicLucideIcon from './DynamicLucideIcon.vue'
 
 interface Props {
   number: string
@@ -127,15 +128,16 @@ const { assignedProcedures, showTooltip } = useInteractiveSvg({
   onSegmentClick: (segmentId: string) => emit('segment-click', segmentId),
 })
 
-// Find observed surfaces for this schematic
-const observedSurfaces = computed(() => {
-  return props.schemaProcedures.filter((a) => a.procedure.name === 'Obserwacja')
+// Find all surfaces with a procedure that has visualType 'Icon'
+const iconSurfaces = computed(() => {
+  return props.schemaProcedures.filter((a) => a.procedure.visual.visualType === 'Icon')
 })
 
 // Store icon positions for each observed surface
 const iconPositions = ref<
   {
     surface: string
+    icon: string
     x: number
     y: number
     bbox?: { x: number; y: number; width: number; height: number }
@@ -171,15 +173,15 @@ const updateIconPositions = () => {
   const svgjs = SVG(svgEl)
   const newPositions: {
     surface: string
+    icon: string
     x: number
     y: number
     bbox?: { x: number; y: number; width: number; height: number }
   }[] = []
-  observedSurfaces.value.forEach((obs) => {
+  iconSurfaces.value.forEach((assignment) => {
     // Use just the surface name as the ID
-    const surfaceId = obs.surface.toLowerCase()
+    const surfaceId = assignment.surface.toLowerCase()
     let el = svgEl.querySelector(`#${surfaceId}`) as SVGGraphicsElement | null
-    console.log(`[Schematic.vue] Searching for #${surfaceId} (surface: ${obs.surface})`, el)
     // If el is a group, try to find a path inside
     if (el && el.tagName === 'g') {
       const pathInGroup = el.querySelector('path') as SVGPathElement | null
@@ -192,7 +194,8 @@ const updateIconPositions = () => {
       if (svgjsEl) {
         const bbox = svgjsEl.bbox()
         newPositions.push({
-          surface: obs.surface,
+          surface: assignment.surface,
+          icon: assignment.procedure.visual.value,
           x: bbox.cx,
           y: bbox.cy,
           bbox: { x: bbox.x, y: bbox.y, width: bbox.width, height: bbox.height },
@@ -219,7 +222,7 @@ onMounted(() => {
     updateIconPositions()
   })
 })
-watch([observedSurfaces, () => props.number], () =>
+watch([iconSurfaces, () => props.number], () =>
   nextTick(() => {
     updateSvgDimensions()
     updateIconPositions()

@@ -53,7 +53,7 @@
                   pointer-events: none;
                 "
               >
-                <Eye class="w-5 h-5 text-blue-600 opacity-80" style="pointer-events: none" />
+                <DynamicLucideIcon :icon="pos.icon" class="w-5 h-5 text-blue-600 opacity-80" />
               </div>
             </foreignObject>
           </g>
@@ -70,7 +70,8 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, watch, nextTick } from 'vue'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
-import { Eye } from 'lucide-vue-next'
+import * as LucideIcons from 'lucide-vue-next'
+import DynamicLucideIcon from './DynamicLucideIcon.vue'
 import { ToothContainerDirection } from '@/types/odontogram/odontogram'
 import type { ToothProcedureAssignment } from '@/types/odontogram/odontogram'
 import { useInteractiveSvg } from '@/composables/odontogram/useInteractiveSvg'
@@ -144,14 +145,15 @@ const { assignedProcedures, showTooltip } = useInteractiveSvg({
   onSegmentClick: (segmentId: string) => emit('segment-click', segmentId),
 })
 
-// Observation logic for bounding box and icon
-const observedParts = computed(() => {
-  return props.toothProcedures.filter((a) => a.procedure.name === 'Obserwacja')
+// Find all parts with a procedure that has visualType 'Icon'
+const iconParts = computed(() => {
+  return props.toothProcedures.filter((a) => a.procedure.visual.visualType === 'Icon')
 })
 
 const iconPositions = ref<
   {
     part: string
+    icon: string
     x: number
     y: number
     bbox?: { x: number; y: number; width: number; height: number }
@@ -236,35 +238,29 @@ const updateIconPositions = () => {
 
   const newPositions: {
     part: string
+    icon: string
     x: number
     y: number
     bbox?: { x: number; y: number; width: number; height: number }
   }[] = []
 
-  observedParts.value.forEach((obs) => {
-    const partId = obs.toothPart.toLowerCase()
+  iconParts.value.forEach((assignment) => {
+    const partId = assignment.toothPart.toLowerCase()
     let el = svgEl.querySelector(`#tooth_${props.number}_${partId}`) as SVGGraphicsElement | null
     if (!el) {
       el = svgEl.querySelector(`[id$='_${partId}']`) as SVGGraphicsElement | null
     }
     if (!el) {
-      console.warn(`[Tooth.vue] Could not find SVG element for observation part:`, partId)
+      console.warn(`[Tooth.vue] Could not find SVG element for icon part:`, partId)
       return
     }
 
     // Use native SVG methods to get properly transformed coordinates
     const transformedBBox = getTransformedBoundingBox(el, svgEl)
 
-    console.log(`[Tooth.vue] Observation overlay for part:`, {
-      part: obs.toothPart,
-      el,
-      originalBBox: el.getBBox(),
-      transformedBBox,
-      svgDimensions: svgDimensions.value,
-    })
-
     newPositions.push({
-      part: obs.toothPart,
+      part: assignment.toothPart,
+      icon: assignment.procedure.visual.value,
       x: transformedBBox.cx,
       y: transformedBBox.cy,
       bbox: {
@@ -327,7 +323,7 @@ onMounted(() => {
   })
 })
 
-watch([observedParts, () => props.number], () =>
+watch([iconParts, () => props.number], () =>
   nextTick(() => {
     updateSvgDimensions()
     updateIconPositions()
