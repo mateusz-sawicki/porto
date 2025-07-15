@@ -77,6 +77,7 @@ export function useOdontogram() {
       XD2: ['Tooth', 'Crown', 'Root', 'Mesial', 'Distal', 'Buccal', 'Lingual', 'Incisal'],
       XD3: ['Tooth', 'Crown', 'Root', 'Mesial', 'Distal', 'Buccal', 'Lingual', 'Incisal'],
       XD4: ['Tooth', 'Crown', 'Root', 'Mesial', 'Distal', 'Buccal', 'Lingual', 'Incisal'],
+      Starcie: ['Tooth', 'Crown', 'Root', 'Mesial', 'Distal', 'Buccal', 'Lingual', 'Incisal'], // <-- Added
     }),
   )
 
@@ -165,10 +166,11 @@ export function useOdontogram() {
       behavior: 'None',
       visual: { visualType: 'Icon', value: 'ArrowLeftRight' },
     },
+    // Add Starcie with tilde icon
     {
-      name: 'XD4',
+      name: 'Starcie',
       behavior: 'None',
-      visual: { visualType: 'Icon', value: 'ArrowLeftRight' },
+      visual: { visualType: 'Icon', value: '~' },
     },
   ])
 
@@ -241,27 +243,21 @@ export function useOdontogram() {
       ? target.map((t) => t.toLowerCase())
       : [target.toLowerCase()]
 
-    // Only assign to toothProcedures if allowed targets include a tooth-level part
-    const toothLevelParts = ['tooth', 'crown', 'root']
-    const allowedToothParts = targets.filter(t => toothLevelParts.includes(t))
-    if (allowedToothParts.length > 0) {
-      selectedToothNumbers.value.forEach((number) => {
-        const tooth = teeth.value.find((t) => t.number === number)
-        if (!tooth) return
-        if (isHideToothAssigned(tooth) && procedure.behavior !== 'HideTooth') return // Block if 'brak zęba' is present
-        const part = allowedToothParts[0]
-        if (
-          !tooth.toothProcedures.some(
-            (a) => a.toothPart.toLowerCase() === part && a.procedure.name === procedure.name,
-          )
-        ) {
-          tooth.toothProcedures.push({
-            procedure,
-            toothPart: (part.charAt(0).toUpperCase() + part.slice(1)) as any,
-          })
-        }
-      })
-    }
+    selectedToothNumbers.value.forEach((number) => {
+      const tooth = teeth.value.find((t) => t.number === number)
+      if (!tooth) return
+      if (isHideToothAssigned(tooth) && procedure.behavior !== 'HideTooth') return // Block if 'brak zęba' is present
+      if (
+        !tooth.toothProcedures.some(
+          (a) => a.toothPart.toLowerCase() === targets[0] && a.procedure.name === procedure.name,
+        )
+      ) {
+        tooth.toothProcedures.push({
+          procedure,
+          toothPart: (targets[0].charAt(0).toUpperCase() + targets[0].slice(1)) as any,
+        })
+      }
+    })
 
     selectedSegments.value.forEach((segmentId) => {
       const parts = segmentId.split('_')
