@@ -9,7 +9,6 @@ interface Props {
 
 const props = defineProps<Props>()
 
-// Explicitly type the icon component to avoid TypeScript inference issues
 const IconComp = computed(() => {
   const IconComponent = (LucideIcons as any)[props.icon] || LucideIcons.Eye
   return IconComponent
@@ -17,5 +16,5 @@ const IconComp = computed(() => {
 </script>
 
 <template>
-  <IconComp v-bind="$attrs" :class="props.class" />
+  <component :is="IconComp" v-bind="$attrs" :class="props.class" />
 </template>

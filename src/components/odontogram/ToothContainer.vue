@@ -183,12 +183,13 @@
         <ExtractionOverlay v-if="extraction" :direction="direction" />
         
         <!-- Observation Overlays for different parts -->
-        <IconOverlay 
-          v-if="toothLevelObservation" 
-          :direction="direction" 
-          position="tooth">
-          <Eye class="w-5 h-5 text-blue-600 opacity-80" />
-        </IconOverlay>
+        <template v-for="(assignment, idx) in toothLevelIconProcedures" :key="assignment.procedure.name + idx">
+          <IconOverlay 
+            :direction="direction" 
+            position="tooth">
+            <DynamicLucideIcon :icon="assignment.procedure.visual.value" class="w-5 h-5 text-blue-600 opacity-80" />
+          </IconOverlay>
+        </template>
       </div>
     </PopoverTrigger>
 
@@ -210,6 +211,7 @@ import Tooth from './Tooth.vue'
 import Schematic from './Schematic.vue'
 import ToothLabel from './ToothLabel.vue'
 import { Eye } from 'lucide-vue-next'
+import DynamicLucideIcon from './DynamicLucideIcon.vue'
 
 interface Props {
   tooth: ToothData
@@ -304,6 +306,13 @@ const handleSegmentClick = (segmentId: string) => {
     emit('segment-click', segmentId)
   }
 }
+
+// 🎯 Get all tooth-level icon procedures
+const toothLevelIconProcedures = computed(() =>
+  assignedToothLevelProcedures.value.filter(
+    (a) => a.procedure.visual.visualType === 'Icon'
+  )
+)
 </script>
 
 <style scoped>

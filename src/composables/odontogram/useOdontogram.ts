@@ -71,7 +71,7 @@ export function useOdontogram() {
       'tylko korzeń': 'Tooth',
       'Ząb zatrzymany': 'Tooth', // 🎯 NEW: Impacted tooth targets whole tooth
       Obserwacja: ['Tooth', 'Crown', 'Root', 'Mesial', 'Distal', 'Buccal', 'Lingual', 'Incisal'], // 🎯 NEW: Observation targets all parts
-      Ruchomość: 'Root',
+      Ruchomość: ['Tooth', 'Crown', 'Root', 'Mesial', 'Distal', 'Buccal', 'Lingual', 'Incisal'],
     }),
   )
 
