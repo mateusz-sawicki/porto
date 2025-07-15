@@ -3,6 +3,7 @@
   <Popover :open="showTooltip">
     <PopoverTrigger asChild>
       <div
+        ref="containerRef"
         class="flex h-[125px] scale-[1.2] max-w-[75px] relative"
         :class="[
           direction === ToothContainerDirection.Top
@@ -23,25 +24,25 @@
         <!-- Overlay bounding box and icon for observation procedures -->
         <svg
           v-if="validIconPositions.length > 0"
-          class="absolute left-0 top-0 pointer-events-none"
+          class="absolute pointer-events-none"
+          :style="overlayStyles"
           :width="svgDimensions.width"
           :height="svgDimensions.height"
           :viewBox="svgDimensions.viewBox"
-          style="z-index: 10; pointer-events: none;"
+          style="z-index: 10; pointer-events: none"
         >
-          <g v-for="(pos, idx) in validIconPositions" :key="pos.part + idx" style="pointer-events: none;">
-            <rect
-              :x="pos.bbox.x"
-              :y="pos.bbox.y"
-              :width="pos.bbox.width"
-              :height="pos.bbox.height"
-              fill="none"
-              stroke="#3b82f6"
-              stroke-width="1.5"
-              stroke-dasharray="4 2"
-              style="pointer-events: none;"
-            />
-            <foreignObject :x="pos.x - 10" :y="pos.y - 10" width="20" height="20" style="pointer-events: none;">
+          <g
+            v-for="(pos, idx) in validIconPositions"
+            :key="pos.part + idx"
+            style="pointer-events: none"
+          >
+            <foreignObject
+              :x="pos.x - 10"
+              :y="pos.y - 10"
+              width="20"
+              height="20"
+              style="pointer-events: none"
+            >
               <div
                 style="
                   width: 20px;
@@ -52,13 +53,11 @@
                   pointer-events: none;
                 "
               >
-                <span class="w-5 h-5 text-blue-600 opacity-80" style="pointer-events: none;">👁</span>
+                <Eye class="w-5 h-5 text-blue-600 opacity-80" style="pointer-events: none" />
               </div>
             </foreignObject>
           </g>
         </svg>
-
-        <!-- Fallback when no SVG available (removed) -->
       </div>
     </PopoverTrigger>
 
@@ -71,6 +70,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, watch, nextTick } from 'vue'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
+import { Eye } from 'lucide-vue-next'
 import { ToothContainerDirection } from '@/types/odontogram/odontogram'
 import type { ToothProcedureAssignment } from '@/types/odontogram/odontogram'
 import { useInteractiveSvg } from '@/composables/odontogram/useInteractiveSvg'
@@ -82,7 +82,7 @@ interface Props {
   toothProcedures: ToothProcedureAssignment[]
   selectedSegments: string[]
   direction: ToothContainerDirection
-  onlyRoot?: boolean // Add prop for only-root
+  onlyRoot?: boolean
 }
 
 interface Emits {
@@ -92,8 +92,8 @@ interface Emits {
 const props = defineProps<Props>()
 const emit = defineEmits<Emits>()
 
-// Use the original ref approach but with better handling
 const svgRef = ref<HTMLElement>()
+const containerRef = ref<HTMLElement>()
 
 const marginDirection = computed(() => {
   const marginValue = '20px'
@@ -103,7 +103,7 @@ const marginDirection = computed(() => {
 })
 
 const ToothSvgComponent = computed(() => {
-  return getToothSvgComponent(props.number) // Gets SVG for tooth "11", "16", etc.
+  return getToothSvgComponent(props.number)
 })
 
 // Interactive SVG logic
@@ -136,7 +136,7 @@ const procedureColors = computed(() => {
 })
 
 const { assignedProcedures, showTooltip } = useInteractiveSvg({
-  svgRef: svgRef, // Back to original ref
+  svgRef: svgRef,
   normalizeSegment,
   assignments,
   procedureColors,
@@ -159,77 +159,166 @@ const iconPositions = ref<
 >([])
 
 const svgDimensions = ref({ width: 0, height: 0, viewBox: '0 0 0 0' })
+const svgOffset = ref({ x: 0, y: 0 })
+
+// Computed style for overlay positioning that accounts for transforms and margins
+const overlayStyles = computed(() => {
+  const marginValue = 20 // 20px margin from marginDirection
+  const offset =
+    props.direction === ToothContainerDirection.Bottom
+      ? { top: `${marginValue}px`, left: '0px' }
+      : { bottom: `${marginValue}px`, left: '0px' }
+
+  return {
+    ...offset,
+    transform: 'none', // Reset any inherited transforms
+  }
+})
+
+const getTransformedBoundingBox = (element: SVGGraphicsElement, svgElement: SVGSVGElement) => {
+  try {
+    // Get the bounding box in the SVG coordinate system
+    const bbox = element.getBBox()
+
+    // Get the CTM (Current Transformation Matrix) to account for any transforms
+    const ctm = element.getCTM() || svgElement.createSVGMatrix()
+
+    // Transform the bounding box corners
+    const topLeft = svgElement.createSVGPoint()
+    topLeft.x = bbox.x
+    topLeft.y = bbox.y
+    const transformedTopLeft = topLeft.matrixTransform(ctm)
+
+    const bottomRight = svgElement.createSVGPoint()
+    bottomRight.x = bbox.x + bbox.width
+    bottomRight.y = bbox.y + bbox.height
+    const transformedBottomRight = bottomRight.matrixTransform(ctm)
+
+    // Calculate center point
+    const center = svgElement.createSVGPoint()
+    center.x = bbox.x + bbox.width / 2
+    center.y = bbox.y + bbox.height / 2
+    const transformedCenter = center.matrixTransform(ctm)
+
+    return {
+      x: transformedTopLeft.x,
+      y: transformedTopLeft.y,
+      width: transformedBottomRight.x - transformedTopLeft.x,
+      height: transformedBottomRight.y - transformedTopLeft.y,
+      cx: transformedCenter.x,
+      cy: transformedCenter.y,
+    }
+  } catch (error) {
+    console.warn('Error getting transformed bounding box:', error)
+    // Fallback to basic bbox
+    const bbox = element.getBBox()
+    return {
+      x: bbox.x,
+      y: bbox.y,
+      width: bbox.width,
+      height: bbox.height,
+      cx: bbox.x + bbox.width / 2,
+      cy: bbox.y + bbox.height / 2,
+    }
+  }
+}
 
 const updateIconPositions = () => {
   let svgEl = svgRef.value as any
   if (svgEl && svgEl.$el) svgEl = svgEl.$el
-  if (svgEl && svgEl.tagName !== 'svg') svgEl = svgEl.querySelector && svgEl.querySelector('svg')
-  if (!svgEl || typeof svgEl.querySelector !== 'function') return
-  const svgjs = SVG(svgEl)
+  if (svgEl && svgEl.tagName !== 'svg') {
+    svgEl = svgEl.querySelector && svgEl.querySelector('svg')
+  }
+  if (!svgEl || typeof svgEl.querySelector !== 'function') {
+    console.warn('[Tooth.vue] Could not find SVG element')
+    return
+  }
+
   const newPositions: {
     part: string
     x: number
     y: number
     bbox?: { x: number; y: number; width: number; height: number }
   }[] = []
+
   observedParts.value.forEach((obs) => {
     const partId = obs.toothPart.toLowerCase()
-    let el = svgEl.querySelector(`[id$='_${partId}']`) as SVGGraphicsElement | null
-    if (el && el.tagName === 'g' && partId === 'root') {
-      // For root, use the group's bounding box (covers all child paths)
-      const bbox = el.getBBox();
-      const centerX = bbox.x + bbox.width / 2;
-      const centerY = bbox.y + bbox.height / 2;
-      newPositions.push({
-        part: obs.toothPart,
-        x: centerX,
-        y: centerY,
-        bbox: { x: bbox.x, y: bbox.y, width: bbox.width, height: bbox.height },
-      });
-      return;
+    let el = svgEl.querySelector(`#tooth_${props.number}_${partId}`) as SVGGraphicsElement | null
+    if (!el) {
+      el = svgEl.querySelector(`[id$='_${partId}']`) as SVGGraphicsElement | null
     }
-    if (el && el instanceof SVGPathElement) {
-      const bbox = el.getBBox();
-      const centerX = bbox.x + bbox.width / 2;
-      const centerY = bbox.y + bbox.height / 2;
-      newPositions.push({
-        part: obs.toothPart,
-        x: centerX,
-        y: centerY,
-        bbox: { x: bbox.x, y: bbox.y, width: bbox.width, height: bbox.height },
-      });
-      return;
+    if (!el) {
+      console.warn(`[Tooth.vue] Could not find SVG element for observation part:`, partId)
+      return
     }
-    // fallback: if el is a group but not root, try to find a path inside
-    if (el && el.tagName === 'g') {
-      const pathInGroup = el.querySelector('path') as SVGPathElement | null;
-      if (pathInGroup) {
-        const bbox = pathInGroup.getBBox();
-        const centerX = bbox.x + bbox.width / 2;
-        const centerY = bbox.y + bbox.height / 2;
-        newPositions.push({
-          part: obs.toothPart,
-          x: centerX,
-          y: centerY,
-          bbox: { x: bbox.x, y: bbox.y, width: bbox.width, height: bbox.height },
-        });
-      }
-    }
+
+    // Use native SVG methods to get properly transformed coordinates
+    const transformedBBox = getTransformedBoundingBox(el, svgEl)
+
+    console.log(`[Tooth.vue] Observation overlay for part:`, {
+      part: obs.toothPart,
+      el,
+      originalBBox: el.getBBox(),
+      transformedBBox,
+      svgDimensions: svgDimensions.value,
+    })
+
+    newPositions.push({
+      part: obs.toothPart,
+      x: transformedBBox.cx,
+      y: transformedBBox.cy,
+      bbox: {
+        x: transformedBBox.x,
+        y: transformedBBox.y,
+        width: transformedBBox.width,
+        height: transformedBBox.height,
+      },
+    })
   })
+
   iconPositions.value = newPositions
 }
 
 function updateSvgDimensions() {
   let svgEl = svgRef.value as any
   if (svgEl && svgEl.$el) svgEl = svgEl.$el
-  if (svgEl && svgEl.tagName !== 'svg') svgEl = svgEl.querySelector && svgEl.querySelector('svg')
+  if (svgEl && svgEl.tagName !== 'svg') {
+    svgEl = svgEl.querySelector && svgEl.querySelector('svg')
+  }
   if (!svgEl) return
-  svgDimensions.value.width = svgEl.width?.baseVal?.value || svgEl.getAttribute('width') || 0
-  svgDimensions.value.height = svgEl.height?.baseVal?.value || svgEl.getAttribute('height') || 0
-  svgDimensions.value.viewBox = svgEl.getAttribute('viewBox') || ''
+
+  // Get the actual rendered dimensions
+  const rect = svgEl.getBoundingClientRect()
+  const computedStyle = window.getComputedStyle(svgEl)
+
+  // Use the SVG's actual dimensions, accounting for any CSS scaling
+  svgDimensions.value.width =
+    svgEl.width?.baseVal?.value ||
+    parseFloat(svgEl.getAttribute('width')) ||
+    svgEl.clientWidth ||
+    rect.width
+
+  svgDimensions.value.height =
+    svgEl.height?.baseVal?.value ||
+    parseFloat(svgEl.getAttribute('height')) ||
+    svgEl.clientHeight ||
+    rect.height
+
+  svgDimensions.value.viewBox =
+    svgEl.getAttribute('viewBox') ||
+    `0 0 ${svgDimensions.value.width} ${svgDimensions.value.height}`
+
+  // Calculate the offset of the SVG element relative to its container
+  if (containerRef.value) {
+    const containerRect = containerRef.value.getBoundingClientRect()
+    svgOffset.value = {
+      x: rect.left - containerRect.left,
+      y: rect.top - containerRect.top,
+    }
+  }
 }
 
-const validIconPositions = computed(() => iconPositions.value.filter(pos => pos.bbox))
+const validIconPositions = computed(() => iconPositions.value.filter((pos) => pos.bbox))
 
 onMounted(() => {
   nextTick(() => {
@@ -237,10 +326,29 @@ onMounted(() => {
     updateIconPositions()
   })
 })
-watch([observedParts, () => props.number], () => nextTick(() => {
-  updateSvgDimensions()
-  updateIconPositions()
-}))
+
+watch([observedParts, () => props.number], () =>
+  nextTick(() => {
+    updateSvgDimensions()
+    updateIconPositions()
+  }),
+)
+
+// Watch for container size changes (useful for responsive behavior)
+watch([containerRef], () => {
+  if (containerRef.value) {
+    const resizeObserver = new ResizeObserver(() => {
+      nextTick(() => {
+        updateSvgDimensions()
+        updateIconPositions()
+      })
+    })
+    resizeObserver.observe(containerRef.value)
+
+    // Clean up observer on unmount
+    return () => resizeObserver.disconnect()
+  }
+})
 </script>
 
 <style scoped>

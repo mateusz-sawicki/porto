@@ -20,20 +20,6 @@
           style="z-index: 10"
         >
           <g v-for="(pos, idx) in iconPositions" :key="pos.surface + idx">
-            <!-- Draw bounding box if available -->
-            <template v-if="pos.bbox">
-              <rect
-                :x="pos.bbox.x"
-                :y="pos.bbox.y"
-                :width="pos.bbox.width"
-                :height="pos.bbox.height"
-                fill="none"
-                stroke="#3b82f6"
-                stroke-width="1.5"
-                stroke-dasharray="4 2"
-                style="pointer-events: none"
-              />
-            </template>
             <foreignObject :x="pos.x - 10" :y="pos.y - 10" width="20" height="20">
               <div
                 style="
@@ -233,10 +219,12 @@ onMounted(() => {
     updateIconPositions()
   })
 })
-watch([observedSurfaces, () => props.number], () => nextTick(() => {
-  updateSvgDimensions()
-  updateIconPositions()
-}))
+watch([observedSurfaces, () => props.number], () =>
+  nextTick(() => {
+    updateSvgDimensions()
+    updateIconPositions()
+  }),
+)
 </script>
 
 <style scoped>
