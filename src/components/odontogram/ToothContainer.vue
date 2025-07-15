@@ -186,6 +186,12 @@
           position="tooth"
         >
           <div class="flex flex-wrap items-center justify-center gap-1 max-w-full">
+            <TablerIcon
+              v-for="(assignment, idx) in visibleToothLevelIconProcedures"
+              :key="assignment.procedure.name + idx"
+              :icon-name="assignment.procedure.visual.value"
+              class="w-5 h-5 text-blue-600 opacity-80"
+            />
             <DynamicLucideIcon
               v-for="(assignment, idx) in visibleToothLevelIconProcedures"
               :key="assignment.procedure.name + idx"
@@ -195,7 +201,8 @@
             <span
               v-if="showPlusN"
               class="w-5 h-5 flex items-center justify-center text-xs font-bold text-blue-600 opacity-80"
-            >+{{ hiddenIconCount }}</span>
+              >+{{ hiddenIconCount }}</span
+            >
           </div>
         </IconOverlay>
       </div>
@@ -220,6 +227,7 @@ import Schematic from './Schematic.vue'
 import ToothLabel from './ToothLabel.vue'
 import { Eye } from 'lucide-vue-next'
 import DynamicLucideIcon from './DynamicLucideIcon.vue'
+import TablerIcon from './TablerIcon.vue'
 
 interface Props {
   tooth: ToothData
@@ -326,20 +334,20 @@ const toothLevelIconProcedures = computed(() => {
   })
 })
 
-const MAX_ICONS_PER_LINE = 3;
-const MAX_VISIBLE_ICONS = 2 * MAX_ICONS_PER_LINE; // 6
+const MAX_ICONS_PER_LINE = 3
+const MAX_VISIBLE_ICONS = 2 * MAX_ICONS_PER_LINE // 6
 
-const showPlusN = computed(() => toothLevelIconProcedures.value.length > MAX_VISIBLE_ICONS);
+const showPlusN = computed(() => toothLevelIconProcedures.value.length > MAX_VISIBLE_ICONS)
 const visibleToothLevelIconProcedures = computed(() => {
   if (showPlusN.value) {
     // Show first 5, then +N
-    return toothLevelIconProcedures.value.slice(0, MAX_VISIBLE_ICONS - 1);
+    return toothLevelIconProcedures.value.slice(0, MAX_VISIBLE_ICONS - 1)
   }
-  return toothLevelIconProcedures.value.slice(0, MAX_VISIBLE_ICONS);
-});
+  return toothLevelIconProcedures.value.slice(0, MAX_VISIBLE_ICONS)
+})
 const hiddenIconCount = computed(() =>
-  showPlusN.value ? toothLevelIconProcedures.value.length - (MAX_VISIBLE_ICONS - 1) : 0
-);
+  showPlusN.value ? toothLevelIconProcedures.value.length - (MAX_VISIBLE_ICONS - 1) : 0,
+)
 </script>
 
 <style scoped>

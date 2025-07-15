@@ -77,7 +77,7 @@ export function useOdontogram() {
       XD2: ['Tooth', 'Crown', 'Root', 'Mesial', 'Distal', 'Buccal', 'Lingual', 'Incisal'],
       XD3: ['Tooth', 'Crown', 'Root', 'Mesial', 'Distal', 'Buccal', 'Lingual', 'Incisal'],
       XD4: ['Tooth', 'Crown', 'Root', 'Mesial', 'Distal', 'Buccal', 'Lingual', 'Incisal'],
-      Starcie: ['Tooth', 'Crown', 'Root', 'Mesial', 'Distal', 'Buccal', 'Lingual', 'Incisal'], // <-- Added
+      Starcie: ['Tooth'],
     }),
   )
 
@@ -166,11 +166,10 @@ export function useOdontogram() {
       behavior: 'None',
       visual: { visualType: 'Icon', value: 'ArrowLeftRight' },
     },
-    // Add Starcie with tilde icon
     {
       name: 'Starcie',
       behavior: 'None',
-      visual: { visualType: 'Icon', value: '~' },
+      visual: { visualType: 'Icon', value: 'IconTilde' },
     },
   ])
 
