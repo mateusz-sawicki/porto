@@ -86,9 +86,6 @@
             <!-- 🎯 Schematic moved to end with margin -->
             <template v-if="!hideTooth && !rootOnly">
               <div class="schematic-at-end">
-                <IconOverlay v-if="toothLevelObservation" :direction="direction" position="tooth">
-                  <Eye class="w-5 h-5 text-blue-600 opacity-80" />
-                </IconOverlay>
                 <Schematic
                   :number="tooth.number"
                   :schemaProcedures="tooth.schemaProcedures"
@@ -181,15 +178,26 @@
 
         <!-- Extraction Overlay positioned to cover only tooth components area -->
         <ExtractionOverlay v-if="extraction" :direction="direction" />
-        
+
         <!-- Observation Overlays for different parts -->
-        <template v-for="(assignment, idx) in toothLevelIconProcedures" :key="assignment.procedure.name + idx">
-          <IconOverlay 
-            :direction="direction" 
-            position="tooth">
-            <DynamicLucideIcon :icon="assignment.procedure.visual.value" class="w-5 h-5 text-blue-600 opacity-80" />
-          </IconOverlay>
-        </template>
+        <IconOverlay
+          v-if="toothLevelIconProcedures.length > 0"
+          :direction="direction"
+          position="tooth"
+        >
+          <div class="flex flex-wrap items-center justify-center gap-1 max-w-full">
+            <DynamicLucideIcon
+              v-for="(assignment, idx) in visibleToothLevelIconProcedures"
+              :key="assignment.procedure.name + idx"
+              :icon="assignment.procedure.visual.value"
+              class="w-5 h-5 text-blue-600 opacity-80"
+            />
+            <span
+              v-if="showPlusN"
+              class="w-5 h-5 flex items-center justify-center text-xs font-bold text-blue-600 opacity-80"
+            >+{{ hiddenIconCount }}</span>
+          </div>
+        </IconOverlay>
       </div>
     </PopoverTrigger>
 
@@ -283,9 +291,7 @@ const rootObservation = computed(() =>
 )
 
 const schematicObservation = computed(() =>
-  props.tooth.schemaProcedures.find(
-    (a) => a.procedure.name === 'Obserwacja',
-  ),
+  props.tooth.schemaProcedures.find((a) => a.procedure.name === 'Obserwacja'),
 )
 
 const showTooltip = computed(
@@ -307,12 +313,33 @@ const handleSegmentClick = (segmentId: string) => {
   }
 }
 
-// 🎯 Get all tooth-level icon procedures
-const toothLevelIconProcedures = computed(() =>
-  assignedToothLevelProcedures.value.filter(
-    (a) => a.procedure.visual.visualType === 'Icon'
-  )
-)
+// 🎯 Get all tooth-level icon procedures, deduplicated by name and icon
+const toothLevelIconProcedures = computed(() => {
+  const seen = new Set()
+  return assignedToothLevelProcedures.value.filter((a) => {
+    const key = a.procedure.name + '|' + a.procedure.visual.value
+    if (a.procedure.visual.visualType === 'Icon' && !seen.has(key)) {
+      seen.add(key)
+      return true
+    }
+    return false
+  })
+})
+
+const MAX_ICONS_PER_LINE = 3;
+const MAX_VISIBLE_ICONS = 2 * MAX_ICONS_PER_LINE; // 6
+
+const showPlusN = computed(() => toothLevelIconProcedures.value.length > MAX_VISIBLE_ICONS);
+const visibleToothLevelIconProcedures = computed(() => {
+  if (showPlusN.value) {
+    // Show first 5, then +N
+    return toothLevelIconProcedures.value.slice(0, MAX_VISIBLE_ICONS - 1);
+  }
+  return toothLevelIconProcedures.value.slice(0, MAX_VISIBLE_ICONS);
+});
+const hiddenIconCount = computed(() =>
+  showPlusN.value ? toothLevelIconProcedures.value.length - (MAX_VISIBLE_ICONS - 1) : 0
+);
 </script>
 
 <style scoped>

@@ -70,8 +70,13 @@ export function useOdontogram() {
       'brak zęba': 'Tooth',
       'tylko korzeń': 'Tooth',
       'Ząb zatrzymany': 'Tooth', // 🎯 NEW: Impacted tooth targets whole tooth
-      Obserwacja: ['Tooth', 'Crown', 'Root', 'Mesial', 'Distal', 'Buccal', 'Lingual', 'Incisal'], // 🎯 NEW: Observation targets all parts
+      Obserwacja: ['Mesial', 'Distal', 'Buccal', 'Lingual', 'Incisal'], // 🎯 NEW: Observation targets all parts
       Ruchomość: ['Tooth', 'Crown', 'Root', 'Mesial', 'Distal', 'Buccal', 'Lingual', 'Incisal'],
+      XD: ['Tooth', 'Crown', 'Root', 'Mesial', 'Distal', 'Buccal', 'Lingual', 'Incisal'],
+      XD1: ['Tooth', 'Crown', 'Root', 'Mesial', 'Distal', 'Buccal', 'Lingual', 'Incisal'],
+      XD2: ['Tooth', 'Crown', 'Root', 'Mesial', 'Distal', 'Buccal', 'Lingual', 'Incisal'],
+      XD3: ['Tooth', 'Crown', 'Root', 'Mesial', 'Distal', 'Buccal', 'Lingual', 'Incisal'],
+      XD4: ['Tooth', 'Crown', 'Root', 'Mesial', 'Distal', 'Buccal', 'Lingual', 'Incisal'],
     }),
   )
 
@@ -137,6 +142,31 @@ export function useOdontogram() {
     // Example for future: Ruchomość (mobility) with ArrowLeftRight icon, root only
     {
       name: 'Ruchomość',
+      behavior: 'None',
+      visual: { visualType: 'Icon', value: 'ArrowLeftRight' },
+    },
+    {
+      name: 'XD',
+      behavior: 'None',
+      visual: { visualType: 'Icon', value: 'ArrowLeftRight' },
+    },
+    {
+      name: 'XD1',
+      behavior: 'None',
+      visual: { visualType: 'Icon', value: 'ArrowLeftRight' },
+    },
+    {
+      name: 'XD2',
+      behavior: 'None',
+      visual: { visualType: 'Icon', value: 'ArrowLeftRight' },
+    },
+    {
+      name: 'XD3',
+      behavior: 'None',
+      visual: { visualType: 'Icon', value: 'ArrowLeftRight' },
+    },
+    {
+      name: 'XD4',
       behavior: 'None',
       visual: { visualType: 'Icon', value: 'ArrowLeftRight' },
     },
