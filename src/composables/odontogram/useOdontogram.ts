@@ -78,6 +78,7 @@ export function useOdontogram() {
       XD3: ['Tooth', 'Crown', 'Root', 'Mesial', 'Distal', 'Buccal', 'Lingual', 'Incisal'],
       XD4: ['Tooth', 'Crown', 'Root', 'Mesial', 'Distal', 'Buccal', 'Lingual', 'Incisal'],
       Starcie: ['Tooth', 'Crown', 'Root', 'Mesial', 'Distal', 'Buccal', 'Lingual', 'Incisal'],
+      'Ubytek klinowy': ['Tooth'],
     }),
   )
 
@@ -162,9 +163,9 @@ export function useOdontogram() {
       visual: { visualType: 'Icon', value: 'ArrowLeftRight' },
     },
     {
-      name: 'XD3',
+      name: 'Ubytek klinowy',
       behavior: 'None',
-      visual: { visualType: 'Icon', value: 'ArrowLeftRight' },
+      visual: { visualType: 'Icon', value: 'TriangleRight' },
     },
     {
       name: 'Starcie',

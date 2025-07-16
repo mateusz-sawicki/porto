@@ -191,14 +191,13 @@
             :key="assignment.procedure.name + idx"
           >
             <TablerIcon
-              v-if="assignment.procedure.visual.visualType === 'TablerIcon'"
               :icon-name="assignment.procedure.visual.value"
               class="w-5 h-5 text-blue-600 opacity-80"
             />
             <DynamicLucideIcon
-              v-else
               :icon="assignment.procedure.visual.value"
               class="w-5 h-5 text-blue-600 opacity-80"
+              fill="red"
             />
             <span
               v-if="showPlusN"

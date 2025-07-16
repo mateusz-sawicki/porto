@@ -5,6 +5,7 @@ import { computed } from 'vue'
 interface Props {
   icon: string
   class?: string
+  fill?: string
 }
 
 const props = defineProps<Props>()
@@ -16,5 +17,5 @@ const IconComp = computed(() => {
 </script>
 
 <template>
-  <component :is="IconComp" v-bind="$attrs" :class="props.class" />
+  <component :is="IconComp" v-bind="$attrs" :class="props.class" :fill="fill" />
 </template>

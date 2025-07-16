@@ -54,7 +54,11 @@
                 "
               >
                 <TablerIcon :icon-name="pos.icon" class="w-5 h-5 text-blue-600 opacity-80" />
-                <DynamicLucideIcon :icon="pos.icon" class="w-5 h-5 text-blue-600 opacity-80" />
+                <DynamicLucideIcon
+                  :icon="pos.icon"
+                  class="w-5 h-5 text-blue-600 opacity-80"
+                  fill="red"
+                />
               </div>
             </foreignObject>
           </g>
