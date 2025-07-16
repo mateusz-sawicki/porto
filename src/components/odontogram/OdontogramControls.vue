@@ -1,6 +1,13 @@
 <!-- components/OdontogramControls.vue -->
 <template>
   <div class="w-full space-y-4">
+    <Checkbox id="tartar" />
+    <label
+      for="tartar"
+      class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+    >
+      Płytka bakteryjna/kamień
+    </label>
     <!-- Procedure Selection -->
     <Popover v-model:open="open">
       <PopoverTrigger as-child>
@@ -52,6 +59,11 @@
                     class="w-3 h-3 rounded-sm flex-shrink-0"
                     :style="{ backgroundColor: procedure.visual.value }"
                   />
+                  <ProcedureIcon
+                    :icon-name="procedure.visual.value"
+                    :icon-source="procedure.visual.iconSource!"
+                  />
+
                   <span class="text-sm truncate">{{ procedure.name }}</span>
                 </div>
                 <span class="text-xs text-muted-foreground whitespace-nowrap ml-4 flex-shrink-0">
@@ -109,6 +121,9 @@ import {
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { cn } from '@/lib/utils'
 import type { Procedure } from '@/types/odontogram/odontogram'
+import Checkbox from '../ui/checkbox/Checkbox.vue'
+import DynamicLucideIcon from './DynamicLucideIcon.vue'
+import ProcedureIcon from './ProcedureIcon.vue'
 
 interface Props {
   selectedProcedure: Procedure | null

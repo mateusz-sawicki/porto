@@ -1,7 +1,7 @@
 // composables/useOdontogram.ts
 import { ref, computed } from 'vue'
 import type { ToothData, Procedure, ProcedureTargetMap } from '@/types/odontogram/odontogram'
-import { ExtraToothDirection } from '@/types/odontogram/odontogram'
+import { ExtraToothDirection, ProcedureIconSource } from '@/types/odontogram/odontogram'
 
 export function useOdontogram() {
   const selectedProcedure = ref<Procedure | null>(null)
@@ -139,38 +139,58 @@ export function useOdontogram() {
     {
       name: 'Obserwacja',
       behavior: 'None',
-      visual: { visualType: 'Icon', value: 'Eye' }, // Lucide icon name
+      visual: { visualType: 'Icon', value: 'Eye', iconSource: ProcedureIconSource.Lucide }, // Lucide icon name
     },
     // Example for future: Ruchomość (mobility) with ArrowLeftRight icon, root only
     {
       name: 'Ruchomość',
       behavior: 'None',
-      visual: { visualType: 'Icon', value: 'ArrowLeftRight' },
+      visual: {
+        visualType: 'Icon',
+        value: 'ArrowLeftRight',
+        iconSource: ProcedureIconSource.Lucide,
+      },
     },
     {
       name: 'XD',
       behavior: 'None',
-      visual: { visualType: 'Icon', value: 'ArrowLeftRight' },
+      visual: {
+        visualType: 'Icon',
+        value: 'ArrowLeftRight',
+        iconSource: ProcedureIconSource.Lucide,
+      },
     },
     {
       name: 'XD1',
       behavior: 'None',
-      visual: { visualType: 'Icon', value: 'ArrowLeftRight' },
+      visual: {
+        visualType: 'Icon',
+        value: 'ArrowLeftRight',
+        iconSource: ProcedureIconSource.Lucide,
+      },
     },
     {
       name: 'XD2',
       behavior: 'None',
-      visual: { visualType: 'Icon', value: 'ArrowLeftRight' },
+      visual: {
+        visualType: 'Icon',
+        value: 'ArrowLeftRight',
+        iconSource: ProcedureIconSource.Lucide,
+      },
     },
     {
       name: 'Ubytek klinowy',
       behavior: 'None',
-      visual: { visualType: 'Icon', value: 'TriangleRight' },
+      visual: {
+        visualType: 'Icon',
+        value: 'TriangleRight',
+        iconSource: ProcedureIconSource.Lucide,
+      },
     },
     {
       name: 'Starcie',
       behavior: 'None',
-      visual: { visualType: 'Icon', value: 'IconTilde' },
+      visual: { visualType: 'Icon', value: 'IconTilde', iconSource: ProcedureIconSource.Tabler },
     },
   ])
 

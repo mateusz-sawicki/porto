@@ -18,7 +18,7 @@ export interface SchemaProcedureAssignment {
 
 export interface Procedure {
   name: string // Dynamic from API
-  visual: ProcedureVisual
+  visual: ProcedureVisualType
   behavior:
     | 'None'
     | 'CrossOutTooth'
@@ -29,16 +29,21 @@ export interface Procedure {
     | 'ImpactedTooth'
 }
 
-export interface ProcedureVisual {
-  visualType: 'Color' | 'Icon' | 'GumShape' | 'ToothShape' | 'TablerIcon'
+export interface ProcedureVisualType {
+  visualType: 'Color' | 'Icon' | 'GumShape' | 'ToothShape'
   /**
    * For visualType 'Color', value is a color string.
    * For visualType 'Icon', value is a lucide icon name (e.g., 'Eye', 'ArrowLeftRight').
    * For GumShape/ToothShape, value is a color or shape identifier.
    */
+  iconSource?: ProcedureIconSource
   value: string
 }
 
+export enum ProcedureIconSource {
+  Lucide,
+  Tabler,
+}
 // Type for the procedure target mapping - flexible for API data
 export type ProcedureTargetMap = Record<string, string | string[]>
 

@@ -17,5 +17,5 @@ const IconComp = computed(() => {
 </script>
 
 <template>
-  <component :is="IconComp" v-bind="$attrs" :class="props.class" :fill="fill" />
+  <component :is="IconComp" :class="props.class" v-bind="fill !== undefined ? { fill } : {}" />
 </template>

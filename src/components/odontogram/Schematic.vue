@@ -30,8 +30,7 @@
                   justify-content: center;
                 "
               >
-                <TablerIcon :icon-name="pos.icon" class="w-5 h-5 text-blue-600 opacity-80" />
-                <DynamicLucideIcon :icon="pos.icon" class="w-5 h-5 text-blue-600 opacity-80" />
+                <ProcedureIcon :icon-name="pos.icon" :icon-source="pos.iconSource" />
               </div>
             </foreignObject>
           </g>
@@ -61,8 +60,8 @@ import { useInteractiveSvg } from '@/composables/odontogram/useInteractiveSvg'
 import { getSchematicSvgComponent } from '@/utils/schematicSvgMap'
 import * as LucideIcons from 'lucide-vue-next'
 import { Svg, SVG } from '@svgdotjs/svg.js'
-import DynamicLucideIcon from './DynamicLucideIcon.vue'
-import TablerIcon from './TablerIcon.vue'
+import ProcedureIcon from './ProcedureIcon.vue'
+import { ProcedureIconSource } from '@/types/odontogram/odontogram'
 
 interface Props {
   number: string
@@ -140,6 +139,7 @@ const iconPositions = ref<
   {
     surface: string
     icon: string
+    iconSource: ProcedureIconSource
     x: number
     y: number
     bbox?: { x: number; y: number; width: number; height: number }
@@ -176,6 +176,7 @@ const updateIconPositions = () => {
   const newPositions: {
     surface: string
     icon: string
+    iconSource: ProcedureIconSource
     x: number
     y: number
     bbox?: { x: number; y: number; width: number; height: number }
@@ -198,6 +199,7 @@ const updateIconPositions = () => {
         newPositions.push({
           surface: assignment.surface,
           icon: assignment.procedure.visual.value,
+          iconSource: assignment.procedure.visual.iconSource!,
           x: bbox.cx,
           y: bbox.cy,
           bbox: { x: bbox.x, y: bbox.y, width: bbox.width, height: bbox.height },

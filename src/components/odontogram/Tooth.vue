@@ -53,12 +53,7 @@
                   pointer-events: none;
                 "
               >
-                <TablerIcon :icon-name="pos.icon" class="w-5 h-5 text-blue-600 opacity-80" />
-                <DynamicLucideIcon
-                  :icon="pos.icon"
-                  class="w-5 h-5 text-blue-600 opacity-80"
-                  fill="red"
-                />
+                <ProcedureIcon :icon-name="pos.icon" :icon-source="pos.iconSource" />
               </div>
             </foreignObject>
           </g>
@@ -78,11 +73,12 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import * as LucideIcons from 'lucide-vue-next'
 import DynamicLucideIcon from './DynamicLucideIcon.vue'
 import { ToothContainerDirection } from '@/types/odontogram/odontogram'
-import type { ToothProcedureAssignment } from '@/types/odontogram/odontogram'
+import type { ProcedureIconSource, ToothProcedureAssignment } from '@/types/odontogram/odontogram'
 import { useInteractiveSvg } from '@/composables/odontogram/useInteractiveSvg'
 import { getToothSvgComponent } from '@/utils/toothSvgMap'
 import { Svg, SVG } from '@svgdotjs/svg.js'
 import TablerIcon from './TablerIcon.vue'
+import ProcedureIcon from './ProcedureIcon.vue'
 
 interface Props {
   number: string
@@ -163,6 +159,7 @@ const iconPositions = ref<
     x: number
     y: number
     bbox?: { x: number; y: number; width: number; height: number }
+    iconSource: ProcedureIconSource
   }[]
 >([])
 
@@ -248,6 +245,7 @@ const updateIconPositions = () => {
     x: number
     y: number
     bbox?: { x: number; y: number; width: number; height: number }
+    iconSource: ProcedureIconSource
   }[] = []
 
   iconParts.value.forEach((assignment) => {
@@ -275,6 +273,7 @@ const updateIconPositions = () => {
         width: transformedBBox.width,
         height: transformedBBox.height,
       },
+      iconSource: assignment.procedure.visual.iconSource!,
     })
   })
 

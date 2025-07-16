@@ -190,14 +190,9 @@
             v-for="(assignment, idx) in visibleToothLevelIconProcedures"
             :key="assignment.procedure.name + idx"
           >
-            <TablerIcon
+            <ProcedureIcon
               :icon-name="assignment.procedure.visual.value"
-              class="w-5 h-5 text-blue-600 opacity-80"
-            />
-            <DynamicLucideIcon
-              :icon="assignment.procedure.visual.value"
-              class="w-5 h-5 text-blue-600 opacity-80"
-              fill="red"
+              :icon-source="assignment.procedure.visual.iconSource!"
             />
             <span
               v-if="showPlusN"
@@ -229,6 +224,7 @@ import ToothLabel from './ToothLabel.vue'
 import { Eye } from 'lucide-vue-next'
 import DynamicLucideIcon from './DynamicLucideIcon.vue'
 import TablerIcon from './TablerIcon.vue'
+import ProcedureIcon from './ProcedureIcon.vue'
 
 interface Props {
   tooth: ToothData
