@@ -185,16 +185,18 @@
           :direction="direction"
           position="tooth"
         >
-          <div class="flex flex-wrap items-center justify-center gap-1 max-w-full">
+          <div
+            class="flex flex-wrap items-center justify-center gap-1 max-w-full"
+            v-for="(assignment, idx) in visibleToothLevelIconProcedures"
+            :key="assignment.procedure.name + idx"
+          >
             <TablerIcon
-              v-for="(assignment, idx) in visibleToothLevelIconProcedures"
-              :key="assignment.procedure.name + idx"
+              v-if="assignment.procedure.visual.visualType === 'TablerIcon'"
               :icon-name="assignment.procedure.visual.value"
               class="w-5 h-5 text-blue-600 opacity-80"
             />
             <DynamicLucideIcon
-              v-for="(assignment, idx) in visibleToothLevelIconProcedures"
-              :key="assignment.procedure.name + idx"
+              v-else
               :icon="assignment.procedure.visual.value"
               class="w-5 h-5 text-blue-600 opacity-80"
             />

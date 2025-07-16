@@ -53,6 +53,7 @@
                   pointer-events: none;
                 "
               >
+                <TablerIcon :icon-name="pos.icon" class="w-5 h-5 text-blue-600 opacity-80" />
                 <DynamicLucideIcon :icon="pos.icon" class="w-5 h-5 text-blue-600 opacity-80" />
               </div>
             </foreignObject>
@@ -77,6 +78,7 @@ import type { ToothProcedureAssignment } from '@/types/odontogram/odontogram'
 import { useInteractiveSvg } from '@/composables/odontogram/useInteractiveSvg'
 import { getToothSvgComponent } from '@/utils/toothSvgMap'
 import { Svg, SVG } from '@svgdotjs/svg.js'
+import TablerIcon from './TablerIcon.vue'
 
 interface Props {
   number: string

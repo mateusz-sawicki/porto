@@ -30,7 +30,7 @@ export interface Procedure {
 }
 
 export interface ProcedureVisual {
-  visualType: 'Color' | 'Icon' | 'GumShape' | 'ToothShape'
+  visualType: 'Color' | 'Icon' | 'GumShape' | 'ToothShape' | 'TablerIcon'
   /**
    * For visualType 'Color', value is a color string.
    * For visualType 'Icon', value is a lucide icon name (e.g., 'Eye', 'ArrowLeftRight').

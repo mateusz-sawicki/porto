@@ -30,6 +30,7 @@
                   justify-content: center;
                 "
               >
+                <TablerIcon :icon-name="pos.icon" class="w-5 h-5 text-blue-600 opacity-80" />
                 <DynamicLucideIcon :icon="pos.icon" class="w-5 h-5 text-blue-600 opacity-80" />
               </div>
             </foreignObject>
@@ -61,6 +62,7 @@ import { getSchematicSvgComponent } from '@/utils/schematicSvgMap'
 import * as LucideIcons from 'lucide-vue-next'
 import { Svg, SVG } from '@svgdotjs/svg.js'
 import DynamicLucideIcon from './DynamicLucideIcon.vue'
+import TablerIcon from './TablerIcon.vue'
 
 interface Props {
   number: string
