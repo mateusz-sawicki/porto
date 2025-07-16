@@ -2,11 +2,12 @@
 import { IconTilde } from '@tabler/icons-vue'
 interface Props {
   iconName: string
+  class?: string
 }
 
 const props = defineProps<Props>()
 </script>
 
 <template>
-  <IconTilde v-if="props.iconName == 'IconTilde'" />
+  <IconTilde v-if="props.iconName == 'IconTilde'" :class="props.class" />
 </template>

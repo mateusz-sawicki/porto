@@ -199,7 +199,7 @@ const updateIconPositions = () => {
         newPositions.push({
           surface: assignment.surface,
           icon: assignment.procedure.visual.value,
-          iconSource: assignment.procedure.visual.iconSource!,
+          iconSource: assignment.procedure.visual.iconSource,
           x: bbox.cx,
           y: bbox.cy,
           bbox: { x: bbox.x, y: bbox.y, width: bbox.width, height: bbox.height },

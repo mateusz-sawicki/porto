@@ -60,8 +60,9 @@
                     :style="{ backgroundColor: procedure.visual.value }"
                   />
                   <ProcedureIcon
+                    v-else-if="procedure.visual.visualType === 'Icon'"
                     :icon-name="procedure.visual.value"
-                    :icon-source="procedure.visual.iconSource!"
+                    :icon-source="procedure.visual.iconSource"
                   />
 
                   <span class="text-sm truncate">{{ procedure.name }}</span>

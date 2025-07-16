@@ -190,9 +190,15 @@
             v-for="(assignment, idx) in visibleToothLevelIconProcedures"
             :key="assignment.procedure.name + idx"
           >
+            <div
+              v-if="assignment.procedure.visual.visualType === 'Color'"
+              class="w-4 h-4 rounded-sm flex-shrink-0"
+              :style="{ backgroundColor: assignment.procedure.visual.value }"
+            />
             <ProcedureIcon
+              v-else-if="assignment.procedure.visual.visualType === 'Icon'"
               :icon-name="assignment.procedure.visual.value"
-              :icon-source="assignment.procedure.visual.iconSource!"
+              :icon-source="assignment.procedure.visual.iconSource"
             />
             <span
               v-if="showPlusN"

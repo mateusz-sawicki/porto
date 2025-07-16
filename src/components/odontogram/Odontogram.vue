@@ -87,10 +87,8 @@
     <!-- Controls underneath - Centered with max width -->
     <div class="flex justify-center">
       <div class="w-full max-w-2xl">
-        <OdontogramControls
+        <OdontogramControlsEnhanced
           :selectedProcedure="selectedProcedure"
-          :palette="procedurePalette"
-          :targetMap="procedureTargetMap"
           :search="search"
           :isProcedureMissing="isProcedureMissing"
           @select="handleProcedureSelect"
@@ -106,9 +104,9 @@
 import { computed, ref, onMounted, onUnmounted, nextTick, watch, inject } from 'vue'
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area'
 import { ToothContainerDirection } from '@/types/odontogram/odontogram'
-import OdontogramControls from '@/components/odontogram/OdontogramControls.vue'
 import Quadrant from '@/components/odontogram/Quadrant.vue'
 import type { useOdontogram } from '@/composables/odontogram/useOdontogram'
+import OdontogramControlsEnhanced from './OdontogramControlsEnhanced.vue'
 
 const odontogram = inject<ReturnType<typeof useOdontogram>>('odontogram')
 if (!odontogram) throw new Error('Odontogram composable not provided!')
