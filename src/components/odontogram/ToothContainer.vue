@@ -6,7 +6,6 @@
         class="tooth-wrapper"
         :class="{
           selected: isSelected,
-          'tooth-wrapper--hidden': hideTooth,
         }"
         @click="handleToothClick"
         @mouseenter="hoveredTooth = tooth.number"
@@ -175,9 +174,8 @@
             />
           </template>
         </div>
-        <!-- Extraction Overlay positioned to cover everything except ToothLabel -->
         <div
-          v-if="extraction"
+          v-if="extraction || isToothMissing"
           class="full-hover-blocker"
           :class="direction === ToothContainerDirection.Top ? 'blocker-top' : 'blocker-bottom'"
         ></div>
@@ -265,6 +263,13 @@ const extraction = computed(() =>
   assignedToothLevelProcedures.value.find(
     (a) => a.procedure.name === 'Ekstrakcja' && (a.procedure.visual.visualType === 'Icon' || a.procedure.visual.visualType === 'ToothShape'),
   ),
+)
+
+// Add computed for 'brak zęba' (tooth missing)
+const isToothMissing = computed(() =>
+  assignedToothLevelProcedures.value.some(
+    (a) => a.procedure.name === 'Brak zęba' || a.procedure.behavior === 'HideTooth',
+  )
 )
 
 const hasExposedToothProcedure = computed(() =>
@@ -453,13 +458,6 @@ const hiddenIconCount = computed(() =>
   cursor: not-allowed;
   background: transparent;
   pointer-events: all;
-}
-
-.tooth-wrapper--hidden {
-  pointer-events: none;
-}
-.tooth-wrapper--hidden .tooth-label {
-  pointer-events: auto;
 }
 
 /* 🎯 NEW: Dedicated clipping container for tooth component */
