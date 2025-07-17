@@ -175,8 +175,12 @@
             />
           </template>
         </div>
-
-        <!-- Extraction Overlay positioned to cover only tooth components area -->
+        <!-- Extraction Overlay positioned to cover everything except ToothLabel -->
+        <div
+          v-if="extraction"
+          class="full-hover-blocker"
+          :class="direction === ToothContainerDirection.Top ? 'blocker-top' : 'blocker-bottom'"
+        ></div>
         <ExtractionOverlay v-if="extraction" :direction="direction" />
 
         <!-- Observation Overlays for different parts -->
@@ -482,5 +486,25 @@ const hiddenIconCount = computed(() =>
 .schematic-at-end--bottom {
   margin-top: 0;
   margin-bottom: 30px; /* Margin for bottom direction */
+}
+
+.full-hover-blocker {
+  position: absolute;
+  left: 0;
+  right: 0;
+  z-index: 20;
+  background: transparent;
+  pointer-events: all;
+  cursor: not-allowed;
+}
+.blocker-top {
+  /* Leave space for label at the top (approx 32px) */
+  top: 32px;
+  bottom: 0;
+}
+.blocker-bottom {
+  /* Leave space for label at the bottom (approx 32px) */
+  top: 0;
+  bottom: 32px;
 }
 </style>
