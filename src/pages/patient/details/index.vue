@@ -350,16 +350,16 @@
             </div>
             <div class="flex items-center space-x-2">
               <Checkbox
-                id="is-child"
+                id="is-pediatric"
                 :checked="treatmentPlanDialog.isChild"
                 @update:checked="(checked: boolean) => (treatmentPlanDialog.isChild = checked)"
                 :disabled="treatmentPlanDialog.isCreating"
               />
               <Label
-                for="is-child"
+                for="is-pediatric"
                 class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
               >
-                Is Child?
+                Is pediatric?
               </Label>
             </div>
           </div>
