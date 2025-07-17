@@ -47,7 +47,7 @@ export function createMockProcedures(): ProcedureWithTarget[] {
     {
       name: 'Ekstrakcja',
       behavior: 'CrossOutTooth',
-      visual: { visualType: 'Icon', value: 'X' },
+      visual: { visualType: 'ToothShape', value: 'X' },
       targets: 'Tooth',
       category: 'Surgical',
       description: 'Tooth extraction procedure',
@@ -87,7 +87,7 @@ export function createMockProcedures(): ProcedureWithTarget[] {
     {
       name: 'Brak zęba',
       behavior: 'HideTooth',
-      visual: { visualType: 'Icon', value: 'Ø' },
+      visual: { visualType: 'ToothShape', value: 'Ø' },
       targets: 'Tooth',
       category: 'Missing',
       description: 'Missing tooth marking',

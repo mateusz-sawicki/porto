@@ -259,7 +259,7 @@ const assignedToothLevelProcedures = computed(() =>
 
 const extraction = computed(() =>
   assignedToothLevelProcedures.value.find(
-    (a) => a.procedure.name === 'Ekstrakcja' && a.procedure.visual.visualType === 'Icon',
+    (a) => a.procedure.name === 'Ekstrakcja' && (a.procedure.visual.visualType === 'Icon' || a.procedure.visual.visualType === 'ToothShape'),
   ),
 )
 

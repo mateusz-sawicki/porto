@@ -43,10 +43,6 @@ export interface ProcedureVisualType {
 export enum ProcedureIconSource {
   Lucide = 'lucide',
   Tabler = 'tabler',
-  Heroicons = 'heroicons',
-  Feather = 'feather',
-  Material = 'material',
-  Custom = 'custom',
 }
 // Type for the procedure target mapping - flexible for API data
 export type ProcedureTargetMap = Record<string, string | string[]>

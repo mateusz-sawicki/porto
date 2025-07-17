@@ -68,7 +68,7 @@ export function useOdontogram() {
       Próchnica: ['Root', 'Mesial', 'Distal', 'Buccal', 'Lingual', 'Incisal'],
       Recesja: 'Tooth',
       Implant: 'Tooth',
-      'brak zęba': 'Tooth',
+      'Brak zęba': 'Tooth',
       'tylko korzeń': 'Tooth',
       'Ząb zatrzymany': 'Tooth', // 🎯 NEW: Impacted tooth targets whole tooth
       Obserwacja: ['Mesial', 'Distal', 'Buccal', 'Lingual', 'Incisal'], // 🎯 NEW: Observation targets all parts
@@ -97,7 +97,7 @@ export function useOdontogram() {
     {
       name: 'Ekstrakcja',
       behavior: 'CrossOutTooth',
-      visual: { visualType: 'Icon', value: 'X' },
+      visual: { visualType: 'ToothShape', value: 'X' },
       targets: 'Tooth',
       category: 'Surgical',
       description: 'Tooth extraction procedure',
@@ -151,7 +151,7 @@ export function useOdontogram() {
     {
       name: 'Brak zęba',
       behavior: 'HideTooth',
-      visual: { visualType: 'Icon', value: 'Ø' },
+      visual: { visualType: 'ToothShape', value: 'Ø' },
       targets: 'Tooth',
       category: 'Diagnostic',
       description: 'Missing tooth marking',
@@ -471,7 +471,8 @@ export function useOdontogram() {
     handleAddExtraTooth,
     handleProcedureSelect,
     resetAllTeeth,
-    setSelectedProcedure: (procedure: ProcedureWithTarget | null) => (selectedProcedure.value = procedure),
+    setSelectedProcedure: (procedure: ProcedureWithTarget | null) =>
+      (selectedProcedure.value = procedure),
     setSearch: (value: string) => (search.value = value),
     setIsProcedureMissing: (value: boolean) => (isProcedureMissing.value = value),
   }

@@ -122,8 +122,6 @@ const {
   q2teeth,
   q3teeth,
   q4teeth,
-  procedureTargetMap,
-  procedurePalette,
   handleSegmentClick,
   handleToothClick,
   handleRemoveTooth,

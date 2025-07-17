@@ -75,11 +75,7 @@
                   class="w-4 h-4 rounded-full border flex-shrink-0"
                   :style="{ borderColor: procedure.visual.value }"
                 />
-                <div
-                  v-else-if="procedure.visual.visualType === 'ToothShape'"
-                  class="w-4 h-4 rounded-sm border flex-shrink-0"
-                  :style="{ borderColor: procedure.visual.value }"
-                />
+                <!-- Do not render anything for ToothShape -->
                 <div
                   v-else-if="procedure.visual.visualType === 'Pattern'"
                   class="w-4 h-4 rounded-sm bg-gray-200 flex-shrink-0"

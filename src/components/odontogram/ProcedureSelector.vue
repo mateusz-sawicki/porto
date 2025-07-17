@@ -106,9 +106,9 @@
           :style="{ backgroundColor: selectedProcedure.visual.value }"
         />
         <ProcedureIcon
-          v-else-if="selectedProcedure.visual.visualType === 'Icon'"
+          v-else
           :icon-name="selectedProcedure.visual.value"
-          :icon-source="selectedProcedure.visual.iconSource"
+          :icon-source="selectedProcedure.visual.iconSource!"
         />
         <span class="font-medium">{{ selectedProcedure.name }}</span>
       </div>
