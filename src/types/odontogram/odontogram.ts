@@ -35,9 +35,10 @@ export interface ProcedureVisualType {
    * For visualType 'Color', value is a color string.
    * For visualType 'Icon', value is a lucide icon name (e.g., 'Eye', 'ArrowLeftRight').
    * For GumShape/ToothShape, value is a color or shape identifier.
+   * Value is optional; if not present, no icon or color is rendered.
    */
   iconSource?: ProcedureIconSource
-  value: string
+  value?: string
 }
 
 export enum ProcedureIconSource {

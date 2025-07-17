@@ -336,15 +336,18 @@ export function useOdontogram() {
       const tooth = teeth.value.find((t) => t.number === number)
       if (!tooth) return
       if (isHideToothAssigned(tooth) && procedure.behavior !== 'HideTooth') return // Block if 'brak zęba' is present
-      if (
-        !tooth.toothProcedures.some(
-          (a) => a.toothPart.toLowerCase() === targets[0] && a.procedure.name === procedure.name,
-        )
-      ) {
-        tooth.toothProcedures.push({
-          procedure,
-          toothPart: (targets[0].charAt(0).toUpperCase() + targets[0].slice(1)) as any,
-        })
+      // Only assign if 'tooth' is a valid target for this procedure
+      if (targets.includes('tooth')) {
+        if (
+          !tooth.toothProcedures.some(
+            (a) => a.toothPart.toLowerCase() === 'tooth' && a.procedure.name === procedure.name,
+          )
+        ) {
+          tooth.toothProcedures.push({
+            procedure,
+            toothPart: 'Tooth',
+          })
+        }
       }
     })
 

@@ -69,7 +69,7 @@
                 />
                 <ProcedureIcon
                   v-else-if="procedure.visual.visualType === 'Icon'"
-                  :icon-name="procedure.visual.value"
+                  :icon-name="procedure.visual.value!"
                   :icon-source="procedure.visual.iconSource"
                   class="w-4 h-4"
                 />
@@ -99,7 +99,7 @@
                 />
                 <ProcedureIcon
                   v-else-if="selectedProcedure.visual.visualType === 'Icon'"
-                  :icon-name="selectedProcedure.visual.value"
+                  :icon-name="selectedProcedure.visual.value!"
                   :icon-source="selectedProcedure.visual.iconSource"
                   class="w-8 h-8"
                 />
@@ -111,7 +111,9 @@
 
               <div v-if="selectedProcedure.description">
                 <Label>Description:</Label>
-                <p class="text-sm text-muted-foreground mt-1">{{ selectedProcedure.description }}</p>
+                <p class="text-sm text-muted-foreground mt-1">
+                  {{ selectedProcedure.description }}
+                </p>
               </div>
 
               <div>
@@ -124,11 +126,7 @@
               <div>
                 <Label>Available Targets:</Label>
                 <div class="flex flex-wrap gap-1 mt-2">
-                  <Badge
-                    v-for="target in availableTargets"
-                    :key="target"
-                    variant="outline"
-                  >
+                  <Badge v-for="target in availableTargets" :key="target" variant="outline">
                     {{ target }}
                   </Badge>
                 </div>
@@ -195,10 +193,14 @@ import { computed, ref } from 'vue'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Label } from '@/components/ui/label'
 import { Badge } from '@/components/ui/badge'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import type { Procedure } from '@/types/odontogram/odontogram'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
 import type { ProcedureWithTarget } from '@/services/procedure/procedureApi'
-import { ProcedureIconSource } from '@/types/odontogram/odontogram'
 import { getIconSourceName } from '@/utils/iconUtils'
 import ProcedureSelector from '@/components/odontogram/ProcedureSelector.vue'
 import ProcedureIcon from '@/components/odontogram/ProcedureIcon.vue'
@@ -210,16 +212,11 @@ const selectedProcedure = ref<ProcedureWithTarget | null>(null)
 const selectedTarget = ref<string>('')
 
 // Use procedures composable
-const {
-  procedures,
-  categories,
-  getProceduresForTarget,
-  getAvailableTargets,
-} = useProcedures()
+const { procedures, categories, getProceduresForTarget, getAvailableTargets } = useProcedures()
 
 // Computed
 const totalProcedures = computed(() => procedures.value.length)
-const activeProcedures = computed(() => procedures.value.filter(p => p.isActive !== false).length)
+const activeProcedures = computed(() => procedures.value.filter((p) => p.isActive !== false).length)
 
 const proceduresForTarget = computed(() => {
   if (!selectedTarget.value) return procedures.value
@@ -236,6 +233,4 @@ const handleProcedureSelect = (procedure: ProcedureWithTarget) => {
   selectedProcedure.value = procedure
   console.log('Selected procedure:', procedure)
 }
-
-
 </script>

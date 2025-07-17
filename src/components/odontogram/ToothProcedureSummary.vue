@@ -60,24 +60,24 @@
             >
               <div class="flex items-center gap-3">
                 <div
-                  v-if="procedure.visual.visualType === 'Color'"
+                  v-if="procedure.visual.visualType === 'Color' && procedure.visual.value"
                   class="w-4 h-4 rounded-sm flex-shrink-0"
                   :style="{ backgroundColor: procedure.visual.value }"
                 />
                 <div
-                  v-else-if="procedure.visual.visualType === 'Icon'"
+                  v-else-if="procedure.visual.visualType === 'Icon' && procedure.visual.value"
                   class="w-4 h-4 flex items-center justify-center text-xs font-bold flex-shrink-0"
                 >
                   {{ procedure.visual.value }}
                 </div>
                 <div
-                  v-else-if="procedure.visual.visualType === 'GumShape'"
+                  v-else-if="procedure.visual.visualType === 'GumShape' && procedure.visual.value"
                   class="w-4 h-4 rounded-full border flex-shrink-0"
                   :style="{ borderColor: procedure.visual.value }"
                 />
                 <!-- Do not render anything for ToothShape -->
                 <div
-                  v-else-if="procedure.visual.visualType === 'Pattern'"
+                  v-else-if="procedure.visual.visualType === 'Pattern' && procedure.visual.value"
                   class="w-4 h-4 rounded-sm bg-gray-200 flex-shrink-0"
                 />
                 <div class="flex-1 min-w-0">

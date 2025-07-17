@@ -101,12 +101,12 @@
       <h4 class="font-medium text-sm mb-2">Wybrana procedura:</h4>
       <div class="flex items-center gap-2 mb-2">
         <div
-          v-if="selectedProcedure.visual.visualType === 'Color'"
+          v-if="selectedProcedure.visual.visualType === 'Color' && selectedProcedure.visual.value"
           class="w-4 h-4 rounded-sm"
           :style="{ backgroundColor: selectedProcedure.visual.value }"
         />
         <ProcedureIcon
-          v-else
+          v-else-if="selectedProcedure.visual.visualType === 'Icon' && selectedProcedure.visual.value"
           :icon-name="selectedProcedure.visual.value"
           :icon-source="selectedProcedure.visual.iconSource!"
         />

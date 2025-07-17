@@ -199,7 +199,7 @@
             />
             <ProcedureIcon
               v-else-if="assignment.procedure.visual.visualType === 'Icon'"
-              :icon-name="assignment.procedure.visual.value"
+              :icon-name="assignment.procedure.visual.value!"
               :icon-source="assignment.procedure.visual.iconSource"
             />
             <span
@@ -261,7 +261,9 @@ const assignedToothLevelProcedures = computed(() =>
 
 const extraction = computed(() =>
   assignedToothLevelProcedures.value.find(
-    (a) => a.procedure.name === 'Ekstrakcja' && (a.procedure.visual.visualType === 'Icon' || a.procedure.visual.visualType === 'ToothShape'),
+    (a) =>
+      a.procedure.name === 'Ekstrakcja' &&
+      (a.procedure.visual.visualType === 'Icon' || a.procedure.visual.visualType === 'ToothShape'),
   ),
 )
 
@@ -269,7 +271,7 @@ const extraction = computed(() =>
 const isToothMissing = computed(() =>
   assignedToothLevelProcedures.value.some(
     (a) => a.procedure.name === 'Brak zęba' || a.procedure.behavior === 'HideTooth',
-  )
+  ),
 )
 
 const hasExposedToothProcedure = computed(() =>

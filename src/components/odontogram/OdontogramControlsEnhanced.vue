@@ -29,12 +29,12 @@
         >
           <div class="flex items-center gap-2 flex-1 min-w-0">
             <div
-              v-if="selectedProcedure?.visual.visualType === 'Color'"
+              v-if="selectedProcedure?.visual.visualType === 'Color' && selectedProcedure.visual.value"
               class="w-3 h-3 rounded-sm flex-shrink-0"
               :style="{ backgroundColor: selectedProcedure.visual.value }"
             />
             <ProcedureIcon
-              v-else-if="selectedProcedure && selectedProcedure.visual.visualType === 'Icon'"
+              v-else-if="selectedProcedure && selectedProcedure.visual.visualType === 'Icon' && selectedProcedure.visual.value"
               :icon-name="selectedProcedure.visual.value"
               :icon-source="selectedProcedure.visual.iconSource"
               class="w-3 h-3 flex-shrink-0"
@@ -178,12 +178,12 @@
     <div v-if="selectedProcedure" class="w-full p-3 bg-muted rounded-md">
       <div class="flex items-center gap-3">
         <div
-          v-if="selectedProcedure.visual.visualType === 'Color'"
+          v-if="selectedProcedure.visual.visualType === 'Color' && selectedProcedure.visual.value"
           class="w-4 h-4 rounded-sm flex-shrink-0"
           :style="{ backgroundColor: selectedProcedure.visual.value }"
         />
         <ProcedureIcon
-          v-else-if="selectedProcedure.visual.visualType === 'Icon'"
+          v-else-if="selectedProcedure.visual.visualType === 'Icon' && selectedProcedure.visual.value"
           :icon-name="selectedProcedure.visual.value"
           :icon-source="selectedProcedure.visual.iconSource"
           class="w-4 h-4 flex-shrink-0"

@@ -56,7 +56,7 @@ export function createMockProcedures(): ProcedureWithTarget[] {
     {
       name: 'Ząb zatrzymany',
       behavior: 'ImpactedTooth',
-      visual: { visualType: 'ToothShape', value: '↓' },
+      visual: { visualType: 'ToothShape' },
       targets: 'Tooth',
       category: 'Surgical',
       description: 'Impacted tooth marking',
@@ -65,7 +65,7 @@ export function createMockProcedures(): ProcedureWithTarget[] {
     {
       name: 'Implant',
       behavior: 'Implant',
-      visual: { visualType: 'ToothShape', value: '#9a9a9a' },
+      visual: { visualType: 'ToothShape' },
       targets: 'Tooth',
       category: 'Surgical',
       description: 'Dental implant placement',
@@ -76,7 +76,7 @@ export function createMockProcedures(): ProcedureWithTarget[] {
     {
       name: 'Recesja',
       behavior: 'None',
-      visual: { visualType: 'GumShape', value: '#000000' },
+      visual: { visualType: 'GumShape' },
       targets: 'Tooth',
       category: 'Periodontal',
       description: 'Gingival recession marking',
@@ -87,7 +87,7 @@ export function createMockProcedures(): ProcedureWithTarget[] {
     {
       name: 'Brak zęba',
       behavior: 'HideTooth',
-      visual: { visualType: 'ToothShape', value: 'Ø' },
+      visual: { visualType: 'ToothShape' },
       targets: 'Tooth',
       category: 'Missing',
       description: 'Missing tooth marking',
@@ -96,7 +96,7 @@ export function createMockProcedures(): ProcedureWithTarget[] {
     {
       name: 'tylko korzeń',
       behavior: 'RootOnly',
-      visual: { visualType: 'ToothShape', value: 'R' },
+      visual: { visualType: 'ToothShape' },
       targets: 'Tooth',
       category: 'Missing',
       description: 'Root only remaining',
@@ -216,17 +216,6 @@ export function createMockProcedures(): ProcedureWithTarget[] {
       category: 'Wear',
       description: 'Wedge-shaped defect marking',
       isActive: true,
-    },
-
-    // Inactive/Deprecated Procedures (for demonstration)
-    {
-      name: 'Stary zabieg',
-      behavior: 'None',
-      visual: { visualType: 'Color', value: '#6b7280' },
-      targets: 'Tooth',
-      category: 'Deprecated',
-      description: 'Deprecated procedure - no longer used',
-      isActive: false,
     },
   ]
 }

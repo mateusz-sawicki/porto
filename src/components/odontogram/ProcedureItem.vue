@@ -11,12 +11,12 @@
       <!-- Visual Representation -->
       <div class="flex-shrink-0">
         <div
-          v-if="procedure.visual!.visualType === 'Color'"
+          v-if="procedure.visual!.visualType === 'Color' && procedure.visual!.value"
           class="w-6 h-6 rounded-sm border border-border"
           :style="{ backgroundColor: procedure.visual!.value }"
         />
         <ProcedureIcon
-          v-else
+          v-else-if="procedure.visual!.visualType === 'Icon' && procedure.visual!.value"
           :icon-name="procedure.visual!.value"
           :icon-source="procedure.visual!.iconSource!"
           class="w-6 h-6"
