@@ -3,6 +3,7 @@ export interface ToothData {
   number: string
   toothProcedures: ToothProcedureAssignment[]
   schemaProcedures: SchemaProcedureAssignment[]
+  isEmptySlot?: boolean // If true, this is a gum-only empty slot (no label, no tooth)
 }
 
 export interface ToothProcedureAssignment {

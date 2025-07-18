@@ -1,6 +1,22 @@
 <!-- components/ToothContainer.vue - Schematic Moved to End with Margin -->
 <template>
-  <Popover :open="showTooltip">
+  <div v-if="tooth.isEmptySlot" class="tooth-wrapper">
+    <div class="tooth-group" :class="{ 'tooth-group--bottom': direction === ToothContainerDirection.Bottom }">
+      <ToothLabel
+        :toothNumber="''"
+        :isExtra="false"
+        :direction="direction"
+        :disabled="true"
+        @add-extra-before="$emit('add-extra-tooth', { base: tooth.number, direction: ExtraToothDirection.Before })"
+        @add-extra-after="$emit('add-extra-tooth', { base: tooth.number, direction: ExtraToothDirection.After })"
+        @remove-tooth="$emit('remove-tooth', tooth.number)"
+      />
+      <div class="tooth-components-wrapper">
+        <GumOverlay :direction="direction" />
+      </div>
+    </div>
+  </div>
+  <Popover v-else :open="showTooltip">
     <PopoverTrigger asChild>
       <div
         class="tooth-wrapper"

@@ -1,6 +1,6 @@
 <!-- components/ToothLabel.vue -->
 <template>
-  <DropdownMenu>
+  <DropdownMenu v-if="!disabled">
     <DropdownMenuTrigger asChild>
       <div
         class="tooth-label-button"
@@ -26,6 +26,16 @@
       <DropdownMenuItem v-if="isExtra" @click="$emit('remove-tooth')"> Usuń ząb </DropdownMenuItem>
     </DropdownMenuContent>
   </DropdownMenu>
+  <div
+    v-else
+    class="tooth-label-button tooth-label-button--disabled"
+    :class="{
+      'tooth-label-button--top': direction === ToothContainerDirection.Top,
+      'tooth-label-button--bottom': direction === ToothContainerDirection.Bottom,
+    }"
+  >
+    {{ toothNumber }}
+  </div>
 </template>
 
 <script setup lang="ts">
@@ -41,6 +51,7 @@ interface Props {
   toothNumber: string
   isExtra: boolean
   direction: ToothContainerDirection
+  disabled?: boolean
 }
 
 interface Emits {
@@ -87,6 +98,12 @@ const generateExtraToothNumber = (base: string, direction: 'before' | 'after'): 
 
   /* Visual effects - match ToothContainer transitions */
   transition: background-color 0.2s ease;
+}
+
+.tooth-label-button--disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  pointer-events: none;
 }
 
 /* 🎯 Position adjustments based on quadrant */

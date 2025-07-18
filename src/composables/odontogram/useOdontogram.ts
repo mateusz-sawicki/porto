@@ -56,7 +56,27 @@ export function getInitialPediatricTeeth(): ToothData[] {
     // Quadrant 7 (Lower Left)
     '71', '72', '73', '74', '75',
   ];
-  return numbers.map(n => ({ number: n, toothProcedures: [], schemaProcedures: [] }));
+  const teeth = numbers.map(n => ({ number: n, toothProcedures: [], schemaProcedures: [] })) as ToothData[];
+
+  // Add empty slots for 6,7,8 in each quadrant (gum only, no label, no tooth)
+  // Quadrant 5 (Upper Right): 56, 57, 58
+  teeth.push({ number: '56', toothProcedures: [], schemaProcedures: [], isEmptySlot: true });
+  teeth.push({ number: '57', toothProcedures: [], schemaProcedures: [], isEmptySlot: true });
+  teeth.push({ number: '58', toothProcedures: [], schemaProcedures: [], isEmptySlot: true });
+  // Quadrant 6 (Upper Left): 66, 67, 68
+  teeth.push({ number: '66', toothProcedures: [], schemaProcedures: [], isEmptySlot: true });
+  teeth.push({ number: '67', toothProcedures: [], schemaProcedures: [], isEmptySlot: true });
+  teeth.push({ number: '68', toothProcedures: [], schemaProcedures: [], isEmptySlot: true });
+  // Quadrant 8 (Lower Right): 86, 87, 88
+  teeth.push({ number: '86', toothProcedures: [], schemaProcedures: [], isEmptySlot: true });
+  teeth.push({ number: '87', toothProcedures: [], schemaProcedures: [], isEmptySlot: true });
+  teeth.push({ number: '88', toothProcedures: [], schemaProcedures: [], isEmptySlot: true });
+  // Quadrant 7 (Lower Left): 76, 77, 78
+  teeth.push({ number: '76', toothProcedures: [], schemaProcedures: [], isEmptySlot: true });
+  teeth.push({ number: '77', toothProcedures: [], schemaProcedures: [], isEmptySlot: true });
+  teeth.push({ number: '78', toothProcedures: [], schemaProcedures: [], isEmptySlot: true });
+
+  return teeth;
 }
 
 export function useOdontogram(isPediatric = false) {
