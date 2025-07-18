@@ -265,7 +265,7 @@ const updateIconPositions = () => {
 
     newPositions.push({
       part: assignment.toothPart,
-      icon: assignment.procedure.visual.value,
+      icon: assignment.procedure.visual.value!,
       x: transformedBBox.cx,
       y: transformedBBox.cy,
       bbox: {

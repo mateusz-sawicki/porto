@@ -371,7 +371,7 @@ const uploadedFiles = ref({
 })
 
 // Use odontogram composable to sync with chart data
-const isPediatric = false // or use your logic, e.g., basicInfoData.value.patientType === 'child'
+const isPediatric = true // or use your logic, e.g., basicInfoData.value.patientType === 'child'
 const odontogram = useOdontogram(isPediatric)
 provide('odontogram', odontogram)
 
