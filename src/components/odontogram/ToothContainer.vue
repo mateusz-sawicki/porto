@@ -55,6 +55,7 @@
                         :selectedSegments="extraction ? [] : selectedSegments"
                         :direction="direction"
                         only-root
+                        :isPediatric="props.isPediatric"
                         @segment-click="handleSegmentClick"
                       />
                     </div>
@@ -72,6 +73,7 @@
                         :toothProcedures="tooth.toothProcedures"
                         :selectedSegments="extraction ? [] : selectedSegments"
                         :direction="direction"
+                        :isPediatric="props.isPediatric"
                         @segment-click="handleSegmentClick"
                       />
                     </div>
@@ -126,6 +128,7 @@
                         :selectedSegments="extraction ? [] : selectedSegments"
                         :direction="direction"
                         only-root
+                        :isPediatric="props.isPediatric"
                         @segment-click="handleSegmentClick"
                       />
                     </div>
@@ -143,6 +146,7 @@
                         :toothProcedures="tooth.toothProcedures"
                         :selectedSegments="extraction ? [] : selectedSegments"
                         :direction="direction"
+                        :isPediatric="props.isPediatric"
                         @segment-click="handleSegmentClick"
                       />
                     </div>
@@ -239,6 +243,7 @@ interface Props {
   isSelected: boolean
   selectedSegments: string[]
   direction: ToothContainerDirection
+  isPediatric?: boolean
 }
 
 interface Emits {

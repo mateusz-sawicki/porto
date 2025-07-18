@@ -30,6 +30,7 @@
               :selectedToothNumbers="selectedToothNumbers"
               :direction="ToothContainerDirection.Top"
               side="left"
+              :isPediatric="props.isPediatric"
               @segment-click="handleSegmentClick"
               @tooth-click="handleToothClick"
               @remove-tooth="handleRemoveTooth"
@@ -41,6 +42,7 @@
               :selectedToothNumbers="selectedToothNumbers"
               :direction="ToothContainerDirection.Top"
               side="right"
+              :isPediatric="props.isPediatric"
               @segment-click="handleSegmentClick"
               @tooth-click="handleToothClick"
               @remove-tooth="handleRemoveTooth"
@@ -62,6 +64,7 @@
               :selectedToothNumbers="selectedToothNumbers"
               :direction="ToothContainerDirection.Bottom"
               side="left"
+              :isPediatric="props.isPediatric"
               @segment-click="handleSegmentClick"
               @tooth-click="handleToothClick"
               @remove-tooth="handleRemoveTooth"
@@ -73,6 +76,7 @@
               :selectedToothNumbers="selectedToothNumbers"
               :direction="ToothContainerDirection.Bottom"
               side="right"
+              :isPediatric="props.isPediatric"
               @segment-click="handleSegmentClick"
               @tooth-click="handleToothClick"
               @remove-tooth="handleRemoveTooth"
@@ -101,12 +105,14 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref, onMounted, onUnmounted, nextTick, watch, inject } from 'vue'
+import { computed, ref, onMounted, onUnmounted, nextTick, watch, inject, defineProps } from 'vue'
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area'
 import { ToothContainerDirection } from '@/types/odontogram/odontogram'
 import Quadrant from '@/components/odontogram/Quadrant.vue'
 import type { useOdontogram } from '@/composables/odontogram/useOdontogram'
 import OdontogramControlsEnhanced from './OdontogramControlsEnhanced.vue'
+
+const props = defineProps<{ isPediatric?: boolean }>()
 
 const odontogram = inject<ReturnType<typeof useOdontogram>>('odontogram')
 if (!odontogram) throw new Error('Odontogram composable not provided!')

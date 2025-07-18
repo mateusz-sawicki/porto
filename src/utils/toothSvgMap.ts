@@ -34,6 +34,8 @@ import Tooth46 from '@/assets/teeth/porto_tooth_46.svg?component'
 import Tooth47 from '@/assets/teeth/porto_tooth_47.svg?component'
 import Tooth48 from '@/assets/teeth/porto_tooth_48.svg?component'
 
+import { PediatricToothSvgMap } from './PediatricToothSvgMap'
+
 export const ToothSvgMap: Record<string, any> = {
   '11': Tooth11,
   '12': Tooth12,
@@ -77,8 +79,11 @@ export const hasToothSvg = (toothNumber: string): boolean => {
   return baseNumber in ToothSvgMap
 }
 
-export const getToothSvgComponent = (toothNumber: string) => {
+export const getToothSvgComponent = (toothNumber: string, isPediatric = false) => {
   const baseNumber = toothNumber.replace(/[+-]\d+$/, '')
+  if (isPediatric) {
+    return PediatricToothSvgMap[baseNumber] || null
+  }
   return ToothSvgMap[baseNumber] || null
 }
 

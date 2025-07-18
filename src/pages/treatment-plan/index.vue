@@ -128,6 +128,7 @@
           <OdontogramStep
             v-else-if="currentStep === 2"
             :teeth-with-procedures="teethWithProcedures"
+            :isPediatric="isPediatric"
             @remove-procedure="handleRemoveProcedure"
           />
 
@@ -370,7 +371,8 @@ const uploadedFiles = ref({
 })
 
 // Use odontogram composable to sync with chart data
-const odontogram = useOdontogram()
+const isPediatric = false // or use your logic, e.g., basicInfoData.value.patientType === 'child'
+const odontogram = useOdontogram(isPediatric)
 provide('odontogram', odontogram)
 
 // Compute actual procedures from teeth data (not selectedSegments)
@@ -387,7 +389,7 @@ const teethWithProcedures = computed<ToothWithProcedures[]>(() => {
         description: `${assignment.toothPart}${assignment.position ? ` (${assignment.position})` : ''}`,
         visual: {
           visualType: assignment.procedure.visual.visualType,
-          value: assignment.procedure.visual.value,
+          value: assignment.procedure.visual.value!,
         },
       })
     })
@@ -399,7 +401,7 @@ const teethWithProcedures = computed<ToothWithProcedures[]>(() => {
         description: `${assignment.surface} surface`,
         visual: {
           visualType: assignment.procedure.visual.visualType,
-          value: assignment.procedure.visual.value,
+          value: assignment.procedure.visual.value!,
         },
       })
     })

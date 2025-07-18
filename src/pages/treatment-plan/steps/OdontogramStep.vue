@@ -2,7 +2,7 @@
   <div class="space-y-6">
     <div class="grid grid-cols-1 gap-6">
       <!-- Odontogram Component (chart + controls) -->
-      <Odontogram />
+      <Odontogram :isPediatric="props.isPediatric" />
 
       <!-- Procedures Summary -->
       <ToothProceduresSummary
@@ -33,6 +33,7 @@ interface ToothWithProcedures {
 
 interface Props {
   teethWithProcedures: ToothWithProcedures[]
+  isPediatric?: boolean
 }
 
 interface Emits {

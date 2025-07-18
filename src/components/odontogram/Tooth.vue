@@ -86,6 +86,7 @@ interface Props {
   selectedSegments: string[]
   direction: ToothContainerDirection
   onlyRoot?: boolean
+  isPediatric?: boolean
 }
 
 interface Emits {
@@ -106,7 +107,7 @@ const marginDirection = computed(() => {
 })
 
 const ToothSvgComponent = computed(() => {
-  return getToothSvgComponent(props.number)
+  return getToothSvgComponent(props.number, props.isPediatric)
 })
 
 // Interactive SVG logic
@@ -325,6 +326,20 @@ onMounted(() => {
   nextTick(() => {
     updateSvgDimensions()
     updateIconPositions()
+    // Hide implants for pediatric teeth (any element with id containing 'implant')
+    if (props.isPediatric) {
+      let svgEl = svgRef.value as any
+      if (svgEl && svgEl.$el) svgEl = svgEl.$el
+      if (svgEl && svgEl.tagName !== 'svg') {
+        svgEl = svgEl.querySelector && svgEl.querySelector('svg')
+      }
+      if (svgEl && typeof svgEl.querySelectorAll === 'function') {
+        const implantElements = svgEl.querySelectorAll('[id*="implant"]')
+        implantElements.forEach((el: any) => {
+          el.style.display = 'none'
+        })
+      }
+    }
   })
 })
 

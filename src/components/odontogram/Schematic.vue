@@ -81,7 +81,28 @@ const svgRef = ref<HTMLElement | SVGSVGElement>()
 
 // 🎯 THIS DETERMINES IF TOOTH IS MOLAR OR INCISOR
 const getToothType = (number: string): 'molar' | 'incisor' => {
-  const molars = ['16', '17', '18', '26', '27', '28', '36', '37', '38', '46', '47', '48']
+  const molars = [
+    '16',
+    '17',
+    '18',
+    '26',
+    '27',
+    '28',
+    '36',
+    '37',
+    '38',
+    '46',
+    '47',
+    '48',
+    '54',
+    '55',
+    '64',
+    '65',
+    '74',
+    '75',
+    '84',
+    '85',
+  ]
   return molars.includes(number.replace(/[+-]\d+$/, '')) ? 'molar' : 'incisor'
 }
 
@@ -198,8 +219,8 @@ const updateIconPositions = () => {
         const bbox = svgjsEl.bbox()
         newPositions.push({
           surface: assignment.surface,
-          icon: assignment.procedure.visual.value,
-          iconSource: assignment.procedure.visual.iconSource,
+          icon: assignment.procedure.visual.value!,
+          iconSource: assignment.procedure.visual.iconSource!,
           x: bbox.cx,
           y: bbox.cy,
           bbox: { x: bbox.x, y: bbox.y, width: bbox.width, height: bbox.height },

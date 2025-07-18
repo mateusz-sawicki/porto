@@ -4,16 +4,8 @@ import type { ToothData, Procedure, ProcedureTargetMap } from '@/types/odontogra
 import type { ProcedureWithTarget } from '@/services/procedure/procedureApi'
 import { ExtraToothDirection, ProcedureIconSource } from '@/types/odontogram/odontogram'
 
-export function useOdontogram() {
-  const selectedProcedure = ref<ProcedureWithTarget | null>(null)
-  const search = ref('')
-  const selectedSegments = ref<string[]>([])
-  const selectedToothNumbers = ref<string[]>([])
-  const isDeleteMode = ref(false)
-  const isProcedureMissing = ref(false)
-
-  // Initial teeth data (32 permanent teeth)
-  const teeth = ref<ToothData[]>([
+export function getInitialPermanentTeeth(): ToothData[] {
+  return [
     // Quadrant 1 (Upper Right)
     { number: '18', toothProcedures: [], schemaProcedures: [] },
     { number: '17', toothProcedures: [], schemaProcedures: [] },
@@ -50,13 +42,57 @@ export function useOdontogram() {
     { number: '36', toothProcedures: [], schemaProcedures: [] },
     { number: '37', toothProcedures: [], schemaProcedures: [] },
     { number: '38', toothProcedures: [], schemaProcedures: [] },
-  ])
+  ]
+}
+
+export function getInitialPediatricTeeth(): ToothData[] {
+  const numbers = [
+    // Quadrant 5 (Upper Right)
+    '55', '54', '53', '52', '51',
+    // Quadrant 6 (Upper Left)
+    '61', '62', '63', '64', '65',
+    // Quadrant 8 (Lower Right)
+    '85', '84', '83', '82', '81',
+    // Quadrant 7 (Lower Left)
+    '71', '72', '73', '74', '75',
+  ];
+  return numbers.map(n => ({ number: n, toothProcedures: [], schemaProcedures: [] }));
+}
+
+export function useOdontogram(isPediatric = false) {
+  const selectedProcedure = ref<ProcedureWithTarget | null>(null)
+  const search = ref('')
+  const selectedSegments = ref<string[]>([])
+  const selectedToothNumbers = ref<string[]>([])
+  const isDeleteMode = ref(false)
+  const isProcedureMissing = ref(false)
+
+  // Initial teeth data (permanent or pediatric)
+  const teeth = ref<ToothData[]>(
+    isPediatric ? getInitialPediatricTeeth() : getInitialPermanentTeeth()
+  )
 
   // Computed quadrant filters
-  const q1teeth = computed(() => teeth.value.filter((t) => t.number[0] === '1'))
-  const q2teeth = computed(() => teeth.value.filter((t) => t.number[0] === '2'))
-  const q3teeth = computed(() => teeth.value.filter((t) => t.number[0] === '3'))
-  const q4teeth = computed(() => teeth.value.filter((t) => t.number[0] === '4'))
+  const q1teeth = computed(() =>
+    isPediatric
+      ? teeth.value.filter((t) => t.number[0] === '5')
+      : teeth.value.filter((t) => t.number[0] === '1')
+  )
+  const q2teeth = computed(() =>
+    isPediatric
+      ? teeth.value.filter((t) => t.number[0] === '6')
+      : teeth.value.filter((t) => t.number[0] === '2')
+  )
+  const q3teeth = computed(() =>
+    isPediatric
+      ? teeth.value.filter((t) => t.number[0] === '7')
+      : teeth.value.filter((t) => t.number[0] === '3')
+  )
+  const q4teeth = computed(() =>
+    isPediatric
+      ? teeth.value.filter((t) => t.number[0] === '8')
+      : teeth.value.filter((t) => t.number[0] === '4')
+  )
 
   // Static procedure target mapping
   const procedureTargetMap = computed(
@@ -417,44 +453,9 @@ export function useOdontogram() {
     })
 
     // Reset to original 32 permanent teeth (in case extra teeth were added)
-    teeth.value = [
-      // Quadrant 1 (Upper Right)
-      { number: '18', toothProcedures: [], schemaProcedures: [] },
-      { number: '17', toothProcedures: [], schemaProcedures: [] },
-      { number: '16', toothProcedures: [], schemaProcedures: [] },
-      { number: '15', toothProcedures: [], schemaProcedures: [] },
-      { number: '14', toothProcedures: [], schemaProcedures: [] },
-      { number: '13', toothProcedures: [], schemaProcedures: [] },
-      { number: '12', toothProcedures: [], schemaProcedures: [] },
-      { number: '11', toothProcedures: [], schemaProcedures: [] },
-      // Quadrant 2 (Upper Left)
-      { number: '21', toothProcedures: [], schemaProcedures: [] },
-      { number: '22', toothProcedures: [], schemaProcedures: [] },
-      { number: '23', toothProcedures: [], schemaProcedures: [] },
-      { number: '24', toothProcedures: [], schemaProcedures: [] },
-      { number: '25', toothProcedures: [], schemaProcedures: [] },
-      { number: '26', toothProcedures: [], schemaProcedures: [] },
-      { number: '27', toothProcedures: [], schemaProcedures: [] },
-      { number: '28', toothProcedures: [], schemaProcedures: [] },
-      // Quadrant 4 (Lower Right)
-      { number: '48', toothProcedures: [], schemaProcedures: [] },
-      { number: '47', toothProcedures: [], schemaProcedures: [] },
-      { number: '46', toothProcedures: [], schemaProcedures: [] },
-      { number: '45', toothProcedures: [], schemaProcedures: [] },
-      { number: '44', toothProcedures: [], schemaProcedures: [] },
-      { number: '43', toothProcedures: [], schemaProcedures: [] },
-      { number: '42', toothProcedures: [], schemaProcedures: [] },
-      { number: '41', toothProcedures: [], schemaProcedures: [] },
-      // Quadrant 3 (Lower Left)
-      { number: '31', toothProcedures: [], schemaProcedures: [] },
-      { number: '32', toothProcedures: [], schemaProcedures: [] },
-      { number: '33', toothProcedures: [], schemaProcedures: [] },
-      { number: '34', toothProcedures: [], schemaProcedures: [] },
-      { number: '35', toothProcedures: [], schemaProcedures: [] },
-      { number: '36', toothProcedures: [], schemaProcedures: [] },
-      { number: '37', toothProcedures: [], schemaProcedures: [] },
-      { number: '38', toothProcedures: [], schemaProcedures: [] },
-    ]
+    teeth.value = isPediatric
+      ? getInitialPediatricTeeth()
+      : getInitialPermanentTeeth()
 
     // Clear all selections and reset state
     selectedProcedure.value = null

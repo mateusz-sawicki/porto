@@ -7,6 +7,7 @@
         :isSelected="isToothSelected(tooth.number)"
         :selectedSegments="selectedSegments"
         :direction="direction"
+        :isPediatric="props.isPediatric"
         @tooth-click="() => $emit('tooth-click', tooth.number)"
         @segment-click="$emit('segment-click', $event)"
         @remove-tooth="$emit('remove-tooth', $event)"
@@ -31,6 +32,7 @@ interface Props {
   selectedToothNumbers: string[]
   direction: ToothContainerDirection
   side: 'left' | 'right'
+  isPediatric?: boolean
 }
 
 interface Emits {
