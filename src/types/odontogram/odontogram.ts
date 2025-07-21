@@ -1,6 +1,7 @@
 // types/odontogram.ts
 export interface ToothData {
   number: string
+  position?: number // Anatomical position 1-8 (1=center, 8=back), optional for backward compatibility
   toothProcedures: ToothProcedureAssignment[]
   schemaProcedures: SchemaProcedureAssignment[]
   isEmptySlot?: boolean // If true, this is a gum-only empty slot (no label, no tooth)

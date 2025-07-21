@@ -54,31 +54,56 @@ const isToothSelected = (toothNumber: string) => {
   )
 }
 
-// Sort teeth to ensure proper order (exact same logic as React version)
+// Helper function to get tooth position with fallback
+const getToothPosition = (tooth: ToothData): number => {
+  if (tooth.position !== undefined) {
+    return tooth.position
+  }
+  
+  // Fallback: calculate position from tooth number
+  const baseNumber = tooth.number.replace(/[+-]\d+$/, '')
+  const lastDigit = baseNumber[1]
+  
+  switch(lastDigit) {
+    case '1': return 1 // Central incisors
+    case '2': return 2 // Lateral incisors  
+    case '3': return 3 // Canines
+    case '4': return 4 // First premolar/primary molar
+    case '5': return 5 // Second premolar/primary molar
+    case '6': return 6 // First permanent molar
+    case '7': return 7 // Second permanent molar
+    case '8': return 8 // Third permanent molar
+    default: return 999 // Unknown
+  }
+}
+
+// Sort teeth by their position property (1-8) and handle extra teeth
 const sortedTeeth = computed(() => {
   return [...props.teeth].sort((a, b) => {
-    // Extract base number and suffix for proper sorting
+    // Get positions with fallback for backward compatibility
+    const aPosition = getToothPosition(a)
+    const bPosition = getToothPosition(b)
+    
+    // First sort by anatomical position
+    if (aPosition !== bPosition) {
+      // For left side quadrants (Q1, Q4), sort descending (away from center: 8,7,6,5,4,3,2,1)
+      // For right side quadrants (Q2, Q3), sort ascending (away from center: 1,2,3,4,5,6,7,8)
+      return props.side === 'left' ? bPosition - aPosition : aPosition - bPosition
+    }
+
+    // If same position (extra teeth), handle +/- suffix sorting
     const getToothInfo = (toothNumber: string) => {
       const parts = toothNumber.split(/([+-])/)
-      const baseNumber = parseInt(parts[0])
+      const baseNumber = parts[0]
       const sign = parts[1] || ''
       const suffix = parts[2] || ''
-      return { baseNumber, sign, suffix, original: toothNumber }
+      return { baseNumber, sign, suffix }
     }
 
     const aInfo = getToothInfo(a.number)
     const bInfo = getToothInfo(b.number)
 
-    // First sort by base number
-    if (aInfo.baseNumber !== bInfo.baseNumber) {
-      // For left side quadrants (Q1, Q4), sort descending (away from center)
-      // For right side quadrants (Q2, Q3), sort ascending (away from center)
-      return props.side === 'left'
-        ? bInfo.baseNumber - aInfo.baseNumber
-        : aInfo.baseNumber - bInfo.baseNumber
-    }
-
-    // If base numbers are the same, handle extra teeth positioning
+    // Handle extra teeth positioning
     if (aInfo.sign !== bInfo.sign || aInfo.suffix !== bInfo.suffix) {
       // No suffix = main tooth (should be in middle position)
       if (!aInfo.sign && bInfo.sign) return 0 // Main tooth stays in place

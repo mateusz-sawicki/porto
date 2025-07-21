@@ -3,6 +3,7 @@ import { ref, computed } from 'vue'
 import type { ToothData, Procedure, ProcedureTargetMap } from '@/types/odontogram/odontogram'
 import type { ProcedureWithTarget } from '@/services/procedure/procedureApi'
 import { ExtraToothDirection, ProcedureIconSource } from '@/types/odontogram/odontogram'
+import { convertToothType, getAvailableConversions } from '@/utils/toothConversion'
 
 export function getInitialPermanentTeeth(): ToothData[] {
   return [
@@ -46,37 +47,53 @@ export function getInitialPermanentTeeth(): ToothData[] {
 }
 
 export function getInitialPediatricTeeth(): ToothData[] {
-  const numbers = [
-    // Quadrant 5 (Upper Right)
-    '55', '54', '53', '52', '51',
-    // Quadrant 6 (Upper Left)
-    '61', '62', '63', '64', '65',
-    // Quadrant 8 (Lower Right)
-    '85', '84', '83', '82', '81',
-    // Quadrant 7 (Lower Left)
-    '71', '72', '73', '74', '75',
-  ];
-  const teeth = numbers.map(n => ({ number: n, toothProcedures: [], schemaProcedures: [] })) as ToothData[];
+  const teeth: ToothData[] = []
 
-  // Add empty slots for 6,7,8 in each quadrant (gum only, no label, no tooth)
-  // Quadrant 5 (Upper Right): 56, 57, 58
-  teeth.push({ number: '56', toothProcedures: [], schemaProcedures: [], isEmptySlot: true });
-  teeth.push({ number: '57', toothProcedures: [], schemaProcedures: [], isEmptySlot: true });
-  teeth.push({ number: '58', toothProcedures: [], schemaProcedures: [], isEmptySlot: true });
-  // Quadrant 6 (Upper Left): 66, 67, 68
-  teeth.push({ number: '66', toothProcedures: [], schemaProcedures: [], isEmptySlot: true });
-  teeth.push({ number: '67', toothProcedures: [], schemaProcedures: [], isEmptySlot: true });
-  teeth.push({ number: '68', toothProcedures: [], schemaProcedures: [], isEmptySlot: true });
-  // Quadrant 8 (Lower Right): 86, 87, 88
-  teeth.push({ number: '86', toothProcedures: [], schemaProcedures: [], isEmptySlot: true });
-  teeth.push({ number: '87', toothProcedures: [], schemaProcedures: [], isEmptySlot: true });
-  teeth.push({ number: '88', toothProcedures: [], schemaProcedures: [], isEmptySlot: true });
-  // Quadrant 7 (Lower Left): 76, 77, 78
-  teeth.push({ number: '76', toothProcedures: [], schemaProcedures: [], isEmptySlot: true });
-  teeth.push({ number: '77', toothProcedures: [], schemaProcedures: [], isEmptySlot: true });
-  teeth.push({ number: '78', toothProcedures: [], schemaProcedures: [], isEmptySlot: true });
+  // Quadrant 5 (Upper Right) - ordered by position from center (1,2,3,4,5,6,7,8)
+  teeth.push({ number: '51', toothProcedures: [], schemaProcedures: [] }) // Position 1 (center)
+  teeth.push({ number: '52', toothProcedures: [], schemaProcedures: [] }) // Position 2
+  teeth.push({ number: '53', toothProcedures: [], schemaProcedures: [] }) // Position 3
+  teeth.push({ number: '54', toothProcedures: [], schemaProcedures: [] }) // Position 4
+  teeth.push({ number: '55', toothProcedures: [], schemaProcedures: [] }) // Position 5
+  // Empty slots for permanent molars that aren't present yet
+  teeth.push({ number: '16', toothProcedures: [], schemaProcedures: [], isEmptySlot: true }) // Position 6 (empty)
+  teeth.push({ number: '17', toothProcedures: [], schemaProcedures: [], isEmptySlot: true }) // Position 7 (empty)
+  teeth.push({ number: '18', toothProcedures: [], schemaProcedures: [], isEmptySlot: true }) // Position 8 (empty)
 
-  return teeth;
+  // Quadrant 6 (Upper Left) - ordered by position from center (1,2,3,4,5,6,7,8)
+  teeth.push({ number: '61', toothProcedures: [], schemaProcedures: [] }) // Position 1 (center)
+  teeth.push({ number: '62', toothProcedures: [], schemaProcedures: [] }) // Position 2
+  teeth.push({ number: '63', toothProcedures: [], schemaProcedures: [] }) // Position 3
+  teeth.push({ number: '64', toothProcedures: [], schemaProcedures: [] }) // Position 4
+  teeth.push({ number: '65', toothProcedures: [], schemaProcedures: [] }) // Position 5
+  // Empty slots for permanent molars that aren't present yet
+  teeth.push({ number: '26', toothProcedures: [], schemaProcedures: [], isEmptySlot: true }) // Position 6 (empty)
+  teeth.push({ number: '27', toothProcedures: [], schemaProcedures: [], isEmptySlot: true }) // Position 7 (empty)
+  teeth.push({ number: '28', toothProcedures: [], schemaProcedures: [], isEmptySlot: true }) // Position 8 (empty)
+
+  // Quadrant 8 (Lower Right) - ordered by position from center (1,2,3,4,5,6,7,8)
+  teeth.push({ number: '81', toothProcedures: [], schemaProcedures: [] }) // Position 1 (center)
+  teeth.push({ number: '82', toothProcedures: [], schemaProcedures: [] }) // Position 2
+  teeth.push({ number: '83', toothProcedures: [], schemaProcedures: [] }) // Position 3
+  teeth.push({ number: '84', toothProcedures: [], schemaProcedures: [] }) // Position 4
+  teeth.push({ number: '85', toothProcedures: [], schemaProcedures: [] }) // Position 5
+  // Empty slots for permanent molars that aren't present yet
+  teeth.push({ number: '46', toothProcedures: [], schemaProcedures: [], isEmptySlot: true }) // Position 6 (empty)
+  teeth.push({ number: '47', toothProcedures: [], schemaProcedures: [], isEmptySlot: true }) // Position 7 (empty)
+  teeth.push({ number: '48', toothProcedures: [], schemaProcedures: [], isEmptySlot: true }) // Position 8 (empty)
+
+  // Quadrant 7 (Lower Left) - ordered by position from center (1,2,3,4,5,6,7,8)
+  teeth.push({ number: '71', toothProcedures: [], schemaProcedures: [] }) // Position 1 (center)
+  teeth.push({ number: '72', toothProcedures: [], schemaProcedures: [] }) // Position 2
+  teeth.push({ number: '73', toothProcedures: [], schemaProcedures: [] }) // Position 3
+  teeth.push({ number: '74', toothProcedures: [], schemaProcedures: [] }) // Position 4
+  teeth.push({ number: '75', toothProcedures: [], schemaProcedures: [] }) // Position 5
+  // Empty slots for permanent molars that aren't present yet
+  teeth.push({ number: '36', toothProcedures: [], schemaProcedures: [], isEmptySlot: true }) // Position 6 (empty)
+  teeth.push({ number: '37', toothProcedures: [], schemaProcedures: [], isEmptySlot: true }) // Position 7 (empty)
+  teeth.push({ number: '38', toothProcedures: [], schemaProcedures: [], isEmptySlot: true }) // Position 8 (empty)
+
+  return teeth
 }
 
 export function useOdontogram(isPediatric = false) {
@@ -89,29 +106,29 @@ export function useOdontogram(isPediatric = false) {
 
   // Initial teeth data (permanent or pediatric)
   const teeth = ref<ToothData[]>(
-    isPediatric ? getInitialPediatricTeeth() : getInitialPermanentTeeth()
+    isPediatric ? getInitialPediatricTeeth() : getInitialPermanentTeeth(),
   )
 
   // Computed quadrant filters
   const q1teeth = computed(() =>
     isPediatric
-      ? teeth.value.filter((t) => t.number[0] === '5')
-      : teeth.value.filter((t) => t.number[0] === '1')
+      ? teeth.value.filter((t) => t.number[0] === '5' || t.number[0] === '1')
+      : teeth.value.filter((t) => t.number[0] === '1'),
   )
   const q2teeth = computed(() =>
     isPediatric
-      ? teeth.value.filter((t) => t.number[0] === '6')
-      : teeth.value.filter((t) => t.number[0] === '2')
+      ? teeth.value.filter((t) => t.number[0] === '6' || t.number[0] === '2')
+      : teeth.value.filter((t) => t.number[0] === '2'),
   )
   const q3teeth = computed(() =>
     isPediatric
-      ? teeth.value.filter((t) => t.number[0] === '7')
-      : teeth.value.filter((t) => t.number[0] === '3')
+      ? teeth.value.filter((t) => t.number[0] === '7' || t.number[0] === '3')
+      : teeth.value.filter((t) => t.number[0] === '3'),
   )
   const q4teeth = computed(() =>
     isPediatric
-      ? teeth.value.filter((t) => t.number[0] === '8')
-      : teeth.value.filter((t) => t.number[0] === '4')
+      ? teeth.value.filter((t) => t.number[0] === '8' || t.number[0] === '4')
+      : teeth.value.filter((t) => t.number[0] === '4'),
   )
 
   // Static procedure target mapping
@@ -397,7 +414,8 @@ export function useOdontogram(isPediatric = false) {
         const singleTarget = targets[0]
         if (
           !tooth.toothProcedures.some(
-            (a) => a.toothPart.toLowerCase() === singleTarget && a.procedure.name === procedure.name,
+            (a) =>
+              a.toothPart.toLowerCase() === singleTarget && a.procedure.name === procedure.name,
           )
         ) {
           tooth.toothProcedures.push({
@@ -473,9 +491,7 @@ export function useOdontogram(isPediatric = false) {
     })
 
     // Reset to original 32 permanent teeth (in case extra teeth were added)
-    teeth.value = isPediatric
-      ? getInitialPediatricTeeth()
-      : getInitialPermanentTeeth()
+    teeth.value = isPediatric ? getInitialPediatricTeeth() : getInitialPermanentTeeth()
 
     // Clear all selections and reset state
     selectedProcedure.value = null
@@ -487,6 +503,113 @@ export function useOdontogram(isPediatric = false) {
 
     console.log('All teeth data has been reset to initial state')
   }
+
+  // Convert selected teeth between permanent and primary
+  const convertSelectedTeethToPrimary = () => {
+    selectedToothNumbers.value.forEach((toothNumber) => {
+      const converted = convertToothType(toothNumber)
+      if (converted) {
+        const tooth = teeth.value.find((t) => t.number === toothNumber)
+        if (tooth) {
+          tooth.number = converted
+          // If it was an empty slot, make it a real tooth now
+          if (tooth.isEmptySlot) {
+            tooth.isEmptySlot = false
+          }
+        }
+      }
+    })
+    selectedToothNumbers.value = []
+  }
+
+  const convertSelectedTeethToPermanent = () => {
+    selectedToothNumbers.value.forEach((toothNumber) => {
+      const converted = convertToothType(toothNumber)
+      if (converted) {
+        const tooth = teeth.value.find((t) => t.number === toothNumber)
+        if (tooth) {
+          tooth.number = converted
+          // If it was an empty slot, make it a real tooth now
+          if (tooth.isEmptySlot) {
+            tooth.isEmptySlot = false
+          }
+        }
+      }
+    })
+    selectedToothNumbers.value = []
+  }
+
+  // Convert empty slots to real teeth
+  const addToothToEmptySlot = (toothNumber: string) => {
+    const tooth = teeth.value.find((t) => t.number === toothNumber)
+    if (tooth && tooth.isEmptySlot) {
+      tooth.isEmptySlot = false
+    }
+  }
+
+  // Add teeth to all selected empty slots
+  const addTeethToSelectedEmptySlots = () => {
+    selectedToothNumbers.value.forEach((toothNumber) => {
+      addToothToEmptySlot(toothNumber)
+    })
+    selectedToothNumbers.value = []
+  }
+
+  // Get available conversion options for selected teeth
+  const availableConversions = computed(() => {
+    return getAvailableConversions(selectedToothNumbers.value)
+  })
+
+  // Convert real teeth back to empty slots (only for positions 6, 7, 8)
+  const removeToothToEmptySlot = (toothNumber: string) => {
+    const tooth = teeth.value.find((t) => t.number === toothNumber)
+    // Only allow removal of teeth in positions 6, 7, 8 (permanent molars in pediatric mode)
+    const lastDigit = toothNumber[1]
+    const isRemovablePosition = ['6', '7', '8'].includes(lastDigit)
+    
+    if (tooth && !tooth.isEmptySlot && isRemovablePosition) {
+      // Clear any procedures before making it an empty slot
+      tooth.toothProcedures = []
+      tooth.schemaProcedures = []
+      tooth.isEmptySlot = true
+    }
+  }
+
+  // Remove all selected teeth (convert to empty slots) - only positions 6, 7, 8
+  const removeSelectedTeeth = () => {
+    selectedToothNumbers.value.forEach((toothNumber) => {
+      removeToothToEmptySlot(toothNumber)
+    })
+    selectedToothNumbers.value = []
+  }
+
+  // Check if any selected teeth are empty slots
+  const hasSelectedEmptySlots = computed(() => {
+    return selectedToothNumbers.value.some(toothNumber => {
+      const tooth = teeth.value.find(t => t.number === toothNumber)
+      return tooth?.isEmptySlot === true
+    })
+  })
+
+  // Check if any selected teeth are removable real teeth (positions 6, 7, 8 and not empty slots)
+  const hasSelectedRealTeeth = computed(() => {
+    return selectedToothNumbers.value.some(toothNumber => {
+      const tooth = teeth.value.find(t => t.number === toothNumber)
+      const lastDigit = toothNumber[1]
+      const isRemovablePosition = ['6', '7', '8'].includes(lastDigit)
+      return tooth && !tooth.isEmptySlot && isRemovablePosition
+    })
+  })
+
+  // Count how many removable real teeth are selected
+  const selectedRemovableTeethCount = computed(() => {
+    return selectedToothNumbers.value.filter(toothNumber => {
+      const tooth = teeth.value.find(t => t.number === toothNumber)
+      const lastDigit = toothNumber[1]
+      const isRemovablePosition = ['6', '7', '8'].includes(lastDigit)
+      return tooth && !tooth.isEmptySlot && isRemovablePosition
+    }).length
+  })
 
   return {
     selectedProcedure,
@@ -508,6 +631,16 @@ export function useOdontogram(isPediatric = false) {
     handleAddExtraTooth,
     handleProcedureSelect,
     resetAllTeeth,
+    convertSelectedTeethToPrimary,
+    convertSelectedTeethToPermanent,
+    availableConversions,
+    addToothToEmptySlot,
+    addTeethToSelectedEmptySlots,
+    hasSelectedEmptySlots,
+    removeToothToEmptySlot,
+    removeSelectedTeeth,
+    hasSelectedRealTeeth,
+    selectedRemovableTeethCount,
     setSelectedProcedure: (procedure: ProcedureWithTarget | null) =>
       (selectedProcedure.value = procedure),
     setSearch: (value: string) => (search.value = value),

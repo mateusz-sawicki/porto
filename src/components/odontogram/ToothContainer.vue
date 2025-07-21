@@ -1,12 +1,15 @@
 <!-- components/ToothContainer.vue - Schematic Moved to End with Margin -->
 <template>
-  <div v-if="tooth.isEmptySlot" class="tooth-wrapper">
+  <div v-if="tooth.isEmptySlot" class="tooth-wrapper" 
+       :class="{ selected: isSelected, 'empty-slot': true }"
+       @click="handleToothClick">
     <div class="tooth-group" :class="{ 'tooth-group--bottom': direction === ToothContainerDirection.Bottom }">
       <ToothLabel
-        :toothNumber="''"
+        :toothNumber="tooth.number"
         :isExtra="false"
         :direction="direction"
         :disabled="true"
+        :isEmpty="true"
         @add-extra-before="$emit('add-extra-tooth', { base: tooth.number, direction: ExtraToothDirection.Before })"
         @add-extra-after="$emit('add-extra-tooth', { base: tooth.number, direction: ExtraToothDirection.After })"
         @remove-tooth="$emit('remove-tooth', tooth.number)"
@@ -411,6 +414,15 @@ const hiddenIconCount = computed(() =>
   outline-offset: -1px;
   z-index: 2;
   background-color: var(--destructive) / 0.2;
+}
+
+/* Empty slot styling - looks like normal slot with subtle indication */
+.empty-slot {
+  opacity: 0.6;
+}
+
+.empty-slot:hover {
+  opacity: 0.8;
 }
 
 /* Extracted tooth styling - only affects wrapper interaction, not visuals */

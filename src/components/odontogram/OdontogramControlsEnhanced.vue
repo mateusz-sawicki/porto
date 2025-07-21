@@ -209,11 +209,88 @@
         </Button>
       </div>
     </div>
+
+    <!-- Add Teeth to Empty Slots -->
+    <div v-if="hasSelectedEmptySlots" class="w-full p-3 bg-green-50 rounded-md border-2 border-green-200">
+      <div class="flex items-center justify-between">
+        <div class="flex-1">
+          <p class="font-medium text-sm text-green-900 mb-1">Dodaj zęby</p>
+          <p class="text-xs text-green-700">
+            Wybrane puste miejsca: {{ selectedToothNumbers?.join(', ') || 'brak' }}
+          </p>
+        </div>
+        <div class="flex gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            @click="handleAddTeeth"
+            class="text-xs border-green-300 hover:bg-green-100 bg-green-50"
+          >
+            + Dodaj zęby
+          </Button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Remove Teeth (Convert to Empty Slots) -->
+    <div v-if="hasSelectedRealTeeth" class="w-full p-3 bg-red-50 rounded-md border-2 border-red-200">
+      <div class="flex items-center justify-between">
+        <div class="flex-1">
+          <p class="font-medium text-sm text-red-900 mb-1">Usuń zęby</p>
+          <p class="text-xs text-red-700">
+            Wybrane zęby: {{ selectedToothNumbers?.join(', ') || 'brak' }}
+          </p>
+        </div>
+        <div class="flex gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            @click="handleRemoveTeeth"
+            :disabled="!hasSelectedRealTeeth"
+            class="text-xs border-red-300 hover:bg-red-100 bg-red-50 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            − Usuń zęby {{ selectedRemovableTeethCount ? `(${selectedRemovableTeethCount})` : '' }}
+          </Button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tooth Conversion Controls -->
+    <div class="w-full p-3 bg-blue-50 rounded-md border-2 border-blue-200">
+      <div class="flex items-center justify-between">
+        <div class="flex-1">
+          <p class="font-medium text-sm text-blue-900 mb-1">Konwersja zębów</p>
+          <p class="text-xs text-blue-700">
+            Wybrane zęby: {{ selectedToothNumbers?.join(', ') || 'brak' }}
+          </p>
+        </div>
+        <div class="flex gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            @click="handleConvertToPrimary"
+            :disabled="!availableConversions?.toPrimary.length"
+            class="text-xs border-blue-300 hover:bg-blue-100 disabled:opacity-50"
+          >
+            → Młoczne {{ availableConversions?.toPrimary.length ? `(${availableConversions.toPrimary.length})` : '' }}
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            @click="handleConvertToPermanent"
+            :disabled="!availableConversions?.toPermanent.length"
+            class="text-xs border-blue-300 hover:bg-blue-100 disabled:opacity-50"
+          >
+            → Stałe {{ availableConversions?.toPermanent.length ? `(${availableConversions.toPermanent.length})` : '' }}
+          </Button>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, watch, onMounted, nextTick } from 'vue'
+import { ref, watch, onMounted, nextTick, inject } from 'vue'
 import { ChevronsUpDown, Search, AlertCircle, X } from 'lucide-vue-next'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -227,6 +304,7 @@ import Checkbox from '../ui/checkbox/Checkbox.vue'
 import ProcedureIcon from './ProcedureIcon.vue'
 import ProcedureItem from './ProcedureItem.vue'
 import { useProcedures } from '@/composables/procedure/useProcedures'
+import type { useOdontogram } from '@/composables/odontogram/useOdontogram'
 
 interface Props {
   selectedProcedure: ProcedureWithTarget | null
@@ -242,6 +320,20 @@ interface Emits {
 
 const props = defineProps<Props>()
 const emit = defineEmits<Emits>()
+
+// Inject odontogram composable for tooth conversions
+const odontogram = inject<ReturnType<typeof useOdontogram>>('odontogram')
+const { 
+  selectedToothNumbers, 
+  availableConversions, 
+  convertSelectedTeethToPrimary, 
+  convertSelectedTeethToPermanent,
+  addTeethToSelectedEmptySlots,
+  hasSelectedEmptySlots,
+  removeSelectedTeeth,
+  hasSelectedRealTeeth,
+  selectedRemovableTeethCount
+} = odontogram || {}
 
 // State
 const open = ref(false)
@@ -300,6 +392,33 @@ const handleClear = () => {
   searchQuery.value = ''
   emit('search-change', '')
   open.value = false
+}
+
+// Tooth conversion handlers
+const handleConvertToPrimary = () => {
+  if (convertSelectedTeethToPrimary) {
+    convertSelectedTeethToPrimary()
+  }
+}
+
+const handleConvertToPermanent = () => {
+  if (convertSelectedTeethToPermanent) {
+    convertSelectedTeethToPermanent()
+  }
+}
+
+// Add teeth to empty slots handler
+const handleAddTeeth = () => {
+  if (addTeethToSelectedEmptySlots) {
+    addTeethToSelectedEmptySlots()
+  }
+}
+
+// Remove teeth handler
+const handleRemoveTeeth = () => {
+  if (removeSelectedTeeth) {
+    removeSelectedTeeth()
+  }
 }
 
 // Calculate trigger width for popover positioning

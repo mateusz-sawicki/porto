@@ -82,7 +82,8 @@ export const hasToothSvg = (toothNumber: string): boolean => {
 export const getToothSvgComponent = (toothNumber: string, isPediatric = false) => {
   const baseNumber = toothNumber.replace(/[+-]\d+$/, '')
   if (isPediatric) {
-    return PediatricToothSvgMap[baseNumber] || null
+    // In pediatric mode, first check for pediatric teeth, then fall back to permanent teeth
+    return PediatricToothSvgMap[baseNumber] || ToothSvgMap[baseNumber] || null
   }
   return ToothSvgMap[baseNumber] || null
 }

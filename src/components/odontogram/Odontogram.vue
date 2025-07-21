@@ -135,6 +135,16 @@ const {
   handleProcedureSelect,
   setSelectedProcedure,
   setSearch,
+  addToothToEmptySlot,
+  addTeethToSelectedEmptySlots,
+  hasSelectedEmptySlots,
+  removeToothToEmptySlot,
+  removeSelectedTeeth,
+  hasSelectedRealTeeth,
+  selectedRemovableTeethCount,
+  availableConversions,
+  convertSelectedTeethToPrimary,
+  convertSelectedTeethToPermanent,
 } = odontogram
 
 // Constants
