@@ -9,7 +9,6 @@ const USE_MOCK_DATA = import.meta.env.VITE_USE_MOCK_DATA === 'true' || import.me
 // Enhanced procedure type with target information
 export interface ProcedureWithTarget extends Procedure {
   targets: string | string[]
-  category?: string
   description?: string
   isActive?: boolean
 }
@@ -46,19 +45,6 @@ class MockProcedureApi {
     }
   }
 
-  async getProceduresByCategory(category: string): Promise<ApiResponse<ProcedureWithTarget[]>> {
-    await this.delay()
-
-    const filteredProcedures = this.mockProcedures.filter(
-      (proc) => proc.category === category && proc.isActive !== false,
-    )
-
-    return {
-      data: filteredProcedures,
-      success: true,
-      message: `Procedures in category '${category}' retrieved successfully`,
-    }
-  }
 
   async searchProcedures(query: string): Promise<ApiResponse<ProcedureWithTarget[]>> {
     await this.delay()
@@ -67,8 +53,7 @@ class MockProcedureApi {
     const filteredProcedures = this.mockProcedures.filter(
       (proc) =>
         (proc.name.toLowerCase().includes(searchLower) ||
-          proc.description?.toLowerCase().includes(searchLower) ||
-          proc.category?.toLowerCase().includes(searchLower)) &&
+          proc.description?.toLowerCase().includes(searchLower)) &&
         proc.isActive !== false,
     )
 
@@ -148,11 +133,6 @@ class RealProcedureApi {
     return this.request<ProcedureWithTarget[]>('/procedures')
   }
 
-  async getProceduresByCategory(category: string): Promise<ApiResponse<ProcedureWithTarget[]>> {
-    return this.request<ProcedureWithTarget[]>(
-      `/procedures?category=${encodeURIComponent(category)}`,
-    )
-  }
 
   async searchProcedures(query: string): Promise<ApiResponse<ProcedureWithTarget[]>> {
     return this.request<ProcedureWithTarget[]>(`/procedures/search?q=${encodeURIComponent(query)}`)

@@ -80,27 +80,6 @@
               </Button>
             </div>
 
-            <!-- Category Filter -->
-            <div class="flex gap-1 flex-wrap">
-              <Button
-                variant="outline"
-                size="sm"
-                :class="{ 'bg-primary text-primary-foreground': !selectedCategory }"
-                @click="setSelectedCategory(null)"
-              >
-                Wszystkie
-              </Button>
-              <Button
-                v-for="category in categories"
-                :key="category"
-                variant="outline"
-                size="sm"
-                :class="{ 'bg-primary text-primary-foreground': selectedCategory === category }"
-                @click="setSelectedCategory(category)"
-              >
-                {{ category }}
-              </Button>
-            </div>
           </div>
 
           <!-- Procedures List -->
@@ -125,47 +104,22 @@
 
               <!-- Procedures -->
               <div v-else class="space-y-1">
-                <!-- Grouped by Category -->
-                <div v-if="!searchQuery && !selectedCategory" class="space-y-3">
-                  <div v-for="category in categories" :key="category" class="space-y-1">
-                    <h3 class="text-xs font-medium text-muted-foreground px-2">{{ category }}</h3>
-                    <div class="space-y-1">
-                      <ProcedureItem
-                        v-for="procedure in proceduresByCategory[category]"
-                        :key="procedure.name"
-                        :procedure="procedure"
-                        :is-selected="selectedProcedure?.name === procedure.name"
-                        :available-targets="getAvailableTargets(procedure)"
-                        @select="handleProcedureSelect"
-                      />
-                    </div>
-                  </div>
-                </div>
+                <ProcedureItem
+                  v-for="procedure in filteredProcedures"
+                  :key="procedure.name"
+                  :procedure="procedure"
+                  :is-selected="selectedProcedure?.name === procedure.name"
+                  :available-targets="getAvailableTargets(procedure)"
+                  @select="handleProcedureSelect"
+                />
 
-                <!-- Filtered Results -->
-                <div v-else class="space-y-1">
-                  <ProcedureItem
-                    v-for="procedure in filteredProcedures"
-                    :key="procedure.name"
-                    :procedure="procedure"
-                    :is-selected="selectedProcedure?.name === procedure.name"
-                    :available-targets="getAvailableTargets(procedure)"
-                    @select="handleProcedureSelect"
-                  />
-
-                  <!-- No Results -->
-                  <div v-if="filteredProcedures.length === 0" class="text-center py-8">
-                    <Search class="h-8 w-8 text-muted-foreground mx-auto mb-2" />
-                    <p class="text-sm text-muted-foreground">Nie znaleziono procedur</p>
-                    <div class="flex gap-2 justify-center mt-2">
-                      <Button variant="outline" size="sm" @click="clearSearch">
-                        Wyczyść wyszukiwanie
-                      </Button>
-                      <Button variant="outline" size="sm" @click="clearFilters">
-                        Wyczyść filtry
-                      </Button>
-                    </div>
-                  </div>
+                <!-- No Results -->
+                <div v-if="filteredProcedures.length === 0" class="text-center py-8">
+                  <Search class="h-8 w-8 text-muted-foreground mx-auto mb-2" />
+                  <p class="text-sm text-muted-foreground">Nie znaleziono procedur</p>
+                  <Button variant="outline" size="sm" @click="clearSearch">
+                    Wyczyść wyszukiwanie
+                  </Button>
                 </div>
               </div>
             </div>
@@ -251,15 +205,10 @@ const {
   isLoading,
   error,
   searchQuery,
-  selectedCategory,
-  proceduresByCategory,
-  categories,
   filteredProcedures,
   loadProcedures,
   searchProcedures,
   setSearchQuery,
-  setSelectedCategory,
-  clearFilters,
   getAvailableTargets,
 } = useProcedures()
 
