@@ -1,7 +1,5 @@
 <!-- Current Schematic.vue - Already Set Up! -->
 <template>
-  <Popover :open="showTooltip">
-    <PopoverTrigger asChild>
       <div class="w-full flex justify-center items-center relative" :class="marginFromCenter">
         <!-- SVG SCHEMATIC RENDERING -->
         <component
@@ -44,16 +42,10 @@
           {{ getToothType(number)[0].toUpperCase() }}
         </div>
       </div>
-    </PopoverTrigger>
-    <PopoverContent v-if="assignedProcedures?.length" class="w-auto">
-      {{ assignedProcedures.map((p) => p.name).join(', ') }}
-    </PopoverContent>
-  </Popover>
 </template>
 
 <script setup lang="ts">
 import { ref, computed, onMounted, watch, nextTick } from 'vue'
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { ToothContainerDirection } from '@/types/odontogram/odontogram'
 import type { SchemaProcedureAssignment } from '@/types/odontogram/odontogram'
 import { useInteractiveSvg } from '@/composables/odontogram/useInteractiveSvg'

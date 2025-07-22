@@ -15,27 +15,6 @@
         />
       </div>
 
-      <!-- Category Filter -->
-      <div class="flex gap-2 flex-wrap">
-        <Button
-          variant="outline"
-          size="sm"
-          :class="{ 'bg-primary text-primary-foreground': !selectedCategory }"
-          @click="setSelectedCategory(null)"
-        >
-          Wszystkie
-        </Button>
-        <Button
-          v-for="category in categories"
-          :key="category"
-          variant="outline"
-          size="sm"
-          :class="{ 'bg-primary text-primary-foreground': selectedCategory === category }"
-          @click="setSelectedCategory(category)"
-        >
-          {{ category }}
-        </Button>
-      </div>
     </div>
 
     <!-- Loading State -->
@@ -57,25 +36,8 @@
 
     <!-- Procedures List -->
     <div v-else class="space-y-2">
-      <!-- Grouped by Category -->
-      <div v-if="!searchQuery && !selectedCategory" class="space-y-4">
-        <div v-for="category in categories" :key="category" class="space-y-2">
-          <h3 class="text-sm font-medium text-muted-foreground px-2">{{ category }}</h3>
-          <div class="grid grid-cols-1 gap-1">
-            <ProcedureItem
-              v-for="procedure in proceduresByCategory[category]"
-              :key="procedure.name"
-              :procedure="procedure"
-              :is-selected="selectedProcedure?.name === procedure.name"
-              :available-targets="getAvailableTargets(procedure)"
-              @select="handleProcedureSelect"
-            />
-          </div>
-        </div>
-      </div>
-
-      <!-- Filtered Results -->
-      <div v-else class="space-y-1">
+      <!-- Procedure Results -->
+      <div class="space-y-1">
         <ProcedureItem
           v-for="procedure in filteredProcedures"
           :key="procedure.name"
@@ -164,14 +126,10 @@ const {
   isLoading,
   error,
   searchQuery,
-  selectedCategory,
-  proceduresByCategory,
-  categories,
   filteredProcedures,
   loadProcedures,
   searchProcedures,
   setSearchQuery,
-  setSelectedCategory,
   clearFilters,
   getAvailableTargets,
 } = useProcedures()
@@ -225,7 +183,6 @@ defineExpose({
   loadProcedures,
   clearFilters,
   setSearchQuery,
-  setSelectedCategory,
 })
 </script>
 

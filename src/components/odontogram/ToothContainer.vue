@@ -379,8 +379,32 @@
         </ContextMenuContent>
       </ContextMenu>
     </PopoverTrigger>
-    <PopoverContent v-if="assignedToothLevelProcedures.length > 0" class="w-auto">
-      {{ assignedToothLevelProcedures.map((p) => p.procedure.name).join(', ') }}
+    <PopoverContent v-if="groupedProceduresForTooltip.length > 0" class="w-auto max-w-xs">
+      <div class="space-y-2">
+        <div class="font-semibold text-sm mb-2">Tooth {{ tooth.number }}</div>
+        <div class="space-y-1">
+          <div v-for="group in groupedProceduresForTooltip" :key="group.name" class="text-sm">
+            <div class="flex items-center gap-2">
+              <!-- Visual indicator -->
+              <div
+                v-if="group.visual.visualType === 'Color' && group.visual.value"
+                class="w-3 h-3 rounded-sm flex-shrink-0"
+                :style="{ backgroundColor: group.visual.value }"
+              />
+              <span class="font-medium">{{ group.name }}</span>
+            </div>
+            <div class="flex flex-wrap gap-1 mt-1 ml-5">
+              <span
+                v-for="(location, index) in group.locations"
+                :key="index"
+                class="inline-flex px-1.5 py-0.5 bg-secondary text-secondary-foreground rounded text-xs"
+              >
+                {{ location }}
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
     </PopoverContent>
   </Popover>
 </template>
@@ -423,6 +447,17 @@ interface Emits {
   (e: 'segment-click', segmentId: string): void
   (e: 'add-extra-tooth', event: { base: string; direction: ExtraToothDirection }): void
   (e: 'remove-tooth', number: string): void
+}
+
+interface GroupedProcedure {
+  name: string
+  description?: string
+  visual: {
+    visualType: 'Color' | 'Pattern' | 'Icon' | 'GumShape' | 'ToothShape'
+    value: string
+  }
+  locations: string[]
+  originalProcedures: any[]
 }
 
 const props = defineProps<Props>()
@@ -496,8 +531,68 @@ const schematicObservation = computed(() =>
   props.tooth.schemaProcedures.find((a) => a.procedure.name === 'Obserwacja'),
 )
 
+// Create grouped procedures for tooltip (similar to ToothProcedureSummary)
+const groupedProceduresForTooltip = computed(() => {
+  const procedureGroups = new Map<string, GroupedProcedure>()
+  const allProcedures: Array<{
+    name: string
+    description: string
+    visual: { visualType: string, value: string }
+  }> = []
+  
+  // Add tooth procedures (Tooth, Crown, Root)
+  props.tooth.toothProcedures.forEach((assignment) => {
+    allProcedures.push({
+      name: assignment.procedure.name,
+      description: `${assignment.toothPart}${assignment.position ? ` (${assignment.position})` : ''}`,
+      visual: {
+        visualType: assignment.procedure.visual.visualType,
+        value: assignment.procedure.visual.value!,
+      },
+    })
+  })
+
+  // Add schema procedures (Mesial, Distal, Buccal, Lingual)
+  props.tooth.schemaProcedures.forEach((assignment) => {
+    allProcedures.push({
+      name: assignment.procedure.name,
+      description: `${assignment.surface} surface`,
+      visual: {
+        visualType: assignment.procedure.visual.visualType,
+        value: assignment.procedure.visual.value!,
+      },
+    })
+  })
+
+  // Group procedures by name
+  allProcedures.forEach((procedure) => {
+    const key = procedure.name
+
+    if (procedureGroups.has(key)) {
+      // Add location to existing group
+      const existing = procedureGroups.get(key)!
+      existing.locations.push(procedure.description || '')
+      existing.originalProcedures.push(procedure)
+    } else {
+      // Create new group
+      procedureGroups.set(key, {
+        name: procedure.name,
+        description: procedure.description,
+        visual: procedure.visual as {
+          visualType: 'Color' | 'Pattern' | 'Icon' | 'GumShape' | 'ToothShape'
+          value: string
+        },
+        locations: [procedure.description || ''],
+        originalProcedures: [procedure],
+      })
+    }
+  })
+
+  return Array.from(procedureGroups.values())
+})
+
 const showTooltip = computed(
-  () => hoveredTooth.value === props.tooth.number && assignedToothLevelProcedures.value.length > 0,
+  () => hoveredTooth.value === props.tooth.number && groupedProceduresForTooltip.value.length > 0,
 )
 
 const handleToothClick = () => {

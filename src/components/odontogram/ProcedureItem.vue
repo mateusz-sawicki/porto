@@ -28,11 +28,6 @@
         <div class="flex items-center justify-between">
           <h4 class="font-medium text-sm truncate">{{ procedure.name }}</h4>
           <div class="flex items-center gap-1">
-            <!-- Category Badge -->
-            <Badge v-if="procedure.category" variant="outline" class="text-xs">
-              {{ procedure.category }}
-            </Badge>
-
             <!-- Selection Indicator -->
             <Check v-if="isSelected" class="h-4 w-4 text-primary" />
           </div>

@@ -1,7 +1,5 @@
 <!-- components/Tooth.vue -->
 <template>
-  <Popover :open="showTooltip">
-    <PopoverTrigger asChild>
       <div
         ref="containerRef"
         class="flex h-[125px] scale-[1.2] max-w-[75px] relative"
@@ -59,17 +57,10 @@
           </g>
         </svg>
       </div>
-    </PopoverTrigger>
-
-    <PopoverContent v-if="assignedProcedures?.length" class="w-auto">
-      {{ assignedProcedures.map((p) => p.name).join(', ') }}
-    </PopoverContent>
-  </Popover>
 </template>
 
 <script setup lang="ts">
 import { ref, computed, onMounted, watch, nextTick } from 'vue'
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import * as LucideIcons from 'lucide-vue-next'
 import DynamicLucideIcon from './DynamicLucideIcon.vue'
 import { ToothContainerDirection } from '@/types/odontogram/odontogram'

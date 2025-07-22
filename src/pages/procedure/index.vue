@@ -74,9 +74,6 @@
                   class="w-4 h-4"
                 />
                 <span class="text-sm">{{ procedure.name }}</span>
-                <Badge variant="outline" class="text-xs ml-auto">
-                  {{ procedure.category }}
-                </Badge>
               </div>
             </div>
           </div>
@@ -105,7 +102,6 @@
                 />
                 <div>
                   <h3 class="font-semibold">{{ selectedProcedure.name }}</h3>
-                  <p class="text-sm text-muted-foreground">{{ selectedProcedure.category }}</p>
                 </div>
               </div>
 
@@ -169,10 +165,6 @@
               <div class="text-sm text-muted-foreground">Active Procedures</div>
             </div>
             <div class="text-center">
-              <div class="text-2xl font-bold">{{ categories.length }}</div>
-              <div class="text-sm text-muted-foreground">Categories</div>
-            </div>
-            <div class="text-center">
               <div class="text-2xl font-bold">{{ proceduresForTarget.length }}</div>
               <div class="text-sm text-muted-foreground">
                 {{ selectedTarget ? `For ${selectedTarget}` : 'All Targets' }}
@@ -212,7 +204,7 @@ const selectedProcedure = ref<ProcedureWithTarget | null>(null)
 const selectedTarget = ref<string>('')
 
 // Use procedures composable
-const { procedures, categories, getProceduresForTarget, getAvailableTargets } = useProcedures()
+const { procedures, getProceduresForTarget, getAvailableTargets } = useProcedures()
 
 // Computed
 const totalProcedures = computed(() => procedures.value.length)
