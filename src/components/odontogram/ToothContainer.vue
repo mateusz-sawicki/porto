@@ -276,7 +276,7 @@
               :disabled="!canAddSelectedTeeth"
             >
               <Plus class="mr-2 h-4 w-4" />
-              Add Selected Teeth ({{ selectedEmptyCount }})
+              Add Selected Teeth ({{ formatToothNumbers(selectedEmptyNumbers) }})
             </ContextMenuItem>
             <ContextMenuItem
               v-if="hasSelectedRealTeeth"
@@ -284,7 +284,7 @@
               :disabled="!canRemoveSelectedTeeth"
             >
               <Minus class="mr-2 h-4 w-4" />
-              Remove Selected Teeth ({{ selectedRealCount }})
+              Remove Selected Teeth ({{ formatToothNumbers(selectedRealNumbers) }})
             </ContextMenuItem>
           </ContextMenuGroup>
 
@@ -297,7 +297,7 @@
               :disabled="!canConvertSelectedToPrimary"
             >
               <Baby class="mr-2 h-4 w-4" />
-              Convert to Primary ({{ multiSelectionAvailableConversions.toPrimary.length }})
+              Convert to Primary ({{ formatToothNumbers(selectedToPrimaryNumbers) }})
             </ContextMenuItem>
             <ContextMenuItem
               v-if="multiSelectionAvailableConversions?.toPermanent.length"
@@ -305,7 +305,7 @@
               :disabled="!canConvertSelectedToPermanent"
             >
               <User class="mr-2 h-4 w-4" />
-              Convert to Permanent ({{ multiSelectionAvailableConversions.toPermanent.length }})
+              Convert to Permanent ({{ formatToothNumbers(selectedToPermanentNumbers) }})
             </ContextMenuItem>
             <ContextMenuSeparator />
             <!-- Root Only Action for Multi-Selection -->
@@ -314,7 +314,7 @@
               :disabled="!canApplyRootOnlyToSelected"
             >
               <TreePine class="mr-2 h-4 w-4" />
-              Apply Root Only ({{ selectedRealCount }})
+              Apply Root Only ({{ formatToothNumbers(selectedRealNumbers) }})
             </ContextMenuItem>
           </ContextMenuGroup>
 
@@ -613,10 +613,52 @@ const selectedRealCount = computed(() => {
   )
 })
 
+// Get actual tooth numbers for display
+const selectedEmptyNumbers = computed(() => {
+  return (
+    odontogram?.selectedToothNumbers.value.filter((toothNumber) => {
+      const tooth = odontogram?.teeth.value.find((t) => t.number === toothNumber)
+      return tooth?.isEmptySlot === true
+    }) || []
+  )
+})
+
+const selectedRealNumbers = computed(() => {
+  const firstDigit = (num: string) => num[0]
+  const lastDigit = (num: string) => num[1]
+  
+  return (
+    odontogram?.selectedToothNumbers.value.filter((toothNumber) => {
+      const tooth = odontogram?.teeth.value.find((t) => t.number === toothNumber)
+      if (!tooth || tooth.isEmptySlot) return false
+      
+      // Same logic as removeToothToEmptySlot - only removable teeth
+      const isBabyTooth = ['5', '6', '7', '8'].includes(firstDigit(toothNumber)) && ['1', '2', '3', '4', '5'].includes(lastDigit(toothNumber))
+      const isPermanentTooth = ['1', '2', '3', '4'].includes(firstDigit(toothNumber)) && ['1', '2', '3', '4', '5', '6', '7', '8'].includes(lastDigit(toothNumber))
+      return isBabyTooth || isPermanentTooth
+    }) || []
+  )
+})
+
 const multiSelectionAvailableConversions = computed(() => {
   if (!odontogram?.selectedToothNumbers.value.length) return null
   return odontogram.availableConversions.value
 })
+
+// Get conversion tooth numbers for display
+const selectedToPrimaryNumbers = computed(() => {
+  return multiSelectionAvailableConversions.value?.toPrimary || []
+})
+
+const selectedToPermanentNumbers = computed(() => {
+  return multiSelectionAvailableConversions.value?.toPermanent || []
+})
+
+// Helper function to format tooth numbers for display - show ALL teeth
+const formatToothNumbers = (numbers: string[]): string => {
+  if (numbers.length === 0) return ''
+  return numbers.join(', ')
+}
 
 const canAddSelectedTeeth = computed(() => {
   return hasSelectedEmptySlots.value && odontogram?.addTeethToSelectedEmptySlots
