@@ -64,8 +64,8 @@ export function usePatients() {
     const { field, direction } = sortOptions.value
 
     result.sort((a, b) => {
-      let aValue: any = a[field]
-      let bValue: any = b[field]
+      const aValue: any = a[field]
+      const bValue: any = b[field]
 
       // Handle Date objects
       if (aValue instanceof Date && bValue instanceof Date) {

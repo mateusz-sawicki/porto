@@ -1,240 +1,384 @@
 <!-- components/ToothContainer.vue - Schematic Moved to End with Margin -->
 <template>
-  <div v-if="tooth.isEmptySlot" class="tooth-wrapper" 
-       :class="{ selected: isSelected, 'empty-slot': true }"
-       @click="handleToothClick">
-    <div class="tooth-group" :class="{ 'tooth-group--bottom': direction === ToothContainerDirection.Bottom }">
-      <ToothLabel
-        :toothNumber="tooth.number"
-        :isExtra="false"
-        :direction="direction"
-        :disabled="true"
-        :isEmpty="true"
-        @add-extra-before="$emit('add-extra-tooth', { base: tooth.number, direction: ExtraToothDirection.Before })"
-        @add-extra-after="$emit('add-extra-tooth', { base: tooth.number, direction: ExtraToothDirection.After })"
-        @remove-tooth="$emit('remove-tooth', tooth.number)"
-      />
-      <div class="tooth-components-wrapper">
-        <GumOverlay :direction="direction" />
-      </div>
-    </div>
-  </div>
-  <Popover v-else :open="showTooltip">
+  <Popover :open="showTooltip">
     <PopoverTrigger asChild>
-      <div
-        class="tooth-wrapper"
-        :class="{
-          selected: isSelected,
-        }"
-        @click="handleToothClick"
-        @mouseenter="hoveredTooth = tooth.number"
-        @mouseleave="hoveredTooth = null"
-      >
-        <!-- Main Group Container (equivalent to Mantine's Group with h={280}) -->
-        <div
-          class="tooth-group"
-          :class="{
-            'tooth-group--bottom': direction === ToothContainerDirection.Bottom,
-          }"
-        >
-          <template v-if="direction === ToothContainerDirection.Top">
-            <ToothLabel
-              :toothNumber="tooth.number"
-              :isExtra="isExtra"
-              :direction="direction"
-              @add-extra-before="
-                $emit('add-extra-tooth', {
-                  base: tooth.number,
-                  direction: ExtraToothDirection.Before,
-                })
-              "
-              @add-extra-after="
-                $emit('add-extra-tooth', {
-                  base: tooth.number,
-                  direction: ExtraToothDirection.After,
-                })
-              "
-              @remove-tooth="$emit('remove-tooth', tooth.number)"
-            />
-
-            <!-- Single wrapper for tooth components (Schematic moved out) -->
-            <div class="tooth-components-wrapper" :class="{ 'extraction-blocked': !!extraction }">
-              <GumOverlay :direction="direction" :hasCutout="hasExposedToothProcedure" />
-              <template v-if="!hideTooth">
-                <template v-if="rootOnly">
-                  <!-- 🎯 Clipping container specifically for tooth -->
-                  <div class="tooth-clip-container">
-                    <div
-                      class="tooth-only-wrapper"
-                      :class="{ 'impacted-tooth--top': isImpactedTooth }"
-                    >
-                      <Tooth
-                        :number="tooth.number"
-                        :toothProcedures="tooth.toothProcedures"
-                        :selectedSegments="extraction ? [] : selectedSegments"
-                        :direction="direction"
-                        only-root
-                        :isPediatric="props.isPediatric"
-                        @segment-click="handleSegmentClick"
-                      />
-                    </div>
-                  </div>
-                </template>
-                <template v-else>
-                  <!-- 🎯 Clipping container specifically for tooth -->
-                  <div class="tooth-clip-container">
-                    <div
-                      class="tooth-only-wrapper"
-                      :class="{ 'impacted-tooth--top': isImpactedTooth }"
-                    >
-                      <Tooth
-                        :number="tooth.number"
-                        :toothProcedures="tooth.toothProcedures"
-                        :selectedSegments="extraction ? [] : selectedSegments"
-                        :direction="direction"
-                        :isPediatric="props.isPediatric"
-                        @segment-click="handleSegmentClick"
-                      />
-                    </div>
-                  </div>
-                </template>
-              </template>
-              <!-- Single hover blocker for all components -->
-              <div v-if="extraction" class="hover-blocker"></div>
-            </div>
-
-            <!-- 🎯 Schematic moved to end with margin -->
-            <template v-if="!hideTooth && !rootOnly">
-              <div class="schematic-at-end">
-                <Schematic
-                  :number="tooth.number"
-                  :schemaProcedures="tooth.schemaProcedures"
-                  :selectedSegments="extraction ? [] : selectedSegments"
-                  :direction="direction"
-                  @segment-click="handleSegmentClick"
-                />
-              </div>
-            </template>
-          </template>
-          <template v-else>
-            <!-- 🎯 Schematic moved to end with margin for bottom direction -->
-            <template v-if="!hideTooth && !rootOnly">
-              <div class="schematic-at-end schematic-at-end--bottom">
-                <Schematic
-                  :number="tooth.number"
-                  :schemaProcedures="tooth.schemaProcedures"
-                  :selectedSegments="extraction ? [] : selectedSegments"
-                  :direction="direction"
-                  @segment-click="handleSegmentClick"
-                />
-              </div>
-            </template>
-
-            <!-- Single wrapper for tooth components (Schematic moved out) -->
-            <div class="tooth-components-wrapper" :class="{ 'extraction-blocked': !!extraction }">
-              <GumOverlay :direction="direction" :hasCutout="hasExposedToothProcedure" />
-              <template v-if="!hideTooth">
-                <template v-if="rootOnly">
-                  <!-- 🎯 Clipping container specifically for tooth -->
-                  <div class="tooth-clip-container">
-                    <div
-                      class="tooth-only-wrapper"
-                      :class="{ 'impacted-tooth--bottom': isImpactedTooth }"
-                    >
-                      <Tooth
-                        :number="tooth.number"
-                        :toothProcedures="tooth.toothProcedures"
-                        :selectedSegments="extraction ? [] : selectedSegments"
-                        :direction="direction"
-                        only-root
-                        :isPediatric="props.isPediatric"
-                        @segment-click="handleSegmentClick"
-                      />
-                    </div>
-                  </div>
-                </template>
-                <template v-else>
-                  <!-- 🎯 Clipping container specifically for tooth -->
-                  <div class="tooth-clip-container">
-                    <div
-                      class="tooth-only-wrapper"
-                      :class="{ 'impacted-tooth--bottom': isImpactedTooth }"
-                    >
-                      <Tooth
-                        :number="tooth.number"
-                        :toothProcedures="tooth.toothProcedures"
-                        :selectedSegments="extraction ? [] : selectedSegments"
-                        :direction="direction"
-                        :isPediatric="props.isPediatric"
-                        @segment-click="handleSegmentClick"
-                      />
-                    </div>
-                  </div>
-                </template>
-              </template>
-              <!-- Single hover blocker for all components -->
-              <div v-if="extraction" class="hover-blocker"></div>
-            </div>
-
-            <ToothLabel
-              :toothNumber="tooth.number"
-              :isExtra="isExtra"
-              :isSelected="isSelected"
-              @add-extra-before="
-                $emit('add-extra-tooth', {
-                  base: tooth.number,
-                  direction: ExtraToothDirection.Before,
-                })
-              "
-              @add-extra-after="
-                $emit('add-extra-tooth', {
-                  base: tooth.number,
-                  direction: ExtraToothDirection.After,
-                })
-              "
-              @remove-tooth="$emit('remove-tooth', tooth.number)"
-              :direction="direction"
-            />
-          </template>
-        </div>
-        <div
-          v-if="extraction || isToothMissing"
-          class="full-hover-blocker"
-          :class="direction === ToothContainerDirection.Top ? 'blocker-top' : 'blocker-bottom'"
-        ></div>
-        <ExtractionOverlay v-if="extraction" :direction="direction" />
-
-        <!-- Observation Overlays for different parts -->
-        <IconOverlay
-          v-if="toothLevelIconProcedures.length > 0"
-          :direction="direction"
-          position="tooth"
-        >
+      <ContextMenu>
+        <ContextMenuTrigger asChild>
           <div
-            class="flex flex-wrap items-center justify-center gap-1 max-w-full"
-            v-for="(assignment, idx) in visibleToothLevelIconProcedures"
-            :key="assignment.procedure.name + idx"
+            class="tooth-wrapper"
+            :class="{
+              selected: isSelected,
+              'empty-slot': tooth.isEmptySlot,
+            }"
+            @click="handleToothClick"
+            @mouseenter="hoveredTooth = tooth.number"
+            @mouseleave="hoveredTooth = null"
           >
+            <!-- Empty Slot Content -->
             <div
-              v-if="assignment.procedure.visual.visualType === 'Color'"
-              class="w-4 h-4 rounded-sm flex-shrink-0"
-              :style="{ backgroundColor: assignment.procedure.visual.value }"
-            />
-            <ProcedureIcon
-              v-else-if="assignment.procedure.visual.visualType === 'Icon'"
-              :icon-name="assignment.procedure.visual.value!"
-              :icon-source="assignment.procedure.visual.iconSource"
-            />
-            <span
-              v-if="showPlusN"
-              class="w-5 h-5 flex items-center justify-center text-xs font-bold text-blue-600 opacity-80"
-              >+{{ hiddenIconCount }}</span
+              v-if="tooth.isEmptySlot"
+              class="tooth-group"
+              :class="{ 'tooth-group--bottom': direction === ToothContainerDirection.Bottom }"
             >
-          </div>
-        </IconOverlay>
-      </div>
-    </PopoverTrigger>
+              <ToothLabel
+                :toothNumber="tooth.number"
+                :isExtra="false"
+                :direction="direction"
+                :disabled="true"
+                :isEmpty="true"
+                @add-extra-before="
+                  $emit('add-extra-tooth', {
+                    base: tooth.number,
+                    direction: ExtraToothDirection.Before,
+                  })
+                "
+                @add-extra-after="
+                  $emit('add-extra-tooth', {
+                    base: tooth.number,
+                    direction: ExtraToothDirection.After,
+                  })
+                "
+                @remove-tooth="$emit('remove-tooth', tooth.number)"
+              />
+              <div class="tooth-components-wrapper">
+                <GumOverlay :direction="direction" />
+              </div>
+            </div>
 
+            <!-- Regular Tooth Content -->
+            <div
+              v-else
+              class="tooth-group"
+              :class="{ 'tooth-group--bottom': direction === ToothContainerDirection.Bottom }"
+            >
+              <template v-if="direction === ToothContainerDirection.Top">
+                <ToothLabel
+                  :toothNumber="tooth.number"
+                  :isExtra="isExtra"
+                  :direction="direction"
+                  @add-extra-before="
+                    $emit('add-extra-tooth', {
+                      base: tooth.number,
+                      direction: ExtraToothDirection.Before,
+                    })
+                  "
+                  @add-extra-after="
+                    $emit('add-extra-tooth', {
+                      base: tooth.number,
+                      direction: ExtraToothDirection.After,
+                    })
+                  "
+                  @remove-tooth="$emit('remove-tooth', tooth.number)"
+                />
+
+                <!-- Single wrapper for tooth components (Schematic moved out) -->
+                <div
+                  class="tooth-components-wrapper"
+                  :class="{ 'extraction-blocked': !!extraction }"
+                >
+                  <GumOverlay :direction="direction" :hasCutout="hasExposedToothProcedure" />
+                  <template v-if="!hideTooth">
+                    <template v-if="rootOnly">
+                      <!-- 🎯 Clipping container specifically for tooth -->
+                      <div class="tooth-clip-container">
+                        <div
+                          class="tooth-only-wrapper"
+                          :class="{ 'impacted-tooth--top': isImpactedTooth }"
+                        >
+                          <Tooth
+                            :number="tooth.number"
+                            :toothProcedures="tooth.toothProcedures"
+                            :selectedSegments="extraction ? [] : selectedSegments"
+                            :direction="direction"
+                            only-root
+                            :isPediatric="props.isPediatric"
+                            @segment-click="handleSegmentClick"
+                          />
+                        </div>
+                      </div>
+                    </template>
+                    <template v-else>
+                      <!-- 🎯 Clipping container specifically for tooth -->
+                      <div class="tooth-clip-container">
+                        <div
+                          class="tooth-only-wrapper"
+                          :class="{ 'impacted-tooth--top': isImpactedTooth }"
+                        >
+                          <Tooth
+                            :number="tooth.number"
+                            :toothProcedures="tooth.toothProcedures"
+                            :selectedSegments="extraction ? [] : selectedSegments"
+                            :direction="direction"
+                            :isPediatric="props.isPediatric"
+                            @segment-click="handleSegmentClick"
+                          />
+                        </div>
+                      </div>
+                    </template>
+                  </template>
+                  <!-- Single hover blocker for all components -->
+                  <div v-if="extraction" class="hover-blocker"></div>
+                </div>
+
+                <!-- 🎯 Schematic moved to end with margin -->
+                <template v-if="!hideTooth && !rootOnly">
+                  <div class="schematic-at-end">
+                    <Schematic
+                      :number="tooth.number"
+                      :schemaProcedures="tooth.schemaProcedures"
+                      :selectedSegments="extraction ? [] : selectedSegments"
+                      :direction="direction"
+                      @segment-click="handleSegmentClick"
+                    />
+                  </div>
+                </template>
+              </template>
+              <template v-else>
+                <!-- 🎯 Schematic moved to end with margin for bottom direction -->
+                <template v-if="!hideTooth && !rootOnly">
+                  <div class="schematic-at-end schematic-at-end--bottom">
+                    <Schematic
+                      :number="tooth.number"
+                      :schemaProcedures="tooth.schemaProcedures"
+                      :selectedSegments="extraction ? [] : selectedSegments"
+                      :direction="direction"
+                      @segment-click="handleSegmentClick"
+                    />
+                  </div>
+                </template>
+
+                <!-- Single wrapper for tooth components (Schematic moved out) -->
+                <div
+                  class="tooth-components-wrapper"
+                  :class="{ 'extraction-blocked': !!extraction }"
+                >
+                  <GumOverlay :direction="direction" :hasCutout="hasExposedToothProcedure" />
+                  <template v-if="!hideTooth">
+                    <template v-if="rootOnly">
+                      <!-- 🎯 Clipping container specifically for tooth -->
+                      <div class="tooth-clip-container">
+                        <div
+                          class="tooth-only-wrapper"
+                          :class="{ 'impacted-tooth--bottom': isImpactedTooth }"
+                        >
+                          <Tooth
+                            :number="tooth.number"
+                            :toothProcedures="tooth.toothProcedures"
+                            :selectedSegments="extraction ? [] : selectedSegments"
+                            :direction="direction"
+                            only-root
+                            :isPediatric="props.isPediatric"
+                            @segment-click="handleSegmentClick"
+                          />
+                        </div>
+                      </div>
+                    </template>
+                    <template v-else>
+                      <!-- 🎯 Clipping container specifically for tooth -->
+                      <div class="tooth-clip-container">
+                        <div
+                          class="tooth-only-wrapper"
+                          :class="{ 'impacted-tooth--bottom': isImpactedTooth }"
+                        >
+                          <Tooth
+                            :number="tooth.number"
+                            :toothProcedures="tooth.toothProcedures"
+                            :selectedSegments="extraction ? [] : selectedSegments"
+                            :direction="direction"
+                            :isPediatric="props.isPediatric"
+                            @segment-click="handleSegmentClick"
+                          />
+                        </div>
+                      </div>
+                    </template>
+                  </template>
+                  <!-- Single hover blocker for all components -->
+                  <div v-if="extraction" class="hover-blocker"></div>
+                </div>
+
+                <ToothLabel
+                  :toothNumber="tooth.number"
+                  :isExtra="isExtra"
+                  :isSelected="isSelected"
+                  @add-extra-before="
+                    $emit('add-extra-tooth', {
+                      base: tooth.number,
+                      direction: ExtraToothDirection.Before,
+                    })
+                  "
+                  @add-extra-after="
+                    $emit('add-extra-tooth', {
+                      base: tooth.number,
+                      direction: ExtraToothDirection.After,
+                    })
+                  "
+                  @remove-tooth="$emit('remove-tooth', tooth.number)"
+                  :direction="direction"
+                />
+              </template>
+            </div>
+            <div
+              v-if="extraction || isToothMissing"
+              class="full-hover-blocker"
+              :class="direction === ToothContainerDirection.Top ? 'blocker-top' : 'blocker-bottom'"
+            ></div>
+            <ExtractionOverlay v-if="extraction" :direction="direction" />
+
+            <!-- Observation Overlays for different parts -->
+            <IconOverlay
+              v-if="toothLevelIconProcedures.length > 0"
+              :direction="direction"
+              position="tooth"
+            >
+              <div
+                class="flex flex-wrap items-center justify-center gap-1 max-w-full"
+                v-for="(assignment, idx) in visibleToothLevelIconProcedures"
+                :key="assignment.procedure.name + idx"
+              >
+                <div
+                  v-if="assignment.procedure.visual.visualType === 'Color'"
+                  class="w-4 h-4 rounded-sm flex-shrink-0"
+                  :style="{ backgroundColor: assignment.procedure.visual.value }"
+                />
+                <ProcedureIcon
+                  v-else-if="assignment.procedure.visual.visualType === 'Icon'"
+                  :icon-name="assignment.procedure.visual.value!"
+                  :icon-source="assignment.procedure.visual.iconSource"
+                />
+                <span
+                  v-if="showPlusN"
+                  class="w-5 h-5 flex items-center justify-center text-xs font-bold text-blue-600 opacity-80"
+                  >+{{ hiddenIconCount }}</span
+                >
+              </div>
+            </IconOverlay>
+
+            <!-- Extraction and missing tooth overlays -->
+            <div
+              v-if="extraction || isToothMissing"
+              class="full-hover-blocker"
+              :class="direction === ToothContainerDirection.Top ? 'blocker-top' : 'blocker-bottom'"
+            ></div>
+            <ExtractionOverlay v-if="extraction" :direction="direction" />
+          </div>
+        </ContextMenuTrigger>
+        <ContextMenuContent>
+          <!-- Multi-selection actions -->
+          <ContextMenuLabel v-if="hasMultipleSelection"
+            >Selected Teeth ({{ selectedToothCount }})</ContextMenuLabel
+          >
+
+          <!-- Add/Remove Actions for Multi-Selection -->
+          <ContextMenuGroup v-if="hasMultipleSelection">
+            <ContextMenuItem
+              v-if="hasSelectedEmptySlots"
+              @click="handleAddSelectedTeeth"
+              :disabled="!canAddSelectedTeeth"
+            >
+              <Plus class="mr-2 h-4 w-4" />
+              Add Selected Teeth ({{ selectedEmptyCount }})
+            </ContextMenuItem>
+            <ContextMenuItem
+              v-if="hasSelectedRealTeeth"
+              @click="handleRemoveSelectedTeeth"
+              :disabled="!canRemoveSelectedTeeth"
+            >
+              <Minus class="mr-2 h-4 w-4" />
+              Remove Selected Teeth ({{ selectedRealCount }})
+            </ContextMenuItem>
+          </ContextMenuGroup>
+
+          <!-- Conversion Actions for Multi-Selection -->
+          <ContextMenuGroup v-if="hasMultipleSelection && hasSelectedRealTeeth">
+            <ContextMenuSeparator />
+            <ContextMenuItem
+              v-if="multiSelectionAvailableConversions?.toPrimary.length"
+              @click="handleConvertSelectedToPrimary"
+              :disabled="!canConvertSelectedToPrimary"
+            >
+              <Baby class="mr-2 h-4 w-4" />
+              Convert to Primary ({{ multiSelectionAvailableConversions.toPrimary.length }})
+            </ContextMenuItem>
+            <ContextMenuItem
+              v-if="multiSelectionAvailableConversions?.toPermanent.length"
+              @click="handleConvertSelectedToPermanent"
+              :disabled="!canConvertSelectedToPermanent"
+            >
+              <User class="mr-2 h-4 w-4" />
+              Convert to Permanent ({{ multiSelectionAvailableConversions.toPermanent.length }})
+            </ContextMenuItem>
+            <ContextMenuSeparator />
+            <!-- Root Only Action for Multi-Selection -->
+            <ContextMenuItem
+              @click="handleApplyRootOnlyToSelected"
+              :disabled="!canApplyRootOnlyToSelected"
+            >
+              <TreePine class="mr-2 h-4 w-4" />
+              Apply Root Only ({{ selectedRealCount }})
+            </ContextMenuItem>
+          </ContextMenuGroup>
+
+          <!-- Single tooth actions -->
+          <ContextMenuLabel v-if="!hasMultipleSelection"
+            >{{ tooth.isEmptySlot ? 'Empty Slot' : 'Single Tooth' }} Actions</ContextMenuLabel
+          >
+
+          <!-- Single Tooth - Add/Remove -->
+          <ContextMenuItem
+            v-if="!hasMultipleSelection && tooth.isEmptySlot"
+            @click="handleAddTooth"
+            :disabled="!canAddTooth"
+          >
+            <Plus class="mr-2 h-4 w-4" />
+            Add Tooth
+          </ContextMenuItem>
+          <ContextMenuItem
+            v-if="!hasMultipleSelection && !tooth.isEmptySlot"
+            @click="handleRemoveTooth"
+            :disabled="!canRemoveTooth"
+          >
+            <Minus class="mr-2 h-4 w-4" />
+            Remove Tooth
+          </ContextMenuItem>
+
+          <!-- Single Tooth - Root Only (only for real teeth) -->
+          <ContextMenuItem
+            v-if="!hasMultipleSelection && !tooth.isEmptySlot"
+            @click="handleApplyRootOnly"
+            :disabled="!canApplyRootOnly"
+          >
+            <TreePine class="mr-2 h-4 w-4" />
+            Root Only
+          </ContextMenuItem>
+
+          <!-- Single tooth conversions (only for real teeth) -->
+          <ContextMenuSeparator
+            v-if="
+              !hasMultipleSelection &&
+              !tooth.isEmptySlot &&
+              availableConversions &&
+              (availableConversions.toPrimary || availableConversions.toPermanent)
+            "
+          />
+          <ContextMenuItem
+            v-if="!hasMultipleSelection && !tooth.isEmptySlot && availableConversions?.toPrimary"
+            @click="handleConvertToPrimary"
+            :disabled="!canConvertToPrimary"
+          >
+            <Baby class="mr-2 h-4 w-4" />
+            Convert to Primary
+          </ContextMenuItem>
+          <ContextMenuItem
+            v-if="!hasMultipleSelection && !tooth.isEmptySlot && availableConversions?.toPermanent"
+            @click="handleConvertToPermanent"
+            :disabled="!canConvertToPermanent"
+          >
+            <User class="mr-2 h-4 w-4" />
+            Convert to Permanent
+          </ContextMenuItem>
+        </ContextMenuContent>
+      </ContextMenu>
+    </PopoverTrigger>
     <PopoverContent v-if="assignedToothLevelProcedures.length > 0" class="w-auto">
       {{ assignedToothLevelProcedures.map((p) => p.procedure.name).join(', ') }}
     </PopoverContent>
@@ -242,8 +386,17 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed, inject } from 'vue'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
+import {
+  ContextMenu,
+  ContextMenuContent,
+  ContextMenuGroup,
+  ContextMenuItem,
+  ContextMenuLabel,
+  ContextMenuSeparator,
+  ContextMenuTrigger,
+} from '@/components/ui/context-menu'
 import type { ToothData } from '@/types/odontogram/odontogram'
 import { ToothContainerDirection, ExtraToothDirection } from '@/types/odontogram/odontogram'
 import ExtractionOverlay from './ExtractionOverlay.vue'
@@ -252,10 +405,10 @@ import IconOverlay from './IconOverlay.vue'
 import Tooth from './Tooth.vue'
 import Schematic from './Schematic.vue'
 import ToothLabel from './ToothLabel.vue'
-import { Eye } from 'lucide-vue-next'
-import DynamicLucideIcon from './DynamicLucideIcon.vue'
-import TablerIcon from './TablerIcon.vue'
+import { Plus, Minus, User, Baby, TreePine } from 'lucide-vue-next'
 import ProcedureIcon from './ProcedureIcon.vue'
+import type { useOdontogram } from '@/composables/odontogram/useOdontogram'
+import { getAvailableConversions } from '@/utils/toothConversion'
 
 interface Props {
   tooth: ToothData
@@ -274,6 +427,9 @@ interface Emits {
 
 const props = defineProps<Props>()
 const emit = defineEmits<Emits>()
+
+// Inject odontogram composable for tooth actions
+const odontogram = inject<ReturnType<typeof useOdontogram>>('odontogram')
 
 const hoveredTooth = ref<string | null>(null)
 
@@ -386,6 +542,203 @@ const visibleToothLevelIconProcedures = computed(() => {
 const hiddenIconCount = computed(() =>
   showPlusN.value ? toothLevelIconProcedures.value.length - (MAX_VISIBLE_ICONS - 1) : 0,
 )
+
+// Context menu computed properties
+const availableConversions = computed(() => {
+  if (!props.tooth || props.tooth.isEmptySlot) return null
+  return getAvailableConversions([props.tooth.number])
+})
+
+const canAddTooth = computed(() => {
+  return props.tooth.isEmptySlot && odontogram?.addToothToEmptySlot
+})
+
+const canRemoveTooth = computed(() => {
+  return (
+    !props.tooth.isEmptySlot &&
+    !extraction.value &&
+    !hideTooth.value &&
+    odontogram?.removeToothToEmptySlot
+  )
+})
+
+const canConvertToPrimary = computed(() => {
+  return (
+    !props.tooth.isEmptySlot &&
+    availableConversions.value?.toPrimary &&
+    odontogram?.convertSelectedTeethToPrimary
+  )
+})
+
+const canConvertToPermanent = computed(() => {
+  return (
+    !props.tooth.isEmptySlot &&
+    availableConversions.value?.toPermanent &&
+    odontogram?.convertSelectedTeethToPermanent
+  )
+})
+
+// Multi-selection computed properties
+const hasMultipleSelection = computed(() => {
+  return (odontogram?.selectedToothNumbers.value.length || 0) > 1
+})
+
+const selectedToothCount = computed(() => {
+  return odontogram?.selectedToothNumbers.value.length || 0
+})
+
+const hasSelectedEmptySlots = computed(() => {
+  return odontogram?.hasSelectedEmptySlots.value || false
+})
+
+const hasSelectedRealTeeth = computed(() => {
+  return odontogram?.hasSelectedRealTeeth.value || false
+})
+
+const selectedEmptyCount = computed(() => {
+  return (
+    odontogram?.selectedToothNumbers.value.filter((toothNumber) => {
+      const tooth = odontogram?.teeth.value.find((t) => t.number === toothNumber)
+      return tooth?.isEmptySlot === true
+    }).length || 0
+  )
+})
+
+const selectedRealCount = computed(() => {
+  return (
+    odontogram?.selectedToothNumbers.value.filter((toothNumber) => {
+      const tooth = odontogram?.teeth.value.find((t) => t.number === toothNumber)
+      return tooth?.isEmptySlot !== true
+    }).length || 0
+  )
+})
+
+const multiSelectionAvailableConversions = computed(() => {
+  if (!odontogram?.selectedToothNumbers.value.length) return null
+  return odontogram.availableConversions.value
+})
+
+const canAddSelectedTeeth = computed(() => {
+  return hasSelectedEmptySlots.value && odontogram?.addTeethToSelectedEmptySlots
+})
+
+const canRemoveSelectedTeeth = computed(() => {
+  return hasSelectedRealTeeth.value && odontogram?.removeSelectedTeeth
+})
+
+const canConvertSelectedToPrimary = computed(() => {
+  return (
+    (multiSelectionAvailableConversions.value?.toPrimary.length || 0) > 0 &&
+    odontogram?.convertSelectedTeethToPrimary
+  )
+})
+
+const canConvertSelectedToPermanent = computed(() => {
+  return (
+    (multiSelectionAvailableConversions.value?.toPermanent.length || 0) > 0 &&
+    odontogram?.convertSelectedTeethToPermanent
+  )
+})
+
+const canApplyRootOnly = computed(() => {
+  return !props.tooth.isEmptySlot && !extraction.value && !hideTooth.value && !rootOnly.value
+})
+
+const canApplyRootOnlyToSelected = computed(() => {
+  return (
+    hasSelectedRealTeeth.value &&
+    odontogram?.selectedToothNumbers.value.some((toothNumber) => {
+      const tooth = odontogram?.teeth.value.find((t) => t.number === toothNumber)
+      if (!tooth || tooth.isEmptySlot) return false
+      const hasExtraction = tooth.toothProcedures.some((a) => a.procedure.name === 'Ekstrakcja')
+      const hasHideTooth = tooth.toothProcedures.some((a) => a.procedure.behavior === 'HideTooth')
+      const hasRootOnly = tooth.toothProcedures.some((a) => a.procedure.behavior === 'RootOnly')
+      return !hasExtraction && !hasHideTooth && !hasRootOnly
+    })
+  )
+})
+
+// Context menu handlers
+const handleAddTooth = () => {
+  if (canAddTooth.value && odontogram?.addToothToEmptySlot) {
+    odontogram.addToothToEmptySlot(props.tooth.number)
+  }
+}
+
+const handleRemoveTooth = () => {
+  if (canRemoveTooth.value && odontogram?.removeToothToEmptySlot) {
+    odontogram.removeToothToEmptySlot(props.tooth.number)
+  }
+}
+
+const handleConvertToPrimary = () => {
+  if (canConvertToPrimary.value && odontogram?.convertSelectedTeethToPrimary) {
+    // First select the tooth, then convert
+    odontogram.selectedToothNumbers.value = [props.tooth.number]
+    odontogram.convertSelectedTeethToPrimary()
+  }
+}
+
+const handleConvertToPermanent = () => {
+  if (canConvertToPermanent.value && odontogram?.convertSelectedTeethToPermanent) {
+    // First select the tooth, then convert
+    odontogram.selectedToothNumbers.value = [props.tooth.number]
+    odontogram.convertSelectedTeethToPermanent()
+  }
+}
+
+// Multi-selection handlers
+const handleAddSelectedTeeth = () => {
+  if (canAddSelectedTeeth.value && odontogram?.addTeethToSelectedEmptySlots) {
+    odontogram.addTeethToSelectedEmptySlots()
+  }
+}
+
+const handleRemoveSelectedTeeth = () => {
+  if (canRemoveSelectedTeeth.value && odontogram?.removeSelectedTeeth) {
+    odontogram.removeSelectedTeeth()
+  }
+}
+
+const handleConvertSelectedToPrimary = () => {
+  if (canConvertSelectedToPrimary.value && odontogram?.convertSelectedTeethToPrimary) {
+    odontogram.convertSelectedTeethToPrimary()
+  }
+}
+
+const handleConvertSelectedToPermanent = () => {
+  if (canConvertSelectedToPermanent.value && odontogram?.convertSelectedTeethToPermanent) {
+    odontogram.convertSelectedTeethToPermanent()
+  }
+}
+
+// Root only handlers
+const handleApplyRootOnly = () => {
+  if (canApplyRootOnly.value && odontogram?.handleProcedureSelect) {
+    // Find the "tylko korzeń" procedure
+    const rootOnlyProcedure = odontogram.procedurePalette.value.find(
+      (p) => p.name === 'tylko korzeń',
+    )
+    if (rootOnlyProcedure) {
+      // Select this tooth and apply the procedure
+      odontogram.selectedToothNumbers.value = [props.tooth.number]
+      odontogram.handleProcedureSelect(rootOnlyProcedure)
+    }
+  }
+}
+
+const handleApplyRootOnlyToSelected = () => {
+  if (canApplyRootOnlyToSelected.value && odontogram?.handleProcedureSelect) {
+    // Find the "tylko korzeń" procedure
+    const rootOnlyProcedure = odontogram.procedurePalette.value.find(
+      (p) => p.name === 'tylko korzeń',
+    )
+    if (rootOnlyProcedure) {
+      // Apply to all selected teeth
+      odontogram.handleProcedureSelect(rootOnlyProcedure)
+    }
+  }
+}
 </script>
 
 <style scoped>

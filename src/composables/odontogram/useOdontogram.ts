@@ -560,12 +560,18 @@ export function useOdontogram(isPediatric = false) {
     return getAvailableConversions(selectedToothNumbers.value)
   })
 
-  // Convert real teeth back to empty slots (only for positions 6, 7, 8)
+  // Convert real teeth back to empty slots
   const removeToothToEmptySlot = (toothNumber: string) => {
     const tooth = teeth.value.find((t) => t.number === toothNumber)
-    // Only allow removal of teeth in positions 6, 7, 8 (permanent molars in pediatric mode)
+    const firstDigit = toothNumber[0]
     const lastDigit = toothNumber[1]
-    const isRemovablePosition = ['6', '7', '8'].includes(lastDigit)
+    
+    // Allow removal of:
+    // 1. Baby teeth (positions 1-5) when first digit is 5,6,7,8 (pediatric teeth)
+    // 2. ALL permanent teeth (positions 1-8) when first digit is 1,2,3,4 (permanent teeth)
+    const isBabyTooth = ['5', '6', '7', '8'].includes(firstDigit) && ['1', '2', '3', '4', '5'].includes(lastDigit)
+    const isPermanentTooth = ['1', '2', '3', '4'].includes(firstDigit) && ['1', '2', '3', '4', '5', '6', '7', '8'].includes(lastDigit)
+    const isRemovablePosition = isBabyTooth || isPermanentTooth
     
     if (tooth && !tooth.isEmptySlot && isRemovablePosition) {
       // Clear any procedures before making it an empty slot
@@ -575,7 +581,7 @@ export function useOdontogram(isPediatric = false) {
     }
   }
 
-  // Remove all selected teeth (convert to empty slots) - only positions 6, 7, 8
+  // Remove all selected teeth (convert to empty slots)
   const removeSelectedTeeth = () => {
     selectedToothNumbers.value.forEach((toothNumber) => {
       removeToothToEmptySlot(toothNumber)
@@ -591,12 +597,18 @@ export function useOdontogram(isPediatric = false) {
     })
   })
 
-  // Check if any selected teeth are removable real teeth (positions 6, 7, 8 and not empty slots)
+  // Check if any selected teeth are removable real teeth (baby teeth or permanent teeth, not empty slots)
   const hasSelectedRealTeeth = computed(() => {
     return selectedToothNumbers.value.some(toothNumber => {
       const tooth = teeth.value.find(t => t.number === toothNumber)
+      const firstDigit = toothNumber[0]
       const lastDigit = toothNumber[1]
-      const isRemovablePosition = ['6', '7', '8'].includes(lastDigit)
+      
+      // Same logic as removeToothToEmptySlot
+      const isBabyTooth = ['5', '6', '7', '8'].includes(firstDigit) && ['1', '2', '3', '4', '5'].includes(lastDigit)
+      const isPermanentTooth = ['1', '2', '3', '4'].includes(firstDigit) && ['1', '2', '3', '4', '5', '6', '7', '8'].includes(lastDigit)
+      const isRemovablePosition = isBabyTooth || isPermanentTooth
+      
       return tooth && !tooth.isEmptySlot && isRemovablePosition
     })
   })
@@ -605,8 +617,14 @@ export function useOdontogram(isPediatric = false) {
   const selectedRemovableTeethCount = computed(() => {
     return selectedToothNumbers.value.filter(toothNumber => {
       const tooth = teeth.value.find(t => t.number === toothNumber)
+      const firstDigit = toothNumber[0]
       const lastDigit = toothNumber[1]
-      const isRemovablePosition = ['6', '7', '8'].includes(lastDigit)
+      
+      // Same logic as removeToothToEmptySlot
+      const isBabyTooth = ['5', '6', '7', '8'].includes(firstDigit) && ['1', '2', '3', '4', '5'].includes(lastDigit)
+      const isPermanentTooth = ['1', '2', '3', '4'].includes(firstDigit) && ['1', '2', '3', '4', '5', '6', '7', '8'].includes(lastDigit)
+      const isRemovablePosition = isBabyTooth || isPermanentTooth
+      
       return tooth && !tooth.isEmptySlot && isRemovablePosition
     }).length
   })
