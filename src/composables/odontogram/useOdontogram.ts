@@ -3,7 +3,7 @@ import { ref, computed } from 'vue'
 import type { ToothData, Procedure, ProcedureTargetMap } from '@/types/odontogram/odontogram'
 import type { ProcedureWithTarget } from '@/services/procedure/procedureApi'
 import { ExtraToothDirection, ProcedureIconSource } from '@/types/odontogram/odontogram'
-import { convertToothType, getAvailableConversions } from '@/utils/toothConversion'
+import { convertToothType, getAvailableConversions, permanentToPrimary, primaryToPermanent } from '@/utils/toothConversion'
 
 export function getInitialPermanentTeeth(): ToothData[] {
   return [
@@ -507,7 +507,7 @@ export function useOdontogram(isPediatric = false) {
   // Convert selected teeth between permanent and primary
   const convertSelectedTeethToPrimary = () => {
     selectedToothNumbers.value.forEach((toothNumber) => {
-      const converted = convertToothType(toothNumber)
+      const converted = permanentToPrimary(toothNumber) // Use specific conversion function
       if (converted) {
         const tooth = teeth.value.find((t) => t.number === toothNumber)
         if (tooth) {
@@ -524,7 +524,7 @@ export function useOdontogram(isPediatric = false) {
 
   const convertSelectedTeethToPermanent = () => {
     selectedToothNumbers.value.forEach((toothNumber) => {
-      const converted = convertToothType(toothNumber)
+      const converted = primaryToPermanent(toothNumber) // Use specific conversion function
       if (converted) {
         const tooth = teeth.value.find((t) => t.number === toothNumber)
         if (tooth) {
