@@ -11,8 +11,9 @@
               'empty-slot': tooth.isEmptySlot,
             }"
             @click="handleToothClick"
-            @mouseenter="hoveredTooth = tooth.number"
-            @mouseleave="hoveredTooth = null"
+            @mouseenter="handleToothMouseEnter"
+            @mouseleave="handleToothMouseLeave"
+            @contextmenu="handleContextMenu"
           >
             <!-- Empty Slot Content -->
             <div
@@ -379,7 +380,12 @@
         </ContextMenuContent>
       </ContextMenu>
     </PopoverTrigger>
-    <PopoverContent v-if="groupedProceduresForTooltip.length > 0" class="w-auto max-w-xs">
+    <PopoverContent 
+      v-if="groupedProceduresForTooltip.length > 0" 
+      class="w-auto max-w-xs"
+      @mouseenter="handlePopoverMouseEnter"
+      @mouseleave="handlePopoverMouseLeave"
+    >
       <div class="space-y-2">
         <div class="font-semibold text-sm mb-2">Tooth {{ tooth.number }}</div>
         <div class="space-y-1">
@@ -392,15 +398,32 @@
                 :style="{ backgroundColor: group.visual.value }"
               />
               <span class="font-medium">{{ group.name }}</span>
+              <!-- Remove entire procedure group button -->
+              <Button
+                variant="ghost"
+                size="sm"
+                @click="() => removeGroupedProcedure(group)"
+                class="h-6 w-6 p-0 hover:bg-destructive hover:text-destructive-foreground text-muted-foreground hover:text-white ml-auto"
+                :title="`Remove all ${group.name} procedures from this tooth (${group.originalProcedures.length} locations)`"
+              >
+                <X class="w-3 h-3" />
+              </Button>
             </div>
             <div class="flex flex-wrap gap-1 mt-1 ml-5">
-              <span
+              <div
                 v-for="(location, index) in group.locations"
                 :key="index"
-                class="inline-flex px-1.5 py-0.5 bg-secondary text-secondary-foreground rounded text-xs"
+                class="inline-flex items-center gap-1.5 px-2 py-1 bg-secondary text-secondary-foreground rounded text-xs group hover:bg-secondary/80"
               >
-                {{ location }}
-              </span>
+                <span>{{ location }}</span>
+                <button
+                  @click="() => removeSpecificProcedure(group, index)"
+                  class="w-3 h-3 rounded-full bg-secondary-foreground/20 hover:bg-destructive hover:text-destructive-foreground flex items-center justify-center transition-colors"
+                  :title="`Remove ${group.name} from ${location}`"
+                >
+                  <X class="w-2 h-2" />
+                </button>
+              </div>
             </div>
           </div>
         </div>
@@ -412,6 +435,7 @@
 <script setup lang="ts">
 import { ref, computed, inject } from 'vue'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
+import { Button } from '@/components/ui/button'
 import {
   ContextMenu,
   ContextMenuContent,
@@ -429,7 +453,7 @@ import IconOverlay from './IconOverlay.vue'
 import Tooth from './Tooth.vue'
 import Schematic from './Schematic.vue'
 import ToothLabel from './ToothLabel.vue'
-import { Plus, Minus, User, Baby, TreePine } from 'lucide-vue-next'
+import { Plus, Minus, User, Baby, TreePine, X } from 'lucide-vue-next'
 import ProcedureIcon from './ProcedureIcon.vue'
 import type { useOdontogram } from '@/composables/odontogram/useOdontogram'
 import { getAvailableConversions } from '@/utils/toothConversion'
@@ -467,6 +491,8 @@ const emit = defineEmits<Emits>()
 const odontogram = inject<ReturnType<typeof useOdontogram>>('odontogram')
 
 const hoveredTooth = ref<string | null>(null)
+const hoveredPopover = ref<boolean>(false)
+let mouseLeaveTimeout: number | null = null
 
 const isExtra = computed(() => props.tooth.number.includes('+') || props.tooth.number.includes('-'))
 
@@ -592,7 +618,7 @@ const groupedProceduresForTooltip = computed(() => {
 })
 
 const showTooltip = computed(
-  () => hoveredTooth.value === props.tooth.number && groupedProceduresForTooltip.value.length > 0,
+  () => (hoveredTooth.value === props.tooth.number || hoveredPopover.value) && groupedProceduresForTooltip.value.length > 0,
 )
 
 const handleToothClick = () => {
@@ -607,6 +633,93 @@ const handleSegmentClick = (segmentId: string) => {
   // Prevent segment clicks when extracted
   if (!extraction.value) {
     emit('segment-click', segmentId)
+  }
+}
+
+const handleToothMouseEnter = () => {
+  if (mouseLeaveTimeout) {
+    clearTimeout(mouseLeaveTimeout)
+    mouseLeaveTimeout = null
+  }
+  hoveredTooth.value = props.tooth.number
+}
+
+const handleToothMouseLeave = () => {
+  mouseLeaveTimeout = window.setTimeout(() => {
+    if (!hoveredPopover.value) {
+      hoveredTooth.value = null
+    }
+  }, 100) // Small delay to allow moving to popover
+}
+
+const handlePopoverMouseEnter = () => {
+  if (mouseLeaveTimeout) {
+    clearTimeout(mouseLeaveTimeout)
+    mouseLeaveTimeout = null
+  }
+  hoveredPopover.value = true
+}
+
+const handlePopoverMouseLeave = () => {
+  hoveredPopover.value = false
+  mouseLeaveTimeout = window.setTimeout(() => {
+    hoveredTooth.value = null
+  }, 100) // Small delay before closing
+}
+
+const handleContextMenu = () => {
+  // Close the tooltip when right-click context menu appears
+  if (mouseLeaveTimeout) {
+    clearTimeout(mouseLeaveTimeout)
+    mouseLeaveTimeout = null
+  }
+  hoveredTooth.value = null
+  hoveredPopover.value = false
+}
+
+// Remove procedure functions (similar to ToothProcedureSummary)
+const removeGroupedProcedure = (groupedProcedure: GroupedProcedure) => {
+  // Remove all procedures in this group from the tooth
+  groupedProcedure.originalProcedures.forEach((procedure) => {
+    removeProcedureFromTooth(procedure)
+  })
+}
+
+const removeSpecificProcedure = (groupedProcedure: GroupedProcedure, locationIndex: number) => {
+  // Remove only the specific procedure at the given location index
+  const procedureToRemove = groupedProcedure.originalProcedures[locationIndex]
+  if (procedureToRemove) {
+    removeProcedureFromTooth(procedureToRemove)
+  }
+}
+
+const removeProcedureFromTooth = (procedureToRemove: any) => {
+  if (!odontogram) return
+
+  const tooth = odontogram.teeth.value.find((t) => t.number === props.tooth.number)
+  if (!tooth) return
+
+  // Remove from toothProcedures if it matches
+  const toothProcIndex = tooth.toothProcedures.findIndex(
+    (assignment) =>
+      assignment.procedure.name === procedureToRemove.name &&
+      assignment.procedure.visual.value === procedureToRemove.visual.value,
+  )
+
+  if (toothProcIndex !== -1) {
+    tooth.toothProcedures.splice(toothProcIndex, 1)
+    return
+  }
+
+  // Remove from schemaProcedures if it matches
+  const schemaProcIndex = tooth.schemaProcedures.findIndex(
+    (assignment) =>
+      assignment.procedure.name === procedureToRemove.name &&
+      assignment.procedure.visual.value === procedureToRemove.visual.value,
+  )
+
+  if (schemaProcIndex !== -1) {
+    tooth.schemaProcedures.splice(schemaProcIndex, 1)
   }
 }
 
