@@ -168,7 +168,7 @@
       </Card>
 
       <!-- Navigation -->
-      <div class="flex justify-between">
+      <div class="flex justify-between items-center">
         <Button
           variant="outline"
           @click="prevStep"

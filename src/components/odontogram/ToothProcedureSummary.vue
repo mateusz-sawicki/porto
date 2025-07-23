@@ -11,7 +11,6 @@
     <!-- Search and Filter Section -->
     <div 
       class="search-filter-section"
-      :class="{ 'pinned-search': isOdontogramPinned }"
     >
       <!-- Search Input -->
       <div class="relative mb-4">
@@ -319,7 +318,6 @@ interface ToothWithGroupedProcedures {
 
 interface Props {
   teethWithProcedures: ToothWithProcedures[]
-  isOdontogramPinned?: boolean
 }
 
 interface Emits {
@@ -557,14 +555,4 @@ const removeSpecificProcedure = (
   transition: all 0.3s ease-in-out;
 }
 
-.pinned-search {
-  position: sticky;
-  top: 0;
-  z-index: 30;
-  background: var(--background);
-  border-bottom: 1px solid var(--border);
-  padding-bottom: 16px;
-  margin-bottom: 16px;
-  box-shadow: 0 2px 4px -1px rgb(0 0 0 / 0.06);
-}
 </style>
