@@ -388,7 +388,7 @@ export function useOdontogram(isPediatric = false) {
     if (baseIndex === -1) return
 
     const quadrant = base[0]
-    const isLeftSide = quadrant === '1' || quadrant === '4'
+    const isLeftSide = quadrant === '1' || quadrant === '4' || quadrant === '5' || quadrant === '8'
     const insertAt =
       (direction === ExtraToothDirection.Before) === isLeftSide ? baseIndex + 1 : baseIndex
 
