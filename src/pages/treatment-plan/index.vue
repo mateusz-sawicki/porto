@@ -3,7 +3,7 @@
     <div class="mx-auto">
       <!-- Header -->
       <div class="mb-8">
-        <div class="flex items-center justify-between">
+        <div class="flex flex-col xl:flex-row xl:items-center xl:justify-between gap-4">
           <div>
             <h1 class="text-3xl font-bold mb-2">Create Treatment Plan</h1>
             <p class="text-muted-foreground">
@@ -11,31 +11,33 @@
             </p>
           </div>
 
-          <div class="flex items-center gap-3">
-            <div v-if="lastSaved" class="text-sm text-gray-500">
+          <div class="flex flex-col sm:flex-row items-start sm:items-center gap-3 lg:gap-3">
+            <div v-if="lastSaved" class="text-sm text-gray-500 order-1">
               Last saved: {{ lastSaved.toLocaleTimeString() }}
             </div>
 
-            <!-- Remove Treatment Plan Button -->
-            <Button
-              @click="showRemoveConfirmation = true"
-              :disabled="isLoading || isSaving || isRemoving"
-              variant="destructive"
-              size="sm"
-              class="flex items-center gap-2"
-            >
-              <Trash2 class="w-4 h-4" />
-              Remove Plan
-            </Button>
+            <div class="flex flex-col sm:flex-row gap-2 order-2 w-full sm:w-auto">
+              <!-- Remove Treatment Plan Button -->
+              <Button
+                @click="showRemoveConfirmation = true"
+                :disabled="isLoading || isSaving || isRemoving"
+                variant="destructive"
+                size="sm"
+                class="flex items-center justify-center gap-2 w-full sm:w-auto"
+              >
+                <Trash2 class="w-4 h-4" />
+                Remove Plan
+              </Button>
 
-            <Button
-              @click="saveTreatmentPlan"
-              :disabled="isSaving || isRemoving"
-              class="flex items-center gap-2"
-            >
-              <CheckCircle class="w-4 h-4" />
-              {{ isSaving ? 'Saving...' : 'Save Treatment Plan' }}
-            </Button>
+              <Button
+                @click="saveTreatmentPlan"
+                :disabled="isSaving || isRemoving"
+                class="flex items-center justify-center gap-2 w-full sm:w-auto"
+              >
+                <CheckCircle class="w-4 h-4" />
+                {{ isSaving ? 'Saving...' : 'Save Treatment Plan' }}
+              </Button>
+            </div>
           </div>
         </div>
       </div>
