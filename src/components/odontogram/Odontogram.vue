@@ -1,11 +1,27 @@
 <!-- components/Odontogram.vue -->
 <template>
-  <div class="w-full space-y-6">
+  <div 
+    class="w-full space-y-6"
+    :class="{ 'pinned-odontogram': isPinned }"
+  >
     <!-- Dental Chart - Centered -->
-    <div class="flex justify-center">
+    <div class="flex justify-center relative">
+      <!-- Pin Button -->
+      <Button
+        @click="isPinned = !isPinned"
+        variant="outline"
+        size="sm"
+        class="absolute top-2 right-2 z-10"
+        :class="{ 'bg-primary text-primary-foreground': isPinned }"
+      >
+        <Pin v-if="!isPinned" class="h-4 w-4" />
+        <PinOff v-else class="h-4 w-4" />
+        <span class="ml-1">{{ isPinned ? 'Unpin' : 'Pin' }}</span>
+      </Button>
+      
       <ScrollArea
         ref="scrollAreaRef"
-        class="h-[600px]"
+        class="h-[600px] scroll-area"
         style="width: 1490px"
         orientation="horizontal"
       >
@@ -89,7 +105,7 @@
     </div>
 
     <!-- Controls underneath - Centered with max width -->
-    <div class="flex justify-center">
+    <div class="flex justify-center controls-section">
       <div class="w-full max-w-2xl">
         <OdontogramControlsEnhanced
           :selectedProcedure="selectedProcedure"
@@ -107,12 +123,18 @@
 <script setup lang="ts">
 import { computed, ref, onMounted, onUnmounted, nextTick, watch, inject, defineProps } from 'vue'
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area'
+import { Button } from '@/components/ui/button'
+import { Pin, PinOff } from 'lucide-vue-next'
 import { ToothContainerDirection } from '@/types/odontogram/odontogram'
 import Quadrant from '@/components/odontogram/Quadrant.vue'
 import type { useOdontogram } from '@/composables/odontogram/useOdontogram'
 import OdontogramControlsEnhanced from './OdontogramControlsEnhanced.vue'
 
 const props = defineProps<{ isPediatric?: boolean }>()
+
+const emit = defineEmits<{
+  'pin-change': [isPinned: boolean]
+}>()
 
 const odontogram = inject<ReturnType<typeof useOdontogram>>('odontogram')
 if (!odontogram) throw new Error('Odontogram composable not provided!')
@@ -154,6 +176,14 @@ const paperPadding = 20
 
 // ScrollArea reference
 const scrollAreaRef = ref<InstanceType<typeof ScrollArea> | null>(null)
+
+// Pin state management
+const isPinned = ref(false)
+
+// Emit pin state changes
+watch(isPinned, (newValue) => {
+  emit('pin-change', newValue)
+})
 
 // Calculate widths for each quadrant
 const q1Width = computed(() => q1teeth.value.length * TOOTH_WIDTH)
@@ -301,6 +331,19 @@ onUnmounted(() => {
   white-space: nowrap;
   /* Ensure proper sizing */
   box-sizing: border-box;
+}
+
+/* Pinned odontogram styles - sticky position when scrolling */
+.pinned-odontogram {
+  position: sticky;
+  top: 20px;
+  z-index: 40;
+  background: var(--background);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 16px;
+  box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -1px rgb(0 0 0 / 0.06);
+  transition: all 0.3s ease-in-out;
 }
 
 /* Focus indicators for accessibility */
