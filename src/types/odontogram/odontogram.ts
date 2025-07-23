@@ -2,6 +2,7 @@
 export interface ToothData {
   number: string
   position?: number // Anatomical position 1-8 (1=center, 8=back), optional for backward compatibility
+  verticalOffset?: number // Individual vertical offset in pixels, positive for down, negative for up
   toothProcedures: ToothProcedureAssignment[]
   schemaProcedures: SchemaProcedureAssignment[]
   isEmptySlot?: boolean // If true, this is a gum-only empty slot (no label, no tooth)

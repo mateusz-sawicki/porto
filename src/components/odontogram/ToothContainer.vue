@@ -85,6 +85,11 @@
                         <div
                           class="tooth-only-wrapper"
                           :class="{ 'impacted-tooth--top': isImpactedTooth }"
+                          :style="{
+                            transform: tooth.verticalOffset
+                              ? `translateY(${tooth.verticalOffset}px)`
+                              : undefined,
+                          }"
                         >
                           <Tooth
                             :number="tooth.number"
@@ -104,6 +109,11 @@
                         <div
                           class="tooth-only-wrapper"
                           :class="{ 'impacted-tooth--top': isImpactedTooth }"
+                          :style="{
+                            transform: tooth.verticalOffset
+                              ? `translateY(${tooth.verticalOffset}px)`
+                              : undefined,
+                          }"
                         >
                           <Tooth
                             :number="tooth.number"
@@ -161,6 +171,11 @@
                         <div
                           class="tooth-only-wrapper"
                           :class="{ 'impacted-tooth--bottom': isImpactedTooth }"
+                          :style="{
+                            transform: tooth.verticalOffset
+                              ? `translateY(${tooth.verticalOffset}px)`
+                              : undefined,
+                          }"
                         >
                           <Tooth
                             :number="tooth.number"
@@ -180,6 +195,11 @@
                         <div
                           class="tooth-only-wrapper"
                           :class="{ 'impacted-tooth--bottom': isImpactedTooth }"
+                          :style="{
+                            transform: tooth.verticalOffset
+                              ? `translateY(${tooth.verticalOffset}px)`
+                              : undefined,
+                          }"
                         >
                           <Tooth
                             :number="tooth.number"
@@ -380,8 +400,8 @@
         </ContextMenuContent>
       </ContextMenu>
     </PopoverTrigger>
-    <PopoverContent 
-      v-if="groupedProceduresForTooltip.length > 0" 
+    <PopoverContent
+      v-if="groupedProceduresForTooltip.length > 0"
       class="w-auto max-w-xs"
       @mouseenter="handlePopoverMouseEnter"
       @mouseleave="handlePopoverMouseLeave"
@@ -489,7 +509,6 @@ const emit = defineEmits<Emits>()
 
 // Inject odontogram composable for tooth actions
 const odontogram = inject<ReturnType<typeof useOdontogram>>('odontogram')
-
 const hoveredTooth = ref<string | null>(null)
 const hoveredPopover = ref<boolean>(false)
 let mouseLeaveTimeout: number | null = null
@@ -563,9 +582,9 @@ const groupedProceduresForTooltip = computed(() => {
   const allProcedures: Array<{
     name: string
     description: string
-    visual: { visualType: string, value: string }
+    visual: { visualType: string; value: string }
   }> = []
-  
+
   // Add tooth procedures (Tooth, Crown, Root)
   props.tooth.toothProcedures.forEach((assignment) => {
     allProcedures.push({
@@ -618,7 +637,9 @@ const groupedProceduresForTooltip = computed(() => {
 })
 
 const showTooltip = computed(
-  () => (hoveredTooth.value === props.tooth.number || hoveredPopover.value) && groupedProceduresForTooltip.value.length > 0,
+  () =>
+    (hoveredTooth.value === props.tooth.number || hoveredPopover.value) &&
+    groupedProceduresForTooltip.value.length > 0,
 )
 
 const handleToothClick = () => {
@@ -834,15 +855,19 @@ const selectedEmptyNumbers = computed(() => {
 const selectedRealNumbers = computed(() => {
   const firstDigit = (num: string) => num[0]
   const lastDigit = (num: string) => num[1]
-  
+
   return (
     odontogram?.selectedToothNumbers.value.filter((toothNumber) => {
       const tooth = odontogram?.teeth.value.find((t) => t.number === toothNumber)
       if (!tooth || tooth.isEmptySlot) return false
-      
+
       // Same logic as removeToothToEmptySlot - only removable teeth
-      const isBabyTooth = ['5', '6', '7', '8'].includes(firstDigit(toothNumber)) && ['1', '2', '3', '4', '5'].includes(lastDigit(toothNumber))
-      const isPermanentTooth = ['1', '2', '3', '4'].includes(firstDigit(toothNumber)) && ['1', '2', '3', '4', '5', '6', '7', '8'].includes(lastDigit(toothNumber))
+      const isBabyTooth =
+        ['5', '6', '7', '8'].includes(firstDigit(toothNumber)) &&
+        ['1', '2', '3', '4', '5'].includes(lastDigit(toothNumber))
+      const isPermanentTooth =
+        ['1', '2', '3', '4'].includes(firstDigit(toothNumber)) &&
+        ['1', '2', '3', '4', '5', '6', '7', '8'].includes(lastDigit(toothNumber))
       return isBabyTooth || isPermanentTooth
     }) || []
   )
