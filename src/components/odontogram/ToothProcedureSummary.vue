@@ -8,18 +8,23 @@
       </Badge>
     </div>
 
-    <!-- Search Input -->
-    <div class="relative mb-4">
-      <Search class="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
-      <Input
-        v-model="searchQuery"
-        placeholder="Search by tooth number or procedure name..."
-        class="pl-10"
-      />
-    </div>
+    <!-- Search and Filter Section -->
+    <div 
+      class="search-filter-section"
+      :class="{ 'pinned-search': isOdontogramPinned }"
+    >
+      <!-- Search Input -->
+      <div class="relative mb-4">
+        <Search class="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
+        <Input
+          v-model="searchQuery"
+          placeholder="Search by tooth number or procedure name..."
+          class="pl-10"
+        />
+      </div>
 
-    <!-- Filter Tags -->
-    <div class="space-y-3 mb-6">
+      <!-- Filter Tags -->
+      <div class="space-y-3 mb-6">
       <!-- Overview Tags -->
       <div class="flex flex-wrap gap-2">
         <Badge
@@ -92,6 +97,8 @@
         </Badge>
       </div>
     </div>
+    
+    </div> <!-- Close search-filter-section -->
 
     <div
       v-if="filteredTeethWithProcedures.length === 0"
@@ -312,6 +319,7 @@ interface ToothWithGroupedProcedures {
 
 interface Props {
   teethWithProcedures: ToothWithProcedures[]
+  isOdontogramPinned?: boolean
 }
 
 interface Emits {
@@ -543,3 +551,20 @@ const removeSpecificProcedure = (
   }
 }
 </script>
+
+<style scoped>
+.search-filter-section {
+  transition: all 0.3s ease-in-out;
+}
+
+.pinned-search {
+  position: sticky;
+  top: 0;
+  z-index: 30;
+  background: var(--background);
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 16px;
+  margin-bottom: 16px;
+  box-shadow: 0 2px 4px -1px rgb(0 0 0 / 0.06);
+}
+</style>

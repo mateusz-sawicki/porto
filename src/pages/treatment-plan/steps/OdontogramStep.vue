@@ -11,6 +11,7 @@
       >
         <ToothProceduresSummary
           :teeth-with-procedures="teethWithProcedures"
+          :is-odontogram-pinned="isOdontogramPinned"
           @remove-procedure="handleRemoveProcedure"
         />
       </div>
