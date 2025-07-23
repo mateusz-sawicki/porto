@@ -1,5 +1,5 @@
-# Multi-stage build for optimized production image
-FROM node:18-alpine AS build-stage
+# Multi-stage build for development and production
+FROM node:18-alpine AS base
 
 # Set working directory
 WORKDIR /app
@@ -7,11 +7,26 @@ WORKDIR /app
 # Copy package files
 COPY package*.json ./
 
-# Install ALL dependencies (including dev deps needed for build)
+# Install ALL dependencies (including dev dependencies)
 RUN npm ci
 
 # Copy source code
 COPY . .
+
+# Development stage
+FROM base AS development-stage
+
+# Set environment to development
+ENV NODE_ENV=development
+
+# Expose development port (Vite default)
+EXPOSE 5173
+
+# Start development server
+CMD ["npm", "run", "dev", "--", "--host", "0.0.0.0"]
+
+# Build stage for production
+FROM base AS build-stage
 
 # Build the application
 RUN npm run build

@@ -1,7 +1,13 @@
 services:
   vue-app:
-    build: .
+    build: 
+      context: .
+      target: development-stage
     ports:
-      - '6969:80'
+      - '6969:5173'
     environment:
-      - NODE_ENV=production
+      - NODE_ENV=development
+      - VITE_API_URL=http://localhost:3000
+    volumes:
+      - .:/app
+      - /app/node_modules
