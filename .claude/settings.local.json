@@ -10,7 +10,10 @@
       "Bash(rm:*)",
       "Bash(npm run lint)",
       "Bash(npm run lint:*)",
-      "Bash(npm run type-check:*)"
+      "Bash(npm run type-check:*)",
+      "WebFetch(domain:vee-validate.logaretm.com)",
+      "mcp__ide__getDiagnostics",
+      "WebFetch(domain:reka-ui.com)"
     ],
     "deny": []
   }

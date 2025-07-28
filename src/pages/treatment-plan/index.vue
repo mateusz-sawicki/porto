@@ -120,10 +120,15 @@
         </CardHeader>
         <CardContent>
           <!-- Step 1: Basic Information -->
-          <BasicInformationStep
+          <!-- <BasicInformationStep
             v-if="currentStep === 1"
             :form-data="basicInfoData"
             @update:form-data="updateBasicInfo"
+          /> -->
+          <MedicalInterviewStep
+            v-if="currentStep === 1"
+            :form-data="formData"
+            @update:form-data="handleFormUpdate"
           />
 
           <!-- Step 2: Odontogram -->
@@ -276,12 +281,14 @@ import {
   Loader2,
 } from 'lucide-vue-next'
 import { useOdontogram } from '@/composables/odontogram/useOdontogram'
-import BasicInformationStep from './steps/BasicInformationStep.vue'
+import BasicInformationStep from './steps/medical-interview/MedicalInterviewStep.vue'
 import OdontogramStep from './steps/OdontogramStep.vue'
 import MeasurementsStep from './steps/MeasurementsStep.vue'
 import AssessmentStep from './steps/AssessmentStep.vue'
 import DocumentsStep from './steps/DocumentsStep.vue'
 import ReviewStep from './steps/ReviewStep.vue'
+import UserRegistrationForm from '@/components/forms/UserRegistrationForm.vue'
+import MedicalInterviewStep from './steps/medical-interview/MedicalInterviewStep.vue'
 
 // Types
 interface Procedure {
@@ -737,5 +744,13 @@ const createTreatmentPlan = () => {
     teethWithProcedures: teethWithProcedures.value,
   })
   // Handle treatment plan creation
+}
+
+const formData = ref({
+  medicalHistory: {},
+})
+
+const handleFormUpdate = (data: { medicalHistory: any }) => {
+  formData.value = data
 }
 </script>
