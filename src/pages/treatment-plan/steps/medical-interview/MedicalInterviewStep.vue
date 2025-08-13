@@ -1,7 +1,6 @@
 <template>
   <div class="p-6 space-y-6">
     <form :validation-schema="formSchema" @submit="onSubmit" class="space-y-8">
-      <!-- Dynamic Sections -->
       <div
         v-for="(section, sectionKey) in fieldConfigs.sections"
         :key="sectionKey"
@@ -40,7 +39,6 @@
         </template>
       </div>
 
-      <!-- Submit Button -->
       <Button type="submit" class="max-w-md"> Wyślij formularz </Button>
     </form>
   </div>
@@ -53,8 +51,6 @@ import * as z from 'zod'
 
 import { Button } from '@/components/ui/button'
 import CheckBoxWithTextField from '@/components/forms/CheckBoxWithTextField.vue'
-const medicalHistoryTextFieldPlaceholder = 'Opisz pełne rozpoznanie, od kiedy, rodzaj leczenia...'
-// Field configuration for dynamic rendering
 const fieldConfigs = {
   sections: [
     {
@@ -256,7 +252,6 @@ const fieldConfigs = {
   template: 'medicalInterview',
 }
 
-// Generate schemas dynamically from field configs
 const createCheckboxWithTextFieldSchema = (fields: any[]) => {
   const schemaObj: any = {}
   fields.forEach((field: any) => {
@@ -268,14 +263,12 @@ const createCheckboxWithTextFieldSchema = (fields: any[]) => {
   return z.object(schemaObj)
 }
 
-// Generate all schemas dynamically from fieldConfigs
 const generateFormSchema = () => {
   const schemaObj: any = {}
 
   fieldConfigs.sections.forEach((section: any) => {
     const sectionSchemaObj: any = {}
 
-    // Create separate schemas for each subsection
     if (section.subsections && section.subsections.length > 0) {
       section.subsections.forEach((subsection: any) => {
         if (subsection.fields && subsection.fields.length > 0) {
@@ -284,7 +277,6 @@ const generateFormSchema = () => {
       })
     }
 
-    // Add direct fields if no subsections
     if (section.fields && section.fields.length > 0) {
       sectionSchemaObj.fields = createCheckboxWithTextFieldSchema(section.fields)
     }
@@ -295,17 +287,12 @@ const generateFormSchema = () => {
   return z.object(schemaObj)
 }
 
-// Combined nested schema - completely dynamic
 const formSchema = toTypedSchema(generateFormSchema())
 
-// Formularz setup
 const form = useForm({
   validationSchema: formSchema,
 })
 
-// No need for manual field states - vee-validate handles this automatically
-
-// Submit handler
 const onSubmit = form.handleSubmit((values) => {
   console.log('Form values:', values)
 })
