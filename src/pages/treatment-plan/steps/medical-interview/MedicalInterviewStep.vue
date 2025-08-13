@@ -103,12 +103,6 @@ const fieldConfigs = {
               type: 'checkboxWithTextField',
             },
             {
-              checkboxLabel: 'Choroby serca?',
-              name: 'heartDisease',
-              textFieldPlaceholder: 'Opisz pełne rozpoznanie, od kiedy, rodzaj leczenia...',
-              type: 'checkboxWithTextField',
-            },
-            {
               checkboxLabel: 'Choroby układu odpornościowego?',
               name: 'immuneSystemDiseases',
               textFieldPlaceholder: 'Opisz pełne rozpoznanie, od kiedy, rodzaj leczenia...',
@@ -117,12 +111,6 @@ const fieldConfigs = {
             {
               checkboxLabel: 'WZW typ B/C?',
               name: 'hepatisisBOrC',
-              textFieldPlaceholder: 'Opisz pełne rozpoznanie, od kiedy, rodzaj leczenia...',
-              type: 'checkboxWithTextField',
-            },
-            {
-              checkboxLabel: 'Choroby serca?',
-              name: 'heartDisease',
               textFieldPlaceholder: 'Opisz pełne rozpoznanie, od kiedy, rodzaj leczenia...',
               type: 'checkboxWithTextField',
             },
@@ -139,7 +127,7 @@ const fieldConfigs = {
               type: 'checkboxWithTextField',
             },
             {
-              checkboxLabel: 'Padaczka??',
+              checkboxLabel: 'Padaczka?',
               name: 'epilepsy',
               textFieldPlaceholder: 'Opisz pełne rozpoznanie, od kiedy, rodzaj leczenia...',
               type: 'checkboxWithTextField',
@@ -157,20 +145,8 @@ const fieldConfigs = {
               type: 'checkboxWithTextField',
             },
             {
-              checkboxLabel: 'Choroby serca?',
-              name: 'congenitalDefects',
-              textFieldPlaceholder: 'Opisz pełne rozpoznanie, od kiedy, rodzaj leczenia...',
-              type: 'checkboxWithTextField',
-            },
-            {
               checkboxLabel: 'Wady wrodzone?',
-              name: 'cardiovascularDiseases',
-              textFieldPlaceholder: 'Opisz pełne rozpoznanie, od kiedy, rodzaj leczenia...',
-              type: 'checkboxWithTextField',
-            },
-            {
-              checkboxLabel: 'Choroby sercowo naczyniowe?',
-              name: 'cardiovascularDiseases',
+              name: 'congenitalDefects',
               textFieldPlaceholder: 'Opisz pełne rozpoznanie, od kiedy, rodzaj leczenia...',
               type: 'checkboxWithTextField',
             },
