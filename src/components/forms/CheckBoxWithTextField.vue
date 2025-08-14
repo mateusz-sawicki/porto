@@ -46,7 +46,7 @@
             v-bind="textComponentField"
             :placeholder="textFieldPlaceholder"
             type="text"
-            class="max-w-md"
+            class="max-w-xl"
           />
         </FormControl>
         <FormMessage />

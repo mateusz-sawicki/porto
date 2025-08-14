@@ -1,27 +1,29 @@
 <template>
   <div class="p-6 space-y-6">
     <form :validation-schema="formSchema" @submit="onSubmit" class="space-y-8">
-      <div
-        v-for="(section, sectionKey) in fieldConfigs.sections"
-        :key="sectionKey"
-        class="space-y-4"
-      >
-        <h2 class="text-lg font-bold">{{ section.title }}</h2>
-        <h5 class="text-md whitespace-pre-line">{{ section.description }}</h5>
+      <div v-for="(section, sectionKey) in fieldConfigs.sections" :key="sectionKey">
+        <h2 class="text-lg font-bold mb-2">{{ section.title }}</h2>
+        <h5 class="text-md whitespace-pre-line mb-2">{{ section.description }}</h5>
         <template v-if="section.subsections && section.subsections.length > 0">
           <div
             v-for="(subsection, subsectionIndex) in section.subsections"
             :key="subsectionIndex"
-            class="space-y-3"
+            class="space-y-3 mb-8"
           >
-            <h4 v-if="subsection.title" class="text-md">{{ subsection.title }}</h4>
+            <h4 v-if="subsection.title" class="text-md my-5">{{ subsection.title }}</h4>
             <template v-for="field in subsection.fields" :key="field.name">
               <CheckBoxWithTextField
                 v-if="field.type === 'checkboxWithTextField'"
                 :name="`${section.name}.${subsection.name}.${field.name}`"
-                :checkbox-label="field.checkboxLabel"
-                :text-field-label="(field as any).textFieldLabel || null"
+                :checkbox-label="(field as any).checkboxLabel"
+                :text-field-label="(field as any).textFieldLabel ?? null"
                 :text-field-placeholder="field.textFieldPlaceholder"
+              />
+              <TextareaFormField
+                v-if="field.type === 'textarea'"
+                :name="`${section.name}.${subsection.name}.${field.name}`"
+                :label="(field as any).textFieldLabel"
+                :placeholder="field.textFieldPlaceholder"
               />
             </template>
           </div>
@@ -34,6 +36,12 @@
               :checkbox-label="(field as any).checkboxLabel"
               :text-field-label="(field as any).textFieldLabel || null"
               :text-field-placeholder="(field as any).textFieldPlaceholder"
+            />
+            <TextareaFormField
+              v-if="(field as any).type === 'textarea'"
+              :name="`${section.name}.fields.${(field as any).name}`"
+              :label="(field as any).textFieldLabel"
+              :placeholder="(field as any).textFieldPlaceholder"
             />
           </template>
         </template>
@@ -51,12 +59,12 @@ import * as z from 'zod'
 
 import { Button } from '@/components/ui/button'
 import CheckBoxWithTextField from '@/components/forms/CheckBoxWithTextField.vue'
+import TextareaFormField from '@/components/forms/TextareaFormField.vue'
 const fieldConfigs = {
   sections: [
     {
       description:
         'Proszę szczegółowo odpowiedzieć na wszystkie pytania, aby pomóc w postawieniu diagnozy i ułożeniu planu leczenia.',
-      fields: [],
       name: 'medicalHistory',
       subsections: [
         {
@@ -245,8 +253,54 @@ const fieldConfigs = {
           name: 'patientDisorders',
           title: 'Czy podejrzewa się lub zdiagnozowano zaburzenia:',
         },
+        {
+          description: '',
+          fields: [
+            {
+              name: 'surgeries',
+              textFieldLabel: 'Pobyty w szpitalu i operacje. Kiedy i z jakiego powodu?',
+              textFieldPlaceholder: 'Opisz pobyty w szpitalu i przebyte operacje...',
+              type: 'textarea',
+            },
+            {
+              name: 'medications',
+              textFieldLabel: 'Przyjmowane leki:',
+              textFieldPlaceholder: 'Opisz przyjmowane leki...',
+              type: 'textarea',
+            },
+            {
+              name: 'notes',
+              textFieldLabel: 'Inne uwagi:',
+              textFieldPlaceholder: 'Inne uwagi dotyczące historii medycznej pacjenta...',
+              type: 'textarea',
+            },
+          ],
+          name: 'patientDisorders',
+          title: '',
+        },
       ],
       title: 'Historia medyczna',
+    },
+    {
+      name: 'infancy',
+      description: '',
+      title: 'Okres niemowlęcy',
+      fields: [
+        {
+          checkboxLabel: 'Poród Cesarskie cięcie?',
+          name: 'caesareanSection',
+          textFieldLabel: 'Powód?',
+          textFieldPlaceholder: 'Opisz powód wykonania cesarskiego cięcia...',
+          type: 'checkboxWithTextField',
+        },
+        {
+          checkboxLabel: 'Poród Cesarskie cięcie?',
+          name: 'caesareanSection',
+          textFieldLabel: 'Powód?',
+          textFieldPlaceholder: 'Opisz powód wykonania cesarskiego cięcia...',
+          type: 'checkboxWithTextField',
+        },
+      ],
     },
   ],
   template: 'medicalInterview',
@@ -258,6 +312,8 @@ const createCheckboxWithTextFieldSchema = (fields: any[]) => {
     if (field.type === 'checkboxWithTextField') {
       schemaObj[field.name] = z.boolean().default(false)
       schemaObj[`${field.name}Description`] = z.string().default('')
+    } else if (field.type === 'textarea') {
+      schemaObj[field.name] = z.string().default('')
     }
   })
   return z.object(schemaObj)
