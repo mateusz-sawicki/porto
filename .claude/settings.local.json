@@ -13,7 +13,8 @@
       "Bash(npm run type-check:*)",
       "WebFetch(domain:vee-validate.logaretm.com)",
       "mcp__ide__getDiagnostics",
-      "WebFetch(domain:reka-ui.com)"
+      "WebFetch(domain:reka-ui.com)",
+      "Bash(mv:*)"
     ],
     "deny": [],
     "defaultMode": "acceptEdits"

@@ -18,7 +18,6 @@ interface Props {
   name: string
   label?: string
   placeholder?: string
-  className?: string
 }
 
 withDefaults(defineProps<Props>(), {})

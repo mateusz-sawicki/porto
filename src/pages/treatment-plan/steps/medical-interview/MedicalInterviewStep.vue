@@ -1,7 +1,8 @@
 <template>
   <div class="p-6 space-y-6">
     <form :validation-schema="formSchema" @submit="onSubmit" class="space-y-8">
-      <div v-for="(section, sectionKey) in fieldConfigs.sections" :key="sectionKey">
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <div v-for="(section, sectionKey) in fieldConfigs.sections" :key="sectionKey">
         <h2 class="text-lg font-bold mb-2">{{ section.title }}</h2>
         <h5 class="text-md whitespace-pre-line mb-2">{{ section.description }}</h5>
         <template v-if="section.subsections && section.subsections.length > 0">
@@ -12,39 +13,62 @@
           >
             <h4 v-if="subsection.title" class="text-md my-5">{{ subsection.title }}</h4>
             <template v-for="field in subsection.fields" :key="field.name">
-              <CheckBoxWithTextField
-                v-if="field.type === 'checkboxWithTextField'"
-                :name="`${section.name}.${subsection.name}.${field.name}`"
-                :checkbox-label="(field as any).checkboxLabel"
-                :text-field-label="(field as any).textFieldLabel ?? null"
-                :text-field-placeholder="field.textFieldPlaceholder"
-              />
               <TextareaFormField
                 v-if="field.type === 'textarea'"
                 :name="`${section.name}.${subsection.name}.${field.name}`"
                 :label="(field as any).textFieldLabel"
-                :placeholder="field.textFieldPlaceholder"
+                :placeholder="(field as any).textFieldPlaceholder"
+              />
+              <ConditionalFormField
+                v-if="field.type === 'conditionalField'"
+                :name="`${section.name}.${subsection.name}.${field.name}`"
+                :checkbox-label="(field as any).checkboxLabel"
+                :conditional-field="(field as any).conditionalField"
+              />
+              <CheckBoxFormField
+                v-if="field.type === 'checkbox'"
+                :name="`${section.name}.${subsection.name}.${field.name}`"
+                :label="(field as any).label"
+              />
+              <RadioFormField
+                v-if="field.type === 'radio'"
+                :name="`${section.name}.${subsection.name}.${field.name}`"
+                :label="(field as any).label"
+                :options="(field as any).options"
               />
             </template>
           </div>
         </template>
         <template v-if="!section.subsections || section.subsections.length === 0">
-          <template v-for="field in section.fields" :key="(field as any).name">
-            <CheckBoxWithTextField
-              v-if="(field as any).type === 'checkboxWithTextField'"
-              :name="`${section.name}.fields.${(field as any).name}`"
-              :checkbox-label="(field as any).checkboxLabel"
-              :text-field-label="(field as any).textFieldLabel || null"
-              :text-field-placeholder="(field as any).textFieldPlaceholder"
-            />
-            <TextareaFormField
-              v-if="(field as any).type === 'textarea'"
-              :name="`${section.name}.fields.${(field as any).name}`"
-              :label="(field as any).textFieldLabel"
-              :placeholder="(field as any).textFieldPlaceholder"
-            />
-          </template>
+          <div class="space-y-3 mb-8">
+            <template v-for="field in section.fields" :key="(field as any).name">
+              <ConditionalFormField
+                v-if="(field as any).type === 'conditionalField'"
+                :name="`${section.name}.fields.${(field as any).name}`"
+                :checkbox-label="(field as any).checkboxLabel"
+                :conditional-field="(field as any).conditionalField"
+              />
+              <TextareaFormField
+                v-if="(field as any).type === 'textarea'"
+                :name="`${section.name}.fields.${(field as any).name}`"
+                :label="(field as any).textFieldLabel"
+                :placeholder="(field as any).textFieldPlaceholder"
+              />
+              <CheckBoxFormField
+                v-if="(field as any).type === 'checkbox'"
+                :name="`${section.name}.fields.${(field as any).name}`"
+                :label="(field as any).label"
+              />
+              <RadioFormField
+                v-if="(field as any).type === 'radio'"
+                :name="`${section.name}.fields.${(field as any).name}`"
+                :label="(field as any).label"
+                :options="(field as any).options"
+              />
+            </template>
+          </div>
         </template>
+        </div>
       </div>
 
       <Button type="submit" class="max-w-md"> Wyślij formularz </Button>
@@ -58,261 +82,37 @@ import { toTypedSchema } from '@vee-validate/zod'
 import * as z from 'zod'
 
 import { Button } from '@/components/ui/button'
-import CheckBoxWithTextField from '@/components/forms/CheckBoxWithTextField.vue'
+import ConditionalFormField from '@/components/forms/ConditionalFormField.vue'
 import TextareaFormField from '@/components/forms/TextareaFormField.vue'
-const fieldConfigs = {
-  sections: [
-    {
-      description:
-        'Proszę szczegółowo odpowiedzieć na wszystkie pytania, aby pomóc w postawieniu diagnozy i ułożeniu planu leczenia.',
-      name: 'medicalHistory',
-      subsections: [
-        {
-          description: null,
-          fields: [
-            {
-              checkboxLabel: 'Choroby serca?',
-              name: 'heartDisease',
-              textFieldPlaceholder: 'Opisz pełne rozpoznanie, od kiedy, rodzaj leczenia...',
-              type: 'checkboxWithTextField',
-            },
-            {
-              checkboxLabel: 'Choroby sercowo naczyniowe?',
-              name: 'cardiovascularDiseases',
-              textFieldPlaceholder: 'Opisz pełne rozpoznanie, od kiedy, rodzaj leczenia...',
-              type: 'checkboxWithTextField',
-            },
-            {
-              checkboxLabel: 'Nadciśnienie krwi?',
-              name: 'hypertension',
-              textFieldPlaceholder: 'Opisz pełne rozpoznanie, od kiedy, rodzaj leczenia...',
-              type: 'checkboxWithTextField',
-            },
-            {
-              checkboxLabel: 'Krwawienie, zaburzenia krzepnięcia krwi?',
-              name: 'bloodDisorders',
-              textFieldPlaceholder: 'Opisz pełne rozpoznanie, od kiedy, rodzaj leczenia...',
-              type: 'checkboxWithTextField',
-            },
-            {
-              checkboxLabel: 'Choroby nowotworowe?',
-              name: 'cancer',
-              textFieldPlaceholder: 'Opisz pełne rozpoznanie, od kiedy, rodzaj leczenia...',
-              type: 'checkboxWithTextField',
-            },
-            {
-              checkboxLabel: 'Zaburzenia odżywiania?',
-              name: 'eatingDisorders',
-              textFieldPlaceholder: 'Opisz pełne rozpoznanie, od kiedy, rodzaj leczenia...',
-              type: 'checkboxWithTextField',
-            },
-            {
-              checkboxLabel: 'Choroby układu odpornościowego?',
-              name: 'immuneSystemDiseases',
-              textFieldPlaceholder: 'Opisz pełne rozpoznanie, od kiedy, rodzaj leczenia...',
-              type: 'checkboxWithTextField',
-            },
-            {
-              checkboxLabel: 'WZW typ B/C?',
-              name: 'hepatisisBOrC',
-              textFieldPlaceholder: 'Opisz pełne rozpoznanie, od kiedy, rodzaj leczenia...',
-              type: 'checkboxWithTextField',
-            },
-            {
-              checkboxLabel: 'HIV?',
-              name: 'hiv',
-              textFieldPlaceholder: 'Opisz pełne rozpoznanie, od kiedy, rodzaj leczenia...',
-              type: 'checkboxWithTextField',
-            },
-            {
-              checkboxLabel: 'Choroby neurologiczne?',
-              name: 'neurologicalDiseases',
-              textFieldPlaceholder: 'Opisz pełne rozpoznanie, od kiedy, rodzaj leczenia...',
-              type: 'checkboxWithTextField',
-            },
-            {
-              checkboxLabel: 'Padaczka?',
-              name: 'epilepsy',
-              textFieldPlaceholder: 'Opisz pełne rozpoznanie, od kiedy, rodzaj leczenia...',
-              type: 'checkboxWithTextField',
-            },
-            {
-              checkboxLabel: 'Zaburzenia hormonalne?',
-              name: 'hormonalDisorders',
-              textFieldPlaceholder: 'Opisz pełne rozpoznanie, od kiedy, rodzaj leczenia...',
-              type: 'checkboxWithTextField',
-            },
-            {
-              checkboxLabel: 'Cukrzyca?',
-              name: 'diabetes',
-              textFieldPlaceholder: 'Opisz pełne rozpoznanie, od kiedy, rodzaj leczenia...',
-              type: 'checkboxWithTextField',
-            },
-            {
-              checkboxLabel: 'Wady wrodzone?',
-              name: 'congenitalDefects',
-              textFieldPlaceholder: 'Opisz pełne rozpoznanie, od kiedy, rodzaj leczenia...',
-              type: 'checkboxWithTextField',
-            },
-            {
-              checkboxLabel: 'Choroby dziedziczne?',
-              name: 'hereditaryDiseases',
-              textFieldPlaceholder: 'Opisz pełne rozpoznanie, od kiedy, rodzaj leczenia...',
-              type: 'checkboxWithTextField',
-            },
-            {
-              checkboxLabel: 'Choroby reumatoidalne?',
-              name: 'rheumatoidDiseases',
-              textFieldPlaceholder: 'Opisz pełne rozpoznanie, od kiedy, rodzaj leczenia...',
-              type: 'checkboxWithTextField',
-            },
-            {
-              checkboxLabel: 'Choroby układu kostnego?',
-              name: 'skeletalDiseases',
-              textFieldPlaceholder: 'Opisz pełne rozpoznanie, od kiedy, rodzaj leczenia...',
-              type: 'checkboxWithTextField',
-            },
-            {
-              checkboxLabel: 'Choroby nerek?',
-              name: 'kidneyDiseases',
-              textFieldPlaceholder: 'Opisz pełne rozpoznanie, od kiedy, rodzaj leczenia...',
-              type: 'checkboxWithTextField',
-            },
-            {
-              checkboxLabel: 'Choroby wątroby?',
-              name: 'liverDiseases',
-              textFieldPlaceholder: 'Opisz pełne rozpoznanie, od kiedy, rodzaj leczenia...',
-              type: 'checkboxWithTextField',
-            },
-            {
-              checkboxLabel: 'Choroby psychiczne?',
-              name: 'mentalIllnesses',
-              textFieldPlaceholder: 'Opisz pełne rozpoznanie, od kiedy, rodzaj leczenia...',
-              type: 'checkboxWithTextField',
-            },
-            {
-              checkboxLabel: 'Depresja?',
-              name: 'depression',
-              textFieldPlaceholder: 'Opisz pełne rozpoznanie, od kiedy, rodzaj leczenia...',
-              type: 'checkboxWithTextField',
-            },
-            {
-              checkboxLabel: 'Czy w czasie ostatnich 3 lat była konsultacja psychiatryczna?',
-              name: 'psychiatricConsultationInLastThreeYears',
-              textFieldPlaceholder: 'Opisz pełne rozpoznanie, od kiedy, rodzaj leczenia...',
-              type: 'checkboxWithTextField',
-            },
-            {
-              checkboxLabel: 'Astma?',
-              name: 'asthma',
-              textFieldPlaceholder: 'Opisz pełne rozpoznanie, od kiedy, rodzaj leczenia...',
-              type: 'checkboxWithTextField',
-            },
-            {
-              checkboxLabel: 'Alergie?',
-              name: 'allergies',
-              textFieldPlaceholder: 'Opisz pełne rozpoznanie, od kiedy, rodzaj leczenia...',
-              type: 'checkboxWithTextField',
-            },
-          ],
-          name: 'patientDiseases',
-          title: 'Czy pacjent choruje na:',
-        },
-        {
-          description: 'Czy pacjent choruje na:',
-          fields: [
-            {
-              checkboxLabel: 'ADHD?',
-              name: 'adhd',
-              textFieldLabel: 'Uwagi?',
-              textFieldPlaceholder: 'Opisz pełne rozpoznanie, od kiedy, rodzaj leczenia...',
-              type: 'checkboxWithTextField',
-            },
-            {
-              checkboxLabel: 'Dysleksja?',
-              name: 'dyslexia',
-              textFieldLabel: 'Uwagi?',
-              textFieldPlaceholder: 'Opisz pełne rozpoznanie, od kiedy, rodzaj leczenia...',
-              type: 'checkboxWithTextField',
-            },
-            {
-              checkboxLabel: 'Zespół Aspergera?',
-              name: 'aspergersSyndrome',
-              textFieldLabel: 'Uwagi?',
-              textFieldPlaceholder: 'Opisz pełne rozpoznanie, od kiedy, rodzaj leczenia...',
-              type: 'checkboxWithTextField',
-            },
-            {
-              checkboxLabel: 'Zaburzenia koordynacji?',
-              name: 'coordinationDisorders',
-              textFieldLabel: 'Jakie?',
-              textFieldPlaceholder: 'Opisz pełne rozpoznanie, od kiedy, rodzaj leczenia...',
-              type: 'checkboxWithTextField',
-            },
-          ],
-          name: 'patientDisorders',
-          title: 'Czy podejrzewa się lub zdiagnozowano zaburzenia:',
-        },
-        {
-          description: '',
-          fields: [
-            {
-              name: 'surgeries',
-              textFieldLabel: 'Pobyty w szpitalu i operacje. Kiedy i z jakiego powodu?',
-              textFieldPlaceholder: 'Opisz pobyty w szpitalu i przebyte operacje...',
-              type: 'textarea',
-            },
-            {
-              name: 'medications',
-              textFieldLabel: 'Przyjmowane leki:',
-              textFieldPlaceholder: 'Opisz przyjmowane leki...',
-              type: 'textarea',
-            },
-            {
-              name: 'notes',
-              textFieldLabel: 'Inne uwagi:',
-              textFieldPlaceholder: 'Inne uwagi dotyczące historii medycznej pacjenta...',
-              type: 'textarea',
-            },
-          ],
-          name: 'patientDisorders',
-          title: '',
-        },
-      ],
-      title: 'Historia medyczna',
-    },
-    {
-      name: 'infancy',
-      description: '',
-      title: 'Okres niemowlęcy',
-      fields: [
-        {
-          checkboxLabel: 'Poród Cesarskie cięcie?',
-          name: 'caesareanSection',
-          textFieldLabel: 'Powód?',
-          textFieldPlaceholder: 'Opisz powód wykonania cesarskiego cięcia...',
-          type: 'checkboxWithTextField',
-        },
-        {
-          checkboxLabel: 'Poród Cesarskie cięcie?',
-          name: 'caesareanSection',
-          textFieldLabel: 'Powód?',
-          textFieldPlaceholder: 'Opisz powód wykonania cesarskiego cięcia...',
-          type: 'checkboxWithTextField',
-        },
-      ],
-    },
-  ],
-  template: 'medicalInterview',
-}
+import CheckBoxFormField from '@/components/forms/CheckBoxFormField.vue'
+import RadioFormField from '@/components/forms/RadioFormField.vue'
+import { fieldConfigs } from './medicalInterviewConfig'
 
-const createCheckboxWithTextFieldSchema = (fields: any[]) => {
+const createConditionalFormFieldSchema = (fields: any[]) => {
   const schemaObj: any = {}
   fields.forEach((field: any) => {
-    if (field.type === 'checkboxWithTextField') {
+    if (field.type === 'conditionalField') {
+      // Handle checkbox with conditional field
       schemaObj[field.name] = z.boolean().default(false)
-      schemaObj[`${field.name}Description`] = z.string().default('')
+
+      // Handle the conditional field value based on its type
+      const conditionalFieldType = field.conditionalField?.type
+      if (conditionalFieldType === 'textarea') {
+        schemaObj[`${field.name}Value`] = z.string().default('')
+      } else if (conditionalFieldType === 'select' || conditionalFieldType === 'radio') {
+        schemaObj[`${field.name}Value`] = z.string().default('')
+      } else if (conditionalFieldType === 'multichoice') {
+        schemaObj[`${field.name}Value`] = z.array(z.string()).default([])
+      } else if (conditionalFieldType === 'datepicker') {
+        schemaObj[`${field.name}Value`] = z.date().optional()
+      }
     } else if (field.type === 'textarea') {
+      schemaObj[field.name] = z.string().default('')
+    } else if (field.type === 'checkbox') {
+      // Handle simple checkbox
+      schemaObj[field.name] = z.boolean().default(false)
+    } else if (field.type === 'radio') {
+      // Handle simple radio group
       schemaObj[field.name] = z.string().default('')
     }
   })
@@ -328,13 +128,13 @@ const generateFormSchema = () => {
     if (section.subsections && section.subsections.length > 0) {
       section.subsections.forEach((subsection: any) => {
         if (subsection.fields && subsection.fields.length > 0) {
-          sectionSchemaObj[subsection.name] = createCheckboxWithTextFieldSchema(subsection.fields)
+          sectionSchemaObj[subsection.name] = createConditionalFormFieldSchema(subsection.fields)
         }
       })
     }
 
     if (section.fields && section.fields.length > 0) {
-      sectionSchemaObj.fields = createCheckboxWithTextFieldSchema(section.fields)
+      sectionSchemaObj.fields = createConditionalFormFieldSchema(section.fields)
     }
 
     schemaObj[section.name] = z.object(sectionSchemaObj)
