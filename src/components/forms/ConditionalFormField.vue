@@ -33,15 +33,15 @@
       </FormItem>
     </FormField>
 
-    <!-- Conditional Field -->
+    <!-- Conditional Fields -->
     <template v-if="checkboxState">
-      <!-- Conditional Field Types -->
-      <template v-if="conditionalField">
+      <!-- Loop through all conditional fields -->
+      <template v-for="(conditionalField, index) in conditionalFields" :key="index">
         <!-- Textarea Field -->
         <FormField
           v-if="conditionalField.type === 'textarea'"
           v-slot="{ componentField }"
-          :name="conditionalFieldName"
+          :name="getConditionalFieldName(index)"
         >
           <FormItem>
             <FormLabel v-if="conditionalField.label">{{ conditionalField.label }}</FormLabel>
@@ -60,7 +60,7 @@
         <FormField
           v-if="conditionalField.type === 'select'"
           v-slot="{ componentField }"
-          :name="conditionalFieldName"
+          :name="getConditionalFieldName(index)"
         >
           <FormItem>
             <FormLabel v-if="conditionalField.label">{{ conditionalField.label }}</FormLabel>
@@ -88,7 +88,7 @@
         <FormField
           v-if="conditionalField.type === 'radio'"
           v-slot="{ componentField }"
-          :name="conditionalFieldName"
+          :name="getConditionalFieldName(index)"
         >
           <FormItem class="space-y-3">
             <FormLabel v-if="conditionalField.label">{{ conditionalField.label }}</FormLabel>
@@ -99,8 +99,8 @@
                   :key="option.value"
                   class="flex items-center space-x-2"
                 >
-                  <RadioGroupItem :value="option.value" :id="option.value" />
-                  <Label :for="option.value">{{ option.label }}</Label>
+                  <RadioGroupItem :value="option.value" :id="`${option.value}_${index}`" />
+                  <Label :for="`${option.value}_${index}`">{{ option.label }}</Label>
                 </div>
               </RadioGroup>
             </FormControl>
@@ -112,7 +112,7 @@
         <FormField
           v-if="conditionalField.type === 'multichoice'"
           v-slot="{ componentField }"
-          :name="conditionalFieldName"
+          :name="getConditionalFieldName(index)"
           class="space-y-3"
         >
           <FormItem>
@@ -124,7 +124,7 @@
                 class="flex items-center space-x-2"
               >
                 <Checkbox
-                  :id="option.value"
+                  :id="`${option.value}_${index}`"
                   :checked="(componentField.modelValue || []).includes(option.value)"
                   @update:checked="
                     (checked: boolean) => {
@@ -139,7 +139,7 @@
                     }
                   "
                 />
-                <Label :for="option.value">{{ option.label }}</Label>
+                <Label :for="`${option.value}_${index}`">{{ option.label }}</Label>
               </div>
             </div>
             <FormMessage />
@@ -150,7 +150,7 @@
         <FormField
           v-if="conditionalField.type === 'datepicker'"
           v-slot="{ componentField }"
-          :name="conditionalFieldName"
+          :name="getConditionalFieldName(index)"
           class="space-y-3"
         >
           <FormItem class="flex flex-col">
@@ -190,7 +190,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref } from 'vue'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Label } from '@/components/ui/label'
 import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
@@ -223,7 +223,7 @@ interface ConditionalFieldConfig {
 interface Props {
   name: string
   checkboxLabel: string
-  conditionalField: ConditionalFieldConfig
+  conditionalFields: ConditionalFieldConfig[]
 }
 
 const props = defineProps<Props>()
@@ -231,13 +231,17 @@ const props = defineProps<Props>()
 // Simple reactive state for checkbox
 const checkboxState = ref(false)
 
-const conditionalFieldName = computed(() => {
+// Helper function to generate field name for a specific conditional field
+const getConditionalFieldName = (index: number) => {
   const parts = props.name.split('.')
   if (parts.length > 1) {
     const lastPart = parts[parts.length - 1]
-    parts[parts.length - 1] = `${lastPart}Value`
+    const suffix = props.conditionalFields.length === 1 ? 'Value' : `Value${index + 1}`
+    parts[parts.length - 1] = `${lastPart}${suffix}`
     return parts.join('.')
   }
-  return `${props.name}Value`
-})
+  const suffix = props.conditionalFields.length === 1 ? 'Value' : `Value${index + 1}`
+  return `${props.name}${suffix}`
+}
+
 </script>

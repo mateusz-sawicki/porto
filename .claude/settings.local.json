@@ -14,9 +14,13 @@
       "WebFetch(domain:vee-validate.logaretm.com)",
       "mcp__ide__getDiagnostics",
       "WebFetch(domain:reka-ui.com)",
-      "Bash(mv:*)"
+      "Bash(mv:*)",
+      "Bash(npx eslint:*)"
     ],
     "deny": [],
-    "defaultMode": "acceptEdits"
+    "defaultMode": "acceptEdits",
+    "additionalDirectories": [
+      "C:\\mnt\\c\\Users\\mathe\\source\\repos\\Porto"
+    ]
   }
 }

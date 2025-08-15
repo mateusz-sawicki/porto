@@ -23,7 +23,7 @@
                 v-if="field.type === 'conditionalField'"
                 :name="`${section.name}.${subsection.name}.${field.name}`"
                 :checkbox-label="(field as any).checkboxLabel"
-                :conditional-field="(field as any).conditionalField"
+                :conditional-fields="(field as any).conditionalFields"
               />
               <CheckBoxFormField
                 v-if="field.type === 'checkbox'"
@@ -46,7 +46,7 @@
                 v-if="(field as any).type === 'conditionalField'"
                 :name="`${section.name}.fields.${(field as any).name}`"
                 :checkbox-label="(field as any).checkboxLabel"
-                :conditional-field="(field as any).conditionalField"
+                :conditional-fields="(field as any).conditionalFields"
               />
               <TextareaFormField
                 v-if="(field as any).type === 'textarea'"
@@ -92,19 +92,29 @@ const createConditionalFormFieldSchema = (fields: any[]) => {
   const schemaObj: any = {}
   fields.forEach((field: any) => {
     if (field.type === 'conditionalField') {
-      // Handle checkbox with conditional field
+      // Handle checkbox with conditional field(s)
       schemaObj[field.name] = z.boolean().default(false)
 
-      // Handle the conditional field value based on its type
-      const conditionalFieldType = field.conditionalField?.type
-      if (conditionalFieldType === 'textarea') {
-        schemaObj[`${field.name}Value`] = z.string().default('')
-      } else if (conditionalFieldType === 'select' || conditionalFieldType === 'radio') {
-        schemaObj[`${field.name}Value`] = z.string().default('')
-      } else if (conditionalFieldType === 'multichoice') {
-        schemaObj[`${field.name}Value`] = z.array(z.string()).default([])
-      } else if (conditionalFieldType === 'datepicker') {
-        schemaObj[`${field.name}Value`] = z.date().optional()
+      // Helper function to create schema for a conditional field
+      const createSchemaForConditionalFieldType = (conditionalFieldType: string) => {
+        if (conditionalFieldType === 'textarea') {
+          return z.string().default('')
+        } else if (conditionalFieldType === 'select' || conditionalFieldType === 'radio') {
+          return z.string().default('')
+        } else if (conditionalFieldType === 'multichoice') {
+          return z.array(z.string()).default([])
+        } else if (conditionalFieldType === 'datepicker') {
+          return z.date().optional()
+        }
+        return z.string().default('')
+      }
+
+      // Handle multiple conditional fields
+      if (field.conditionalFields && Array.isArray(field.conditionalFields)) {
+        field.conditionalFields.forEach((conditionalField: any, index: number) => {
+          const suffix = field.conditionalFields.length === 1 ? 'Value' : `Value${index + 1}`
+          schemaObj[`${field.name}${suffix}`] = createSchemaForConditionalFieldType(conditionalField.type)
+        })
       }
     } else if (field.type === 'textarea') {
       schemaObj[field.name] = z.string().default('')
