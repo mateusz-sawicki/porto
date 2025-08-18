@@ -1,73 +1,73 @@
 <template>
   <div class="p-6 space-y-6">
     <form :validation-schema="formSchema" @submit="onSubmit" class="space-y-8">
-      <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+      <div class="grid grid-cols-1 gap-8">
         <div v-for="(section, sectionKey) in fieldConfigs.sections" :key="sectionKey">
-        <h2 class="text-lg font-bold mb-2">{{ section.title }}</h2>
-        <h5 class="text-md whitespace-pre-line mb-2">{{ section.description }}</h5>
-        <template v-if="section.subsections && section.subsections.length > 0">
-          <div
-            v-for="(subsection, subsectionIndex) in section.subsections"
-            :key="subsectionIndex"
-            class="space-y-3 mb-8"
-          >
-            <h4 v-if="subsection.title" class="text-md my-5">{{ subsection.title }}</h4>
-            <template v-for="field in subsection.fields" :key="field.name">
-              <TextareaFormField
-                v-if="field.type === 'textarea'"
-                :name="`${section.name}.${subsection.name}.${field.name}`"
-                :label="(field as any).textFieldLabel"
-                :placeholder="(field as any).textFieldPlaceholder"
-              />
-              <ConditionalFormField
-                v-if="field.type === 'conditionalField'"
-                :name="`${section.name}.${subsection.name}.${field.name}`"
-                :checkbox-label="(field as any).checkboxLabel"
-                :conditional-fields="(field as any).conditionalFields"
-              />
-              <CheckBoxFormField
-                v-if="field.type === 'checkbox'"
-                :name="`${section.name}.${subsection.name}.${field.name}`"
-                :label="(field as any).label"
-              />
-              <RadioFormField
-                v-if="field.type === 'radio'"
-                :name="`${section.name}.${subsection.name}.${field.name}`"
-                :label="(field as any).label"
-                :options="(field as any).options"
-              />
-            </template>
-          </div>
-        </template>
-        <template v-if="!section.subsections || section.subsections.length === 0">
-          <div class="space-y-3 mb-8">
-            <template v-for="field in section.fields" :key="(field as any).name">
-              <ConditionalFormField
-                v-if="(field as any).type === 'conditionalField'"
-                :name="`${section.name}.fields.${(field as any).name}`"
-                :checkbox-label="(field as any).checkboxLabel"
-                :conditional-fields="(field as any).conditionalFields"
-              />
-              <TextareaFormField
-                v-if="(field as any).type === 'textarea'"
-                :name="`${section.name}.fields.${(field as any).name}`"
-                :label="(field as any).textFieldLabel"
-                :placeholder="(field as any).textFieldPlaceholder"
-              />
-              <CheckBoxFormField
-                v-if="(field as any).type === 'checkbox'"
-                :name="`${section.name}.fields.${(field as any).name}`"
-                :label="(field as any).label"
-              />
-              <RadioFormField
-                v-if="(field as any).type === 'radio'"
-                :name="`${section.name}.fields.${(field as any).name}`"
-                :label="(field as any).label"
-                :options="(field as any).options"
-              />
-            </template>
-          </div>
-        </template>
+          <h2 class="text-lg font-bold mb-2">{{ section.title }}</h2>
+          <h5 class="text-md whitespace-pre-line mb-2">{{ section.description }}</h5>
+          <template v-if="section.subsections && section.subsections.length > 0">
+            <div
+              v-for="(subsection, subsectionIndex) in section.subsections"
+              :key="subsectionIndex"
+              class="space-y-3 mb-8"
+            >
+              <h4 v-if="subsection.title" class="text-md my-5">{{ subsection.title }}</h4>
+              <template v-for="field in subsection.fields" :key="field.name">
+                <TextareaFormField
+                  v-if="field.type === 'textarea'"
+                  :name="`${section.name}.${subsection.name}.${field.name}`"
+                  :label="(field as any).textFieldLabel"
+                  :placeholder="(field as any).textFieldPlaceholder"
+                />
+                <ConditionalFormField
+                  v-if="field.type === 'conditionalField'"
+                  :name="`${section.name}.${subsection.name}.${field.name}`"
+                  :label="(field as any).label"
+                  :conditional-fields="(field as any).conditionalFields"
+                />
+                <CheckBoxFormField
+                  v-if="field.type === 'checkbox'"
+                  :name="`${section.name}.${subsection.name}.${field.name}`"
+                  :label="(field as any).label"
+                />
+                <RadioFormField
+                  v-if="field.type === 'radio'"
+                  :name="`${section.name}.${subsection.name}.${field.name}`"
+                  :label="(field as any).label"
+                  :options="(field as any).options"
+                />
+              </template>
+            </div>
+          </template>
+          <template v-if="!section.subsections || section.subsections.length === 0">
+            <div class="space-y-3 mb-8">
+              <template v-for="field in section.fields" :key="(field as any).name">
+                <ConditionalFormField
+                  v-if="(field as any).type === 'conditionalField'"
+                  :name="`${section.name}.fields.${(field as any).name}`"
+                  :label="(field as any).label"
+                  :conditional-fields="(field as any).conditionalFields"
+                />
+                <TextareaFormField
+                  v-if="(field as any).type === 'textarea'"
+                  :name="`${section.name}.fields.${(field as any).name}`"
+                  :label="(field as any).textFieldLabel"
+                  :placeholder="(field as any).textFieldPlaceholder"
+                />
+                <CheckBoxFormField
+                  v-if="(field as any).type === 'checkbox'"
+                  :name="`${section.name}.fields.${(field as any).name}`"
+                  :label="(field as any).label"
+                />
+                <RadioFormField
+                  v-if="(field as any).type === 'radio'"
+                  :name="`${section.name}.fields.${(field as any).name}`"
+                  :label="(field as any).label"
+                  :options="(field as any).options"
+                />
+              </template>
+            </div>
+          </template>
         </div>
       </div>
 
@@ -113,7 +113,9 @@ const createConditionalFormFieldSchema = (fields: any[]) => {
       if (field.conditionalFields && Array.isArray(field.conditionalFields)) {
         field.conditionalFields.forEach((conditionalField: any, index: number) => {
           const suffix = field.conditionalFields.length === 1 ? 'Value' : `Value${index + 1}`
-          schemaObj[`${field.name}${suffix}`] = createSchemaForConditionalFieldType(conditionalField.type)
+          schemaObj[`${field.name}${suffix}`] = createSchemaForConditionalFieldType(
+            conditionalField.type,
+          )
         })
       }
     } else if (field.type === 'textarea') {

@@ -25,7 +25,7 @@
           </FormControl>
           <div class="space-y-1 leading-none">
             <Label :for="name" class="text-sm font-medium cursor-pointer">
-              {{ checkboxLabel }}
+              {{ label }}
             </Label>
           </div>
         </div>
@@ -85,6 +85,7 @@
         </FormField>
 
         <!-- Radio Group Field -->
+
         <FormField
           v-if="conditionalField.type === 'radio'"
           v-slot="{ componentField }"
@@ -222,7 +223,7 @@ interface ConditionalFieldConfig {
 
 interface Props {
   name: string
-  checkboxLabel: string
+  label: string
   conditionalFields: ConditionalFieldConfig[]
 }
 
@@ -243,5 +244,4 @@ const getConditionalFieldName = (index: number) => {
   const suffix = props.conditionalFields.length === 1 ? 'Value' : `Value${index + 1}`
   return `${props.name}${suffix}`
 }
-
 </script>
