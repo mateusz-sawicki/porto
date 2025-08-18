@@ -1,6 +1,6 @@
 <template>
   <div class="space-y-3">
-    <!-- Checkbox Field -->
+    <!-- Main Checkbox Field -->
     <FormField v-slot="{ componentField }" :name="name">
       <FormItem>
         <div class="flex flex-row items-start space-x-3 space-y-0">
@@ -38,27 +38,24 @@
       <!-- Loop through all conditional fields -->
       <template v-for="(conditionalField, index) in conditionalFields" :key="index">
         <!-- Textarea Field -->
-        <FormField
+        <TextareaFormField
           v-if="conditionalField.type === 'textarea'"
-          v-slot="{ componentField }"
           :name="getConditionalFieldName(index)"
-        >
-          <FormItem>
-            <FormLabel v-if="conditionalField.label">{{ conditionalField.label }}</FormLabel>
-            <FormControl>
-              <Textarea
-                v-bind="componentField"
-                :placeholder="conditionalField.placeholder"
-                class="max-w-xl"
-              />
-            </FormControl>
-            <FormMessage />
-          </FormItem>
-        </FormField>
+          :label="conditionalField.label"
+          :placeholder="conditionalField.placeholder"
+        />
+
+        <!-- Radio Group Field -->
+        <RadioFormField
+          v-else-if="conditionalField.type === 'radio'"
+          :name="getConditionalFieldName(index)"
+          :label="conditionalField.label"
+          :options="conditionalField.options!"
+        />
 
         <!-- Select Field -->
         <FormField
-          v-if="conditionalField.type === 'select'"
+          v-else-if="conditionalField.type === 'select'"
           v-slot="{ componentField }"
           :name="getConditionalFieldName(index)"
         >
@@ -84,34 +81,17 @@
           </FormItem>
         </FormField>
 
-        <!-- Radio Group Field -->
-
-        <FormField
-          v-if="conditionalField.type === 'radio'"
-          v-slot="{ componentField }"
+        <!-- Nested Conditional Field -->
+        <ConditionalFormField
+          v-else-if="conditionalField.type === 'conditionalField'"
           :name="getConditionalFieldName(index)"
-        >
-          <FormItem class="space-y-3">
-            <FormLabel v-if="conditionalField.label">{{ conditionalField.label }}</FormLabel>
-            <FormControl>
-              <RadioGroup v-bind="componentField" class="!flex !flex-row !gap-4">
-                <div
-                  v-for="option in conditionalField.options"
-                  :key="option.value"
-                  class="flex items-center space-x-2"
-                >
-                  <RadioGroupItem :value="option.value" :id="`${option.value}_${index}`" />
-                  <Label :for="`${option.value}_${index}`">{{ option.label }}</Label>
-                </div>
-              </RadioGroup>
-            </FormControl>
-            <FormMessage />
-          </FormItem>
-        </FormField>
+          :label="conditionalField.label || ''"
+          :conditional-fields="conditionalField.conditionalFields!"
+        />
 
         <!-- Multiple Checkbox Field -->
         <FormField
-          v-if="conditionalField.type === 'multichoice'"
+          v-else-if="conditionalField.type === 'multichoice'"
           v-slot="{ componentField }"
           :name="getConditionalFieldName(index)"
           class="space-y-3"
@@ -146,45 +126,6 @@
             <FormMessage />
           </FormItem>
         </FormField>
-
-        <!-- Date Picker Field -->
-        <FormField
-          v-if="conditionalField.type === 'datepicker'"
-          v-slot="{ componentField }"
-          :name="getConditionalFieldName(index)"
-          class="space-y-3"
-        >
-          <FormItem class="flex flex-col">
-            <FormLabel v-if="conditionalField.label">{{ conditionalField.label }}</FormLabel>
-            <Popover>
-              <PopoverTrigger as-child>
-                <FormControl>
-                  <Button
-                    variant="outline"
-                    :class="[
-                      'max-w-xl justify-start text-left font-normal',
-                      !componentField.modelValue && 'text-muted-foreground',
-                    ]"
-                  >
-                    <CalendarIcon class="mr-2 h-4 w-4" />
-                    {{
-                      componentField.modelValue
-                        ? new Date(componentField.modelValue).toLocaleDateString('pl-PL')
-                        : conditionalField.placeholder || 'Wybierz datę'
-                    }}
-                  </Button>
-                </FormControl>
-              </PopoverTrigger>
-              <PopoverContent class="w-auto p-0" align="start">
-                <Calendar
-                  v-bind="componentField"
-                  @update:model-value="(date: any) => componentField['onUpdate:modelValue']?.(date)"
-                />
-              </PopoverContent>
-            </Popover>
-            <FormMessage />
-          </FormItem>
-        </FormField>
       </template>
     </template>
   </div>
@@ -195,7 +136,6 @@ import { ref } from 'vue'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Label } from '@/components/ui/label'
 import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
-import { Textarea } from '@/components/ui/textarea'
 import {
   Select,
   SelectContent,
@@ -203,11 +143,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import { Button } from '@/components/ui/button'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { Calendar } from '@/components/ui/calendar'
 import { CalendarIcon } from 'lucide-vue-next'
+import CheckBoxFormField from './CheckBoxFormField.vue'
+import TextareaFormField from './TextareaFormField.vue'
+import RadioFormField from './RadioFormField.vue'
 
 interface Option {
   value: string
@@ -215,10 +157,11 @@ interface Option {
 }
 
 interface ConditionalFieldConfig {
-  type: 'textarea' | 'select' | 'radio' | 'multichoice' | 'datepicker'
+  type: 'textarea' | 'select' | 'radio' | 'multichoice' | 'datepicker' | 'conditionalField'
   label?: string
   placeholder?: string
   options?: Option[]
+  conditionalFields?: ConditionalFieldConfig[]
 }
 
 interface Props {

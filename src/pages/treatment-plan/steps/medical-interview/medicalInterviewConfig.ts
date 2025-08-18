@@ -602,34 +602,36 @@ export const fieldConfigs = {
             {
               label: 'Krótkie wędzidło języka?',
               name: 'tongueTie',
-              type: 'checkbox',
-            },
-            {
-              label: 'Interwencja chirurgiczna?',
-              name: 'tongueSurgery',
               type: 'conditionalField',
               conditionalFields: [
                 {
-                  type: 'textarea',
-                  label: 'Kiedy?',
-                  placeholder: 'Kiedy była interwencja?',
+                  type: 'conditionalField',
+                  label: 'Interwencja chirurgiczna?',
+                  conditionalFields: [
+                    {
+                      type: 'textarea',
+                      label: 'Kiedy',
+                      placeholder: '',
+                    },
+                  ],
                 },
               ],
             },
             {
               label: 'Krótkie wędzidło wargi?',
               name: 'lipTie',
-              type: 'checkbox',
-            },
-            {
-              label: 'Interwencja chirurgiczna?',
-              name: 'lipSurgery',
               type: 'conditionalField',
               conditionalFields: [
                 {
-                  type: 'textarea',
-                  label: 'Kiedy?',
-                  placeholder: 'Kiedy była interwencja?',
+                  type: 'conditionalField',
+                  label: 'Interwencja chirurgiczna?',
+                  conditionalFields: [
+                    {
+                      type: 'textarea',
+                      label: 'Kiedy',
+                      placeholder: '',
+                    },
+                  ],
                 },
               ],
             },

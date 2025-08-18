@@ -96,15 +96,18 @@ const createConditionalFormFieldSchema = (fields: any[]) => {
       schemaObj[field.name] = z.boolean().default(false)
 
       // Helper function to create schema for a conditional field
-      const createSchemaForConditionalFieldType = (conditionalFieldType: string) => {
-        if (conditionalFieldType === 'textarea') {
+      const createSchemaForConditionalFieldType = (conditionalField: any) => {
+        if (conditionalField.type === 'textarea') {
           return z.string().default('')
-        } else if (conditionalFieldType === 'select' || conditionalFieldType === 'radio') {
+        } else if (conditionalField.type === 'select' || conditionalField.type === 'radio') {
           return z.string().default('')
-        } else if (conditionalFieldType === 'multichoice') {
+        } else if (conditionalField.type === 'multichoice') {
           return z.array(z.string()).default([])
-        } else if (conditionalFieldType === 'datepicker') {
+        } else if (conditionalField.type === 'datepicker') {
           return z.date().optional()
+        } else if (conditionalField.type === 'conditionalField') {
+          // Handle nested conditional field - return boolean for the checkbox
+          return z.boolean().default(false)
         }
         return z.string().default('')
       }
@@ -113,9 +116,15 @@ const createConditionalFormFieldSchema = (fields: any[]) => {
       if (field.conditionalFields && Array.isArray(field.conditionalFields)) {
         field.conditionalFields.forEach((conditionalField: any, index: number) => {
           const suffix = field.conditionalFields.length === 1 ? 'Value' : `Value${index + 1}`
-          schemaObj[`${field.name}${suffix}`] = createSchemaForConditionalFieldType(
-            conditionalField.type,
-          )
+          schemaObj[`${field.name}${suffix}`] = createSchemaForConditionalFieldType(conditionalField)
+          
+          // If it's a nested conditional field, we need to recursively create schemas for its conditional fields
+          if (conditionalField.type === 'conditionalField' && conditionalField.conditionalFields) {
+            conditionalField.conditionalFields.forEach((nestedField: any, nestedIndex: number) => {
+              const nestedSuffix = conditionalField.conditionalFields.length === 1 ? 'Value' : `Value${nestedIndex + 1}`
+              schemaObj[`${field.name}${suffix}${nestedSuffix}`] = createSchemaForConditionalFieldType(nestedField)
+            })
+          }
         })
       }
     } else if (field.type === 'textarea') {
