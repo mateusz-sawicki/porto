@@ -1,10 +1,10 @@
 export interface Patient {
   id: string // GUID
-  name: string
-  surname: string
+  firstName: string
+  lastName: string
   isActive: boolean
-  updateDate: Date
-  creationDate: Date
+  updatedAt: Date
+  createdAt: Date
 }
 
 export interface PatientFilters {

@@ -85,13 +85,13 @@ export function createMockPatients(): Patient[] {
 
     return {
       id: generateId(),
-      name: names[Math.floor(Math.random() * names.length)],
-      surname: surnames[Math.floor(Math.random() * surnames.length)],
+      firstName: names[Math.floor(Math.random() * names.length)],
+      lastName: surnames[Math.floor(Math.random() * surnames.length)],
       isActive: Math.random() > 0.15, // 85% active patients
-      creationDate,
-      updateDate,
+      createdAt: creationDate,
+      updatedAt: updateDate,
     }
-  }).sort((a, b) => b.creationDate.getTime() - a.creationDate.getTime()) // Sort by creation date (newest first)
+  }).sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime()) // Sort by creation date (newest first)
 }
 
 // Individual mock patient
@@ -103,11 +103,11 @@ export function createMockPatient(overrides: Partial<Patient> = {}): Patient {
 
   return {
     id: generateId(),
-    name: names[Math.floor(Math.random() * names.length)],
-    surname: surnames[Math.floor(Math.random() * surnames.length)],
+    firstName: names[Math.floor(Math.random() * names.length)],
+    lastName: surnames[Math.floor(Math.random() * surnames.length)],
     isActive: true,
-    creationDate: now,
-    updateDate: now,
+    createdAt: now,
+    updatedAt: now,
     ...overrides,
   }
 }

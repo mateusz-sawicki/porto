@@ -62,8 +62,8 @@ const addPatient = () => {
 const saveNewPatient = async () => {
   // Create new patient object (matching your Patient type structure)
   const newPatientData = {
-    name: addPatientDialog.value.firstName,
-    surname: addPatientDialog.value.lastName,
+    firstName: addPatientDialog.value.firstName,
+    lastName: addPatientDialog.value.lastName,
     // Add other fields as needed based on your Patient type
     isActive: true, // Default to active
     // Note: You might need to adjust these fields based on your actual Patient type

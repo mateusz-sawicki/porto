@@ -23,7 +23,7 @@ export function usePatients() {
   })
 
   const sortOptions = ref<PatientSortOptions>({
-    field: 'creationDate',
+    field: 'createdAt',
     direction: 'desc',
   })
 
@@ -36,9 +36,9 @@ export function usePatients() {
       const searchLower = filters.search.toLowerCase()
       result = result.filter(
         (patient) =>
-          patient.name.toLowerCase().includes(searchLower) ||
-          patient.surname.toLowerCase().includes(searchLower) ||
-          `${patient.name} ${patient.surname}`.toLowerCase().includes(searchLower),
+          patient.firstName.toLowerCase().includes(searchLower) ||
+          patient.lastName.toLowerCase().includes(searchLower) ||
+          `${patient.firstName} ${patient.lastName}`.toLowerCase().includes(searchLower),
       )
     }
 
@@ -49,11 +49,11 @@ export function usePatients() {
 
     // Date range filter
     if (filters.dateFrom) {
-      result = result.filter((patient) => patient.creationDate >= filters.dateFrom!)
+      result = result.filter((patient) => patient.createdAt >= filters.dateFrom!)
     }
 
     if (filters.dateTo) {
-      result = result.filter((patient) => patient.creationDate <= filters.dateTo!)
+      result = result.filter((patient) => patient.createdAt <= filters.dateTo!)
     }
 
     return result
@@ -96,10 +96,10 @@ export function usePatients() {
   const tableData = computed<PatientTableRow[]>(() => {
     return sortedPatients.value.map((patient) => ({
       ...patient,
-      fullName: `${patient.name} ${patient.surname}`,
+      fullName: `${patient.firstName} ${patient.lastName}`,
       status: patient.isActive ? 'Active' : ('Inactive' as 'Active' | 'Inactive'),
-      formattedCreationDate: patient.creationDate.toLocaleDateString(),
-      formattedUpdateDate: patient.updateDate.toLocaleDateString(),
+      formattedCreationDate: patient.createdAt.toLocaleDateString(),
+      formattedUpdateDate: patient.updatedAt.toLocaleDateString(),
     }))
   })
 
@@ -125,16 +125,17 @@ export function usePatients() {
         // Convert date strings to Date objects if needed
         patients.value = response.data.map((patient) => ({
           ...patient,
-          creationDate: new Date(patient.creationDate),
-          updateDate: new Date(patient.updateDate),
+          createdAt: new Date(patient.createdAt),
+          updatedAt: new Date(patient.updatedAt),
         }))
         initialized.value = true
+        console.log('✅ Patients loaded successfully:', patients.value.length)
       } else {
-        throw new Error('Failed to fetch patients')
+        throw new Error(response.error || 'Failed to fetch patients')
       }
     } catch (err) {
       error.value = err instanceof Error ? err.message : 'Failed to fetch patients'
-      console.error('Error fetching patients:', err)
+      console.error('❌ Error fetching patients:', err)
     } finally {
       loading.value = false
     }
@@ -153,8 +154,8 @@ export function usePatients() {
         // Convert date strings to Date objects if needed
         const newPatient: Patient = {
           ...response.data,
-          creationDate: new Date(response.data.creationDate),
-          updateDate: new Date(response.data.updateDate),
+          createdAt: new Date(response.data.createdAt),
+          updatedAt: new Date(response.data.updatedAt),
         }
 
         // Add to local array at the beginning (newest first)
@@ -187,8 +188,8 @@ export function usePatients() {
         // Convert date strings to Date objects if needed
         const updatedPatient: Patient = {
           ...response.data,
-          creationDate: new Date(response.data.creationDate),
-          updateDate: new Date(response.data.updateDate),
+          createdAt: new Date(response.data.createdAt),
+          updatedAt: new Date(response.data.updatedAt),
         }
 
         // Update in local array

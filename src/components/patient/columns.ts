@@ -38,8 +38,14 @@ export const columns: ColumnDef<Patient>[] = [
     cell: ({ row }) => {
       const patient = row.original
       return h('div', [
-        h('div', { class: 'font-semibold mx-3 my-2' }, `${patient.name} ${patient.surname}`),
+        h('div', { class: 'font-semibold mx-3 my-2' }, `${patient.firstName} ${patient.lastName}`),
       ])
+    },
+    filterFn: (row, id, value) => {
+      if (!value) return true
+      const patient = row.original as Patient
+      const fullName = `${patient.firstName} ${patient.lastName}`.toLowerCase()
+      return fullName.includes(value.toLowerCase())
     },
     size: DEFAULT_COLUMN_WIDTH,
   },
@@ -84,7 +90,7 @@ export const columns: ColumnDef<Patient>[] = [
     size: DEFAULT_COLUMN_WIDTH,
   },
   {
-    accessorKey: 'creationDate',
+    accessorKey: 'createdAt',
     header: ({ column }) => {
       const SortIcon = getSortIcon(column)
       return h(
@@ -103,13 +109,13 @@ export const columns: ColumnDef<Patient>[] = [
       )
     },
     cell: ({ row }) => {
-      const date = row.getValue('creationDate') as Date
+      const date = row.getValue('createdAt') as Date
       return h('div', { class: 'text-muted-foreground mx-3' }, date.toLocaleDateString())
     },
     size: DEFAULT_COLUMN_WIDTH,
   },
   {
-    accessorKey: 'updateDate',
+    accessorKey: 'updatedAt',
     header: ({ column }) => {
       const SortIcon = getSortIcon(column)
       return h(
@@ -128,7 +134,7 @@ export const columns: ColumnDef<Patient>[] = [
       )
     },
     cell: ({ row }) => {
-      const date = row.getValue('updateDate') as Date
+      const date = row.getValue('updatedAt') as Date
       return h('div', { class: 'mx-3 text-muted-foreground' }, date.toLocaleDateString())
     },
     size: DEFAULT_COLUMN_WIDTH,
@@ -142,7 +148,7 @@ export const columns: ColumnDef<Patient>[] = [
         h(
           RouterLink,
           {
-            to: `/patient/${patient.id}`,
+            to: `/patients/${patient.id}`,
           },
           () =>
             h(

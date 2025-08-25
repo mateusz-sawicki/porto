@@ -33,7 +33,7 @@ export const data = {
     },
     {
       title: 'Patients',
-      url: '/patient',
+      url: '/patients',
       icon: Users2,
     },
     {

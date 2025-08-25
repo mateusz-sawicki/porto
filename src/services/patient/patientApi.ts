@@ -1,9 +1,10 @@
 import type { Patient, PatientFilters } from '@/types/patient/patient'
 import { createMockPatients } from './mocks/patientMocks'
+import { api } from '../api'
 
 // API Configuration
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000/api'
-const USE_MOCK_DATA = import.meta.env.VITE_USE_MOCK_DATA === 'true' || import.meta.env.DEV
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://localhost:7263'
+const USE_MOCK_DATA = import.meta.env.VITE_USE_MOCK_DATA === 'true'
 
 // API Response types
 interface ApiResponse<T> {
@@ -39,8 +40,8 @@ class MockPatientApi {
       const searchLower = filters.search.toLowerCase()
       result = result.filter(
         (patient) =>
-          patient.name.toLowerCase().includes(searchLower) ||
-          patient.surname.toLowerCase().includes(searchLower),
+          patient.firstName.toLowerCase().includes(searchLower) ||
+          patient.lastName.toLowerCase().includes(searchLower),
       )
     }
 
@@ -49,11 +50,11 @@ class MockPatientApi {
     }
 
     if (filters?.dateFrom) {
-      result = result.filter((patient) => patient.creationDate >= filters.dateFrom!)
+      result = result.filter((patient) => patient.createdAt >= filters.dateFrom!)
     }
 
     if (filters?.dateTo) {
-      result = result.filter((patient) => patient.creationDate <= filters.dateTo!)
+      result = result.filter((patient) => patient.createdAt <= filters.dateTo!)
     }
 
     return {
@@ -71,8 +72,8 @@ class MockPatientApi {
       const newPatient: Patient = {
         ...patientData,
         id: this.generateId(),
-        creationDate: now,
-        updateDate: now,
+        createdAt: now,
+        updatedAt: now,
       }
 
       // Add to mock data
@@ -109,7 +110,7 @@ class MockPatientApi {
       const updatedPatient: Patient = {
         ...this.mockPatients[patientIndex],
         ...patientData,
-        updateDate: new Date(),
+        updatedAt: new Date(),
       }
 
       // Update in mock data
@@ -189,79 +190,108 @@ class MockPatientApi {
   }
 }
 
-// Real API implementation (ready for production)
+// Real API implementation using centralized API client
 class RealPatientApi {
-  private async request<T>(endpoint: string, options: RequestInit = {}): Promise<ApiResponse<T>> {
+  async getPatients(filters?: PatientFilters): Promise<ApiResponse<Patient[]>> {
     try {
-      const response = await fetch(`${API_BASE_URL}${endpoint}`, {
-        headers: {
-          'Content-Type': 'application/json',
-          // Add authentication headers here
-          // 'Authorization': `Bearer ${getAuthToken()}`,
-          ...options.headers,
-        },
-        ...options,
-      })
+      const queryParams = new URLSearchParams()
 
-      const data = await response.json()
-
-      if (!response.ok) {
-        return {
-          data: {} as T,
-          success: false,
-          error: data.message || `HTTP ${response.status}`,
-        }
+      if (filters?.search) queryParams.append('search', filters.search)
+      if (filters?.isActive !== undefined && filters.isActive !== null) {
+        queryParams.append('isActive', String(filters.isActive))
       }
+      if (filters?.dateFrom) queryParams.append('dateFrom', filters.dateFrom.toISOString())
+      if (filters?.dateTo) queryParams.append('dateTo', filters.dateTo.toISOString())
+
+      const query = queryParams.toString()
+      const endpoint = `/api/patients${query ? `?${query}` : ''}`
+
+      const data = await api.get<Patient[]>(endpoint)
 
       return {
-        ...data,
+        data,
         success: true,
+        message: 'Patients retrieved successfully',
       }
     } catch (error) {
       return {
-        data: {} as T,
+        data: [] as Patient[],
         success: false,
-        error: error instanceof Error ? error.message : 'Network error',
+        error: error instanceof Error ? error.message : 'Failed to fetch patients',
       }
     }
   }
 
-  async getPatients(filters?: PatientFilters): Promise<ApiResponse<Patient[]>> {
-    const queryParams = new URLSearchParams()
-
-    if (filters?.search) queryParams.append('search', filters.search)
-    if (filters?.isActive !== undefined && filters.isActive !== null) {
-      queryParams.append('isActive', String(filters.isActive))
-    }
-    if (filters?.dateFrom) queryParams.append('dateFrom', filters.dateFrom.toISOString())
-    if (filters?.dateTo) queryParams.append('dateTo', filters.dateTo.toISOString())
-
-    const query = queryParams.toString()
-    return this.request<Patient[]>(`/patients${query ? `?${query}` : ''}`)
-  }
-
   async createPatient(patientData: CreatePatientData): Promise<ApiResponse<Patient>> {
-    return this.request<Patient>('/patients', {
-      method: 'POST',
-      body: JSON.stringify(patientData),
-    })
+    try {
+      const data = await api.post<Patient>('/api/patients', patientData)
+
+      return {
+        data,
+        success: true,
+        message: 'Patient created successfully',
+      }
+    } catch (error) {
+      return {
+        data: {} as Patient,
+        success: false,
+        error: error instanceof Error ? error.message : 'Failed to create patient',
+      }
+    }
   }
 
   async updatePatient(id: string, patientData: UpdatePatientData): Promise<ApiResponse<Patient>> {
-    return this.request<Patient>(`/patients/${id}`, {
-      method: 'PATCH',
-      body: JSON.stringify(patientData),
-    })
+    try {
+      const data = await api.patch<Patient>(`/api/patients/${id}`, patientData)
+
+      return {
+        data,
+        success: true,
+        message: 'Patient updated successfully',
+      }
+    } catch (error) {
+      return {
+        data: {} as Patient,
+        success: false,
+        error: error instanceof Error ? error.message : 'Failed to update patient',
+      }
+    }
   }
 
   async deletePatient(id: string): Promise<ApiResponse<null>> {
-    return this.request<null>(`/patients/${id}`, {
-      method: 'DELETE',
-    })
+    try {
+      await api.delete(`/api/patients/${id}`)
+
+      return {
+        data: null,
+        success: true,
+        message: 'Patient deleted successfully',
+      }
+    } catch (error) {
+      return {
+        data: null,
+        success: false,
+        error: error instanceof Error ? error.message : 'Failed to delete patient',
+      }
+    }
   }
 
   async getPatientById(id: string): Promise<ApiResponse<Patient>> {
-    return this.request<Patient>(`/patients/${id}`)
+    try {
+      const data = await api.get<Patient>(`/api/patients/${id}`)
+
+      return {
+        data,
+        success: true,
+        message: 'Patient retrieved successfully',
+      }
+    } catch (error) {
+      return {
+        data: {} as Patient,
+        success: false,
+        error: error instanceof Error ? error.message : 'Failed to retrieve patient',
+      }
+    }
   }
 }
 
