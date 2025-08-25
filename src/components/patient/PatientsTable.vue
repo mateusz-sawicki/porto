@@ -23,6 +23,8 @@ import {
 } from '@/components/ui/select'
 import { Users, UserCheck, UserX, RefreshCw, Database, Plus } from 'lucide-vue-next'
 import { usePatients } from '@/composables/patient/usePatients'
+import type { AddPatient } from '@/types/patient/patient'
+import { Gender } from '@/types/patient/gender'
 
 // Use patients composable
 const {
@@ -30,7 +32,6 @@ const {
   stats,
   loading,
   error,
-  isDevelopment,
   refreshPatients,
   addPatient: createPatient,
 } = usePatients()
@@ -41,7 +42,7 @@ const addPatientDialog = ref({
   firstName: '',
   lastName: '',
   dateOfBirth: '',
-  gender: '',
+  gender: 0,
   phone: '',
   email: '',
 })
@@ -53,20 +54,21 @@ const addPatient = () => {
     firstName: '',
     lastName: '',
     dateOfBirth: '',
-    gender: '',
+    gender: 0,
     phone: '',
     email: '',
   }
 }
 
 const saveNewPatient = async () => {
-  // Create new patient object (matching your Patient type structure)
-  const newPatientData = {
+  // Create new patient object using AddPatient interface
+  const newPatientData: AddPatient = {
     firstName: addPatientDialog.value.firstName,
     lastName: addPatientDialog.value.lastName,
-    // Add other fields as needed based on your Patient type
-    isActive: true, // Default to active
-    // Note: You might need to adjust these fields based on your actual Patient type
+    dateOfBirth: new Date(addPatientDialog.value.dateOfBirth),
+    phoneNumber: addPatientDialog.value.phone,
+    gender: addPatientDialog.value.gender as Gender,
+    email: addPatientDialog.value.email,
   }
 
   try {
@@ -93,7 +95,7 @@ const cancelAddPatient = () => {
     firstName: '',
     lastName: '',
     dateOfBirth: '',
-    gender: '',
+    gender: 0,
     phone: '',
     email: '',
   }
@@ -159,13 +161,7 @@ const isAddPatientFormValid = computed(() => {
       <CardHeader>
         <div class="flex items-center justify-between">
           <div>
-            <CardTitle class="flex items-center gap-2">
-              Patient Management
-              <Badge v-if="isDevelopment" variant="secondary" class="text-xs">
-                <Database class="h-3 w-3 mr-1" />
-                Mock Data
-              </Badge>
-            </CardTitle>
+            <CardTitle class="flex items-center gap-2"> Patient Management </CardTitle>
             <CardDescription>
               Manage your dental practice patients with advanced filtering and sorting
             </CardDescription>

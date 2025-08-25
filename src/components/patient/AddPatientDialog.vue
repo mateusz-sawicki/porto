@@ -1,23 +1,14 @@
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogFooter,
 } from '@/components/ui/dialog'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select'
 import { Plus } from 'lucide-vue-next'
+import AddPatientForm from './AddPatientForm.vue'
+import type { AddPatient } from '@/types/patient/patient'
 
 interface Props {
   open: boolean
@@ -25,76 +16,29 @@ interface Props {
 
 interface Emits {
   (e: 'close'): void
-  (e: 'save', patientData: PatientFormData): void
-}
-
-interface PatientFormData {
-  name: string
-  surname: string
-  isActive: boolean
+  (e: 'save', patientData: AddPatient): void
 }
 
 const props = defineProps<Props>()
 const emit = defineEmits<Emits>()
 
-// Form state
-const formData = ref({
-  firstName: '',
-  lastName: '',
-  dateOfBirth: '',
-  gender: '',
-  phone: '',
-  email: '',
-})
+const addPatientFormRef = ref()
 
 // Reset form when dialog opens
 watch(
   () => props.open,
   (isOpen) => {
-    if (isOpen) {
-      resetForm()
+    if (isOpen && addPatientFormRef.value) {
+      addPatientFormRef.value.resetForm()
     }
   },
 )
-
-// Form validation
-const isFormValid = computed(() => {
-  return (
-    formData.value.firstName.trim() &&
-    formData.value.lastName.trim() &&
-    formData.value.dateOfBirth &&
-    formData.value.gender &&
-    formData.value.phone.trim() &&
-    formData.value.email.trim()
-  )
-})
-
-// Form handlers
-const resetForm = () => {
-  formData.value = {
-    firstName: '',
-    lastName: '',
-    dateOfBirth: '',
-    gender: '',
-    phone: '',
-    email: '',
-  }
-}
 
 const handleClose = () => {
   emit('close')
 }
 
-const handleSave = () => {
-  if (!isFormValid.value) return
-
-  // Transform form data to match Patient interface
-  const patientData: PatientFormData = {
-    name: formData.value.firstName,
-    surname: formData.value.lastName,
-    isActive: true, // Default to active
-  }
-
+const handleSave = (patientData: AddPatient) => {
   emit('save', patientData)
 }
 
@@ -119,72 +63,13 @@ const dialogOpen = computed({
         </DialogTitle>
       </DialogHeader>
 
-      <div class="grid gap-6 py-6">
-        <!-- Name Fields -->
-        <div class="grid grid-cols-2 gap-6">
-          <div class="grid gap-2">
-            <Label for="add-first-name">First Name</Label>
-            <Input
-              id="add-first-name"
-              v-model="formData.firstName"
-              placeholder="Enter first name"
-            />
-          </div>
-          <div class="grid gap-2">
-            <Label for="add-last-name">Last Name</Label>
-            <Input id="add-last-name" v-model="formData.lastName" placeholder="Enter last name" />
-          </div>
-        </div>
-
-        <!-- Date and Gender -->
-        <div class="grid grid-cols-2 gap-6">
-          <div class="grid gap-2">
-            <Label for="add-date-of-birth">Date of Birth</Label>
-            <Input
-              id="add-date-of-birth"
-              type="date"
-              v-model="formData.dateOfBirth"
-              class="w-full"
-            />
-          </div>
-          <div class="grid gap-2">
-            <Label for="add-gender">Gender</Label>
-            <Select v-model="formData.gender">
-              <SelectTrigger>
-                <SelectValue placeholder="Select gender" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="Male">Male</SelectItem>
-                <SelectItem value="Female">Female</SelectItem>
-                <SelectItem value="Other">Other</SelectItem>
-                <SelectItem value="Prefer not to say">Prefer not to say</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-        </div>
-
-        <!-- Contact Fields -->
-        <div class="grid grid-cols-2 gap-6">
-          <div class="grid gap-2">
-            <Label for="add-phone">Phone</Label>
-            <Input id="add-phone" v-model="formData.phone" placeholder="Enter phone number" />
-          </div>
-          <div class="grid gap-2">
-            <Label for="add-email">Email</Label>
-            <Input
-              id="add-email"
-              type="email"
-              v-model="formData.email"
-              placeholder="Enter email address"
-            />
-          </div>
-        </div>
+      <div class="py-6">
+        <AddPatientForm 
+          ref="addPatientFormRef"
+          @save="handleSave"
+          @cancel="handleClose"
+        />
       </div>
-
-      <DialogFooter>
-        <Button variant="outline" @click="handleClose"> Cancel </Button>
-        <Button @click="handleSave" :disabled="!isFormValid"> Add Patient </Button>
-      </DialogFooter>
     </DialogContent>
   </Dialog>
 </template>

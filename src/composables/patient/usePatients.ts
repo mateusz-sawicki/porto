@@ -1,5 +1,6 @@
-import { patientApi, isUsingMockData } from '@/services/patient/patientApi'
+import { patientApi } from '@/services/patient/patientApi'
 import type {
+  AddPatient,
   Patient,
   PatientFilters,
   PatientSortOptions,
@@ -129,21 +130,17 @@ export function usePatients() {
           updatedAt: new Date(patient.updatedAt),
         }))
         initialized.value = true
-        console.log('✅ Patients loaded successfully:', patients.value.length)
       } else {
         throw new Error(response.error || 'Failed to fetch patients')
       }
     } catch (err) {
       error.value = err instanceof Error ? err.message : 'Failed to fetch patients'
-      console.error('❌ Error fetching patients:', err)
     } finally {
       loading.value = false
     }
   }
 
-  async function addPatient(
-    patientData: Omit<Patient, 'id' | 'creationDate' | 'updateDate'>,
-  ): Promise<Patient | null> {
+  async function addPatient(patientData: AddPatient): Promise<Patient | null> {
     loading.value = true
     error.value = null
 
@@ -167,7 +164,6 @@ export function usePatients() {
       }
     } catch (err) {
       error.value = err instanceof Error ? err.message : 'Failed to create patient'
-      console.error('Error creating patient:', err)
       return null
     } finally {
       loading.value = false
@@ -262,9 +258,6 @@ export function usePatients() {
     fetchPatients()
   }
 
-  // Development helpers
-  const isDevelopment = computed(() => isUsingMockData)
-
   return {
     // State
     patients: readonly(patients),
@@ -291,8 +284,6 @@ export function usePatients() {
     clearFilters,
     setSorting,
     refreshPatients,
-
     // Meta
-    isDevelopment,
   }
 }

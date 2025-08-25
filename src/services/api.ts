@@ -18,21 +18,15 @@ class ApiClient {
   }
 
   private async request<T>(
-    endpoint: string, 
-    options: RequestInit = {}
+    endpoint: string,
+    options: RequestInit = {},
   ): Promise<ApiResponse<T> & { data: T }> {
     try {
       const url = `${this.baseUrl}${endpoint}`
-      
-      // Debug logging
-      if (import.meta.env.VITE_DEBUG_API === 'true') {
-        console.log(`🌐 API Request: ${options.method || 'GET'} ${url}`)
-      }
-      
       const response = await fetch(url, {
         headers: {
           'Content-Type': 'application/json',
-          'Accept': 'application/json',
+          Accept: 'application/json',
           // Add authentication headers here if needed
           // 'Authorization': `Bearer ${getAuthToken()}`,
           ...options.headers,

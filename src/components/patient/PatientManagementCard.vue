@@ -11,7 +11,6 @@ interface Props {
   patients: readonly Patient[]
   loading: boolean
   error: string | null
-  isDevelopment: boolean
 }
 
 interface Emits {
@@ -27,7 +26,6 @@ defineEmits<Emits>()
   <Card>
     <!-- Header -->
     <PatientManagementHeader
-      :is-development="isDevelopment"
       :loading="loading"
       @add-patient="$emit('add-patient')"
       @refresh="$emit('refresh')"

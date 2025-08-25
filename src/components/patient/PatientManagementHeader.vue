@@ -5,7 +5,6 @@ import { Badge } from '@/components/ui/badge'
 import { RefreshCw, Database, Plus } from 'lucide-vue-next'
 
 interface Props {
-  isDevelopment: boolean
   loading: boolean
 }
 
@@ -22,13 +21,7 @@ defineEmits<Emits>()
   <CardHeader>
     <div class="flex items-center justify-between">
       <div>
-        <CardTitle class="flex items-center gap-2">
-          Patient Management
-          <Badge v-if="isDevelopment" variant="secondary" class="text-xs">
-            <Database class="h-3 w-3 mr-1" />
-            Mock Data
-          </Badge>
-        </CardTitle>
+        <CardTitle class="flex items-center gap-2"> Patient Management </CardTitle>
         <CardDescription>
           Manage your dental practice patients with advanced filtering and sorting
         </CardDescription>

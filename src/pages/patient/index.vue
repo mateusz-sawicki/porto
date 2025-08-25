@@ -11,7 +11,6 @@ const {
   stats,
   loading,
   error,
-  isDevelopment,
   refreshPatients,
   addPatient: createPatient,
 } = usePatients()
@@ -58,7 +57,6 @@ const handlePatientCreated = async (patientData: any) => {
       :patients="patients"
       :loading="loading"
       :error="error"
-      :is-development="isDevelopment"
       @add-patient="openAddPatientDialog"
       @refresh="refreshPatients"
     />

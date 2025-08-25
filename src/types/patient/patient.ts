@@ -1,3 +1,5 @@
+import type { Gender } from './gender'
+
 export interface Patient {
   id: string // GUID
   firstName: string
@@ -5,6 +7,15 @@ export interface Patient {
   isActive: boolean
   updatedAt: Date
   createdAt: Date
+}
+
+export interface AddPatient {
+  firstName: string
+  lastName: string
+  dateOfBirth: Date
+  phoneNumber: string
+  gender: Gender
+  email: string
 }
 
 export interface PatientFilters {

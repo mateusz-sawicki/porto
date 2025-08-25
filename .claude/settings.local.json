@@ -15,7 +15,9 @@
       "mcp__ide__getDiagnostics",
       "WebFetch(domain:reka-ui.com)",
       "Bash(mv:*)",
-      "Bash(npx eslint:*)"
+      "Bash(npx eslint:*)",
+      "WebFetch(domain:www.shadcn-vue.com)",
+      "WebFetch(domain:github.com)"
     ],
     "deny": [],
     "defaultMode": "acceptEdits",
