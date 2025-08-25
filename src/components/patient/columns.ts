@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button'
 import { ArrowUpDown, ArrowUp, ArrowDown, Eye, Trash2 } from 'lucide-vue-next'
 import type { Patient } from '@/types/patient/patient'
 import { RouterLink, useRouter } from 'vue-router'
+import { useDialog } from '@/composables/useDialog'
 
 // Helper function to get the correct sort icon
 function getSortIcon(column: any) {
@@ -14,8 +15,42 @@ function getSortIcon(column: any) {
   return ArrowUpDown
 }
 const DEFAULT_COLUMN_WIDTH = 150
-const router = useRouter()
-export const columns: ColumnDef<Patient>[] = [
+
+// Create columns function to access composables properly
+export function createColumns(deletePatientFn: (id: string) => Promise<boolean>) {
+  const router = useRouter()
+  const { confirm, success, error } = useDialog()
+
+  // Delete patient function
+  const handleDeletePatient = async (patient: Patient) => {
+    confirm({
+      title: 'Delete Patient',
+      message: `Are you sure you want to delete ${patient.firstName} ${patient.lastName}? This action cannot be undone.`,
+      acceptText: 'Delete',
+      cancelText: 'Cancel',
+      onAccept: async () => {
+        try {
+          const result = await deletePatientFn(patient.id)
+          if (result) {
+            success({
+              title: 'Patient Deleted',
+              message: `${patient.firstName} ${patient.lastName} has been successfully deleted.`,
+            })
+          } else {
+            throw new Error('Delete operation failed')
+          }
+        } catch (err) {
+          console.error('Delete error:', err)
+          error({
+            title: 'Delete Failed',
+            message: 'Failed to delete patient. Please try again.',
+          })
+        }
+      }
+    })
+  }
+
+  return [
   {
     accessorKey: 'name',
     header: ({ column }) => {
@@ -167,9 +202,7 @@ export const columns: ColumnDef<Patient>[] = [
             variant: 'ghost',
             size: 'sm',
             class: 'h-8 w-8 p-0 hover:bg-red-100 hover:text-red-600 cursor-pointer',
-            onClick: () => {
-              console.log('Delete patient:', patient.id)
-            },
+            onClick: () => handleDeletePatient(patient),
           },
           () => h(Trash2, { class: 'h-4 w-4' }),
         ),
@@ -179,4 +212,7 @@ export const columns: ColumnDef<Patient>[] = [
     maxSize: 50,
     size: 50,
   },
-]
+  ] as ColumnDef<Patient>[]
+}
+
+// No default export - force proper usage of createColumns

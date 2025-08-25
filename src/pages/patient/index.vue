@@ -13,6 +13,7 @@ const {
   error,
   refreshPatients,
   addPatient: createPatient,
+  deletePatient,
 } = usePatients()
 
 // Add patient dialog state
@@ -57,6 +58,7 @@ const handlePatientCreated = async (patientData: any) => {
       :patients="patients"
       :loading="loading"
       :error="error"
+      :delete-patient="deletePatient"
       @add-patient="openAddPatientDialog"
       @refresh="refreshPatients"
     />

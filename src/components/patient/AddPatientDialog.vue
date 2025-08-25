@@ -5,10 +5,14 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
+  DialogFooter,
 } from '@/components/ui/dialog'
+import { Button } from '@/components/ui/button'
 import { Plus } from 'lucide-vue-next'
 import AddPatientForm from './AddPatientForm.vue'
 import type { AddPatient } from '@/types/patient/patient'
+import { preventDialogClose, useApiCall } from '@/composables/useApiCall'
+import { usePatients } from '@/composables/patient/usePatients'
 
 interface Props {
   open: boolean
@@ -16,13 +20,16 @@ interface Props {
 
 interface Emits {
   (e: 'close'): void
-  (e: 'save', patientData: AddPatient): void
 }
 
 const props = defineProps<Props>()
 const emit = defineEmits<Emits>()
 
 const addPatientFormRef = ref()
+
+// Use API call and patients composable
+const { execute: executeApiCall } = useApiCall()
+const { addPatient: createPatient } = usePatients()
 
 // Reset form when dialog opens
 watch(
@@ -38,8 +45,21 @@ const handleClose = () => {
   emit('close')
 }
 
-const handleSave = (patientData: AddPatient) => {
-  emit('save', patientData)
+const handleSubmit = () => {
+  if (addPatientFormRef.value) {
+    addPatientFormRef.value.submitForm()
+  }
+}
+
+const handleSave = async (patientData: AddPatient) => {
+  const result = await executeApiCall(() => createPatient(patientData), {
+    withOverlay: true,
+    overlayMessage: 'Adding patient...',
+  })
+
+  if (result) {
+    emit('close')
+  }
 }
 
 // Handle dialog open/close state
@@ -55,7 +75,12 @@ const dialogOpen = computed({
 
 <template>
   <Dialog v-model:open="dialogOpen">
-    <DialogContent class="sm:max-w-[800px]">
+    <DialogContent 
+      class="sm:max-w-[800px]"
+      @escapeKeyDown="preventDialogClose"
+      @interactOutside="preventDialogClose"
+      @pointerDownOutside="preventDialogClose"
+    >
       <DialogHeader>
         <DialogTitle class="flex items-center gap-2">
           <Plus class="w-5 h-5" />
@@ -67,9 +92,24 @@ const dialogOpen = computed({
         <AddPatientForm 
           ref="addPatientFormRef"
           @save="handleSave"
-          @cancel="handleClose"
         />
       </div>
+
+      <DialogFooter>
+        <Button variant="outline" @click="handleClose">Cancel</Button>
+        <Button 
+          variant="secondary" 
+          @click="() => addPatientFormRef?.testGenericDialog()"
+        >
+          Test Dialog
+        </Button>
+        <Button 
+          @click="handleSubmit"
+          :disabled="!addPatientFormRef?.isValid || addPatientFormRef?.isSubmitting"
+        >
+          {{ addPatientFormRef?.isSubmitting ? 'Adding...' : 'Add Patient' }}
+        </Button>
+      </DialogFooter>
     </DialogContent>
   </Dialog>
 </template>

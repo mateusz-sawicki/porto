@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { computed } from 'vue'
 import { toTypedSchema } from '@vee-validate/zod'
 import { useForm } from 'vee-validate'
 import { z } from 'zod'
@@ -12,17 +13,35 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import DatePicker from '@/components/common/DatePicker.vue'
-import {
-  Form,
-  FormControl,
-  FormDescription,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from '@/components/ui/form'
+import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
 import { Gender, GENDER_OPTIONS } from '@/types/patient/gender'
 import type { AddPatient } from '@/types/patient/patient'
+import { useOverlay } from '@/composables/useApiCall'
+import { useDialog } from '@/composables/useDialog'
+
+const overlayState = useOverlay()
+const { confirm, alert, error, success } = useDialog()
+
+// Prevent dialog close when overlay is active
+const canCloseDialog = computed(() => !overlayState.value.visible)
+
+const testGenericDialog = () => {
+  confirm({
+    title: 'Delete Patient',
+    message: 'Are you sure you want to delete this patient? This action cannot be undone.',
+    acceptText: 'Delete',
+    cancelText: 'Cancel',
+    onAccept: () => {
+      success({
+        title: 'Success',
+        message: 'Patient deleted successfully!',
+      })
+    },
+    onCancel: () => {
+      console.log('Delete cancelled')
+    }
+  })
+}
 
 // Zod validation schema matching AddPatient interface
 const formSchema = z.object({
@@ -64,11 +83,8 @@ const formSchema = z.object({
   }),
 })
 
-type FormData = z.infer<typeof formSchema>
-
 interface Emits {
   (e: 'save', patientData: AddPatient): void
-  (e: 'cancel'): void
 }
 
 const emit = defineEmits<Emits>()
@@ -100,10 +116,6 @@ const resetForm = () => {
   })
 }
 
-const handleCancel = () => {
-  emit('cancel')
-}
-
 const onSubmit = form.handleSubmit((values) => {
   // Values already match AddPatient interface
   const patientData: AddPatient = {
@@ -118,9 +130,14 @@ const onSubmit = form.handleSubmit((values) => {
   emit('save', patientData)
 })
 
-// Expose resetForm for parent components
+// Expose form methods for parent components
 defineExpose({
   resetForm,
+  canCloseDialog,
+  submitForm: onSubmit,
+  isValid: computed(() => form.meta.value.valid),
+  isSubmitting: form.isSubmitting,
+  testGenericDialog,
 })
 </script>
 
@@ -213,13 +230,6 @@ defineExpose({
         </FormField>
       </div>
 
-      <!-- Actions -->
-      <div class="flex justify-end gap-3 pt-6 border-t">
-        <Button type="button" variant="outline" @click="handleCancel"> Cancel </Button>
-        <Button type="submit" :disabled="form.isSubmitting.value">
-          {{ form.isSubmitting.value ? 'Adding...' : 'Add Patient' }}
-        </Button>
-      </div>
     </div>
   </form>
 </template>
