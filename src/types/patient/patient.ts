@@ -37,3 +37,24 @@ export interface PatientTableRow extends Patient {
   formattedCreationDate: string
   formattedUpdateDate: string
 }
+
+export interface PatientDetails {
+  basicData: PatientBasicData
+  contactData: PatientContactData
+}
+export interface PatientBasicData {
+  id: string
+  firstName: string
+  lastName: string
+  isActive: boolean
+  updatedAt: Date
+  createdAt: Date
+  dateOfBirth: Date
+  gender: number
+  age: number
+}
+
+export interface PatientContactData {
+  phoneNumber: string
+  email: string
+}

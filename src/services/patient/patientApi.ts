@@ -1,4 +1,4 @@
-import type { AddPatient, Patient, PatientFilters } from '@/types/patient/patient'
+import type { AddPatient, Patient, PatientDetails, PatientFilters } from '@/types/patient/patient'
 import { api } from '../api'
 
 // API Response types
@@ -97,9 +97,9 @@ class RealPatientApi {
     }
   }
 
-  async getPatientById(id: string): Promise<ApiResponse<Patient>> {
+  async getPatientById(id: string): Promise<ApiResponse<PatientDetails>> {
     try {
-      const data = await api.get<Patient>(`/api/patients/${id}`)
+      const data = await api.get<PatientDetails>(`/api/patients/${id}`)
 
       return {
         data,
@@ -108,7 +108,7 @@ class RealPatientApi {
       }
     } catch (error) {
       return {
-        data: {} as Patient,
+        data: {} as PatientDetails,
         success: false,
         error: error instanceof Error ? error.message : 'Failed to retrieve patient',
       }

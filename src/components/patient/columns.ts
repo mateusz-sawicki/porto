@@ -6,6 +6,7 @@ import { ArrowUpDown, ArrowUp, ArrowDown, Eye, Trash2 } from 'lucide-vue-next'
 import type { Patient } from '@/types/patient/patient'
 import { RouterLink, useRouter } from 'vue-router'
 import { useDialog } from '@/composables/useDialog'
+import { patientApi } from '@/services/patient/patientApi'
 
 // Helper function to get the correct sort icon
 function getSortIcon(column: any) {
@@ -20,6 +21,11 @@ const DEFAULT_COLUMN_WIDTH = 150
 export function createColumns(deletePatientFn: (id: string) => Promise<boolean>) {
   const router = useRouter()
   const { confirm, success, error } = useDialog()
+
+  // Navigate to patient details
+  const handleViewPatient = (patient: Patient) => {
+    router.push(`/patients/${patient.id}`)
+  }
 
   // Delete patient function
   const handleDeletePatient = async (patient: Patient) => {
@@ -181,20 +187,14 @@ export function createColumns(deletePatientFn: (id: string) => Promise<boolean>)
       const patient = row.original
       return h('div', { class: 'flex items-center justify-center gap-2 mx-3 my-2' }, [
         h(
-          RouterLink,
+          Button,
           {
-            to: `/patients/${patient.id}`,
+            variant: 'ghost',
+            size: 'sm',
+            class: 'h-8 w-8 p-0 hover:bg-blue-100 hover:text-blue-600 cursor-pointer',
+            onClick: () => handleViewPatient(patient),
           },
-          () =>
-            h(
-              Button,
-              {
-                variant: 'ghost',
-                size: 'sm',
-                class: 'h-8 w-8 p-0 hover:bg-blue-100 hover:text-blue-600 cursor-pointer',
-              },
-              () => h(Eye, { class: 'h-4 w-4' }),
-            ),
+          () => h(Eye, { class: 'h-4 w-4' }),
         ),
         h(
           Button,

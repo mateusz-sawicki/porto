@@ -19,7 +19,9 @@
       <!-- Patient Header -->
       <div class="flex items-center justify-between mb-6">
         <div>
-          <h1 class="text-3xl font-bold">{{ patient.firstName }} {{ patient.lastName }}</h1>
+          <h1 class="text-3xl font-bold">
+            {{ patient.basicData.firstName }} {{ patient.basicData.lastName }}
+          </h1>
           <p class="text-muted-foreground">Patient ID: {{ route.params.id }}</p>
         </div>
         <Button @click="editPatient" variant="outline">
@@ -41,15 +43,15 @@
           <CardContent class="space-y-2">
             <div>
               <Label class="text-sm font-medium">Date of Birth</Label>
-              <p class="text-sm">{{ formatDate(patient.dateOfBirth) }}</p>
+              <p class="text-sm">{{ patient.basicData.dateOfBirth }}</p>
             </div>
             <div>
               <Label class="text-sm font-medium">Age</Label>
-              <p class="text-sm">{{ calculateAge(patient.dateOfBirth) }} years</p>
+              <p class="text-sm">{{ patient.basicData.age }} years</p>
             </div>
             <div>
               <Label class="text-sm font-medium">Gender</Label>
-              <p class="text-sm">{{ patient.gender }}</p>
+              <p class="text-sm">{{ patient.basicData.gender }}</p>
             </div>
           </CardContent>
         </Card>
@@ -65,11 +67,11 @@
           <CardContent class="space-y-2">
             <div>
               <Label class="text-sm font-medium">Phone</Label>
-              <p class="text-sm">{{ patient.phone }}</p>
+              <p class="text-sm">{{ patient.contactData.phoneNumber }}</p>
             </div>
             <div>
               <Label class="text-sm font-medium">Email</Label>
-              <p class="text-sm">{{ patient.email }}</p>
+              <p class="text-sm">{{ patient.contactData.email }}</p>
             </div>
           </CardContent>
         </Card>
@@ -417,19 +419,10 @@ import {
 import { Badge } from '@/components/ui/badge'
 import { Label } from '@/components/ui/label'
 import { User, Phone, Heart, FileText, Plus, Edit, Eye, Trash2 } from 'lucide-vue-next'
+import { patientApi } from '@/services/patient/patientApi'
+import type { Patient, PatientDetails } from '@/types/patient/patient'
 
 // Type definitions
-interface Patient {
-  id: string
-  firstName: string
-  lastName: string
-  dateOfBirth: string
-  gender: string
-  phone: string
-  email: string
-  createdAt: string
-  updatedAt: string
-}
 
 interface TreatmentPlan {
   id: string
@@ -449,19 +442,6 @@ interface Note {
   createdAt: string
   createdBy: string
   updatedAt?: string
-}
-
-// Mock Data - Single patient for development
-const mockPatient: Patient = {
-  id: '123e4567-e89b-12d3-a456-426614174000',
-  firstName: 'Sarah',
-  lastName: 'Johnson',
-  dateOfBirth: '1985-03-15',
-  gender: 'Female',
-  phone: '+1 (555) 123-4567',
-  email: 'sarah.johnson@email.com',
-  createdAt: '2023-01-15T10:30:00Z',
-  updatedAt: '2024-06-10T14:22:00Z',
 }
 
 const mockTreatmentPlans: TreatmentPlan[] = [
@@ -540,7 +520,7 @@ const route = useRoute()
 const router = useRouter()
 const loading = ref(true)
 const error = ref<string | null>(null)
-const patient = ref<Patient | null>(null)
+const patient = ref<PatientDetails | null>(null)
 const treatmentPlans = ref<TreatmentPlan[]>([])
 const notes = ref<Note[]>([])
 
@@ -578,13 +558,32 @@ const treatmentPlanDialog = ref({
   isCreating: false,
 })
 
-// Mock API functions (replace these with real API calls)
-const fetchPatient = async (patientId: string): Promise<Patient> => {
-  // Simulate API call delay
-  await new Promise((resolve) => setTimeout(resolve, 800))
+// Helper function to map gender enum to string
+const mapGenderEnumToString = (genderEnum: number): string => {
+  switch (genderEnum) {
+    case 1:
+      return 'Male'
+    case 2:
+      return 'Female'
+    default:
+      return 'Unknown'
+  }
+}
 
-  // Always return the same mock patient for development
-  return mockPatient
+// Real API functions
+const fetchPatient = async (patientId: string): Promise<PatientDetails> => {
+  const response = await patientApi.getPatientById(patientId)
+  if (!response.success) {
+    throw new Error(response.error || 'Failed to fetch patient')
+  }
+
+  const apiData = response.data
+
+  // Transform API response to match expected Patient interface
+  return {
+    basicData: apiData.basicData,
+    contactData: apiData.contactData,
+  }
 }
 
 const fetchTreatmentPlans = async (patientId: string): Promise<TreatmentPlan[]> => {
@@ -680,19 +679,6 @@ const formatDateTime = (dateString: string) => {
   })
 }
 
-const calculateAge = (dateOfBirth: string) => {
-  const today = new Date()
-  const birthDate = new Date(dateOfBirth)
-  let age = today.getFullYear() - birthDate.getFullYear()
-  const monthDiff = today.getMonth() - birthDate.getMonth()
-
-  if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
-    age--
-  }
-
-  return age
-}
-
 const getStatusVariant = (status: string) => {
   switch (status.toLowerCase()) {
     case 'active':
@@ -713,12 +699,12 @@ const editPatient = () => {
   // Populate dialog with current patient data
   editPatientDialog.value = {
     open: true,
-    firstName: patient.value.firstName,
-    lastName: patient.value.lastName,
-    dateOfBirth: patient.value.dateOfBirth,
-    gender: patient.value.gender,
-    phone: patient.value.phone,
-    email: patient.value.email,
+    firstName: patient.value.basicData.firstName,
+    lastName: patient.value.basicData.lastName,
+    dateOfBirth: patient.value.basicData.dateOfBirth,
+    gender: patient.value.basicData.gender.toString(),
+    phone: patient.value.contactData.phoneNumber,
+    email: patient.value.contactData.email,
   }
 }
 
@@ -880,15 +866,18 @@ const savePatientChanges = () => {
   if (!patient.value) return
 
   // Update patient data
-  patient.value = {
-    ...patient.value,
+  patient.value.basicData = {
+    ...patient.value.basicData,
     firstName: editPatientDialog.value.firstName,
     lastName: editPatientDialog.value.lastName,
-    dateOfBirth: editPatientDialog.value.dateOfBirth,
-    gender: editPatientDialog.value.gender,
-    phone: editPatientDialog.value.phone,
+    dateOfBirth: new Date(editPatientDialog.value.dateOfBirth),
+    gender: Number(editPatientDialog.value.gender),
+  }
+
+  patient.value.contactData = {
+    ...patient.value.contactData,
+    phoneNumber: editPatientDialog.value.phone,
     email: editPatientDialog.value.email,
-    updatedAt: new Date().toISOString(),
   }
 
   cancelEditPatient()
