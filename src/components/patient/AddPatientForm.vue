@@ -12,7 +12,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import DatePicker from '@/components/common/DatePicker.vue'
+import VueDatePicker from '@vuepic/vue-datepicker'
+import '@vuepic/vue-datepicker/dist/main.css'
 import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
 import { Gender, GENDER_OPTIONS } from '@/types/patient/gender'
 import type { AddPatient } from '@/types/patient/patient'
@@ -173,9 +174,12 @@ defineExpose({
           <FormItem>
             <FormLabel>Date of Birth</FormLabel>
             <FormControl>
-              <DatePicker
+              <VueDatePicker
                 :model-value="field.value"
                 @update:model-value="field.onChange"
+                :enable-time-picker="false"
+                auto-apply
+                format="yyyy-MM-dd"
                 placeholder="Select date of birth..."
               />
             </FormControl>

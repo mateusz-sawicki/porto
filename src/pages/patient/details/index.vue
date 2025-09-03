@@ -43,7 +43,7 @@
           <CardContent class="space-y-2">
             <div>
               <Label class="text-sm font-medium">Date of Birth</Label>
-              <p class="text-sm">{{ patient.basicData.dateOfBirth }}</p>
+              <p class="text-sm">{{ formatDate(patient.basicData.dateOfBirth.toString()) }}</p>
             </div>
             <div>
               <Label class="text-sm font-medium">Age</Label>
@@ -51,7 +51,7 @@
             </div>
             <div>
               <Label class="text-sm font-medium">Gender</Label>
-              <p class="text-sm">{{ patient.basicData.gender }}</p>
+              <p class="text-sm">{{ mapGenderEnumToString(patient.basicData.gender) }}</p>
             </div>
           </CardContent>
         </Card>
@@ -280,10 +280,12 @@
             <div class="grid grid-cols-2 gap-6">
               <div class="grid gap-2">
                 <Label for="date-of-birth">Date of Birth</Label>
-                <Input
+                <VueDatePicker
                   id="date-of-birth"
-                  type="date"
                   v-model="editPatientDialog.dateOfBirth"
+                  :enable-time-picker="false"
+                  auto-apply
+                  format="yyyy-MM-dd"
                   class="w-full"
                 />
               </div>
@@ -409,6 +411,8 @@ import {
 import { Textarea } from '@/components/ui/textarea'
 import { Input } from '@/components/ui/input'
 import { Checkbox } from '@/components/ui/checkbox'
+import VueDatePicker from '@vuepic/vue-datepicker'
+import '@vuepic/vue-datepicker/dist/main.css'
 import {
   Select,
   SelectContent,
@@ -662,7 +666,7 @@ const fetchPatientData = async () => {
 
 // Helper functions
 const formatDate = (dateString: string) => {
-  return new Date(dateString).toLocaleDateString('en-US', {
+  return new Date(dateString).toLocaleDateString('pl-PL', {
     year: 'numeric',
     month: 'long',
     day: 'numeric',
@@ -701,7 +705,7 @@ const editPatient = () => {
     open: true,
     firstName: patient.value.basicData.firstName,
     lastName: patient.value.basicData.lastName,
-    dateOfBirth: patient.value.basicData.dateOfBirth,
+    dateOfBirth: patient.value.basicData.dateOfBirth.toString(),
     gender: patient.value.basicData.gender.toString(),
     phone: patient.value.contactData.phoneNumber,
     email: patient.value.contactData.email,

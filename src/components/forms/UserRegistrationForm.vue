@@ -15,6 +15,8 @@ import {
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { User, Mail, Phone, Calendar } from 'lucide-vue-next'
+import VueDatePicker from '@vuepic/vue-datepicker'
+import '@vuepic/vue-datepicker/dist/main.css'
 
 // Zod validation schema
 const formSchema = z.object({
@@ -235,14 +237,14 @@ const hasFieldError = (fieldName: keyof FormData) => {
                 <Calendar class="w-4 h-4 inline mr-1" />
                 Date of Birth *
               </Label>
-              <Input
+              <VueDatePicker
                 id="dateOfBirth"
-                type="date"
-                v-model="values.dateOfBirth"
+                :model-value="values.dateOfBirth"
+                @update:model-value="(value: any) => setFieldValue('dateOfBirth', value ? new Date(value).toISOString().split('T')[0] : '')"
+                :enable-time-picker="false"
+                auto-apply
+                format="yyyy-MM-dd"
                 :class="{ 'border-red-500': hasFieldError('dateOfBirth') }"
-                @update:model-value="
-                  (value: string | number) => setFieldValue('dateOfBirth', String(value))
-                "
               />
               <p v-if="getFieldError('dateOfBirth')" class="text-sm text-red-500">
                 {{ getFieldError('dateOfBirth') }}

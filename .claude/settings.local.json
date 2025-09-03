@@ -17,7 +17,8 @@
       "Bash(mv:*)",
       "Bash(npx eslint:*)",
       "WebFetch(domain:www.shadcn-vue.com)",
-      "WebFetch(domain:github.com)"
+      "WebFetch(domain:github.com)",
+      "Bash(npm install:*)"
     ],
     "deny": [],
     "defaultMode": "acceptEdits",
