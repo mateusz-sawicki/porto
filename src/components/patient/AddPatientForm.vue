@@ -40,7 +40,7 @@ const testGenericDialog = () => {
     },
     onCancel: () => {
       console.log('Delete cancelled')
-    }
+    },
   })
 }
 
@@ -117,6 +117,22 @@ const resetForm = () => {
   })
 }
 
+const populateForm = async (patientData: any) => {
+  form.resetForm({
+    values: {
+      firstName: patientData.firstName,
+      lastName: patientData.lastName,
+      email: patientData.email,
+      phoneNumber: patientData.phoneNumber,
+      dateOfBirth: patientData.dateOfBirth instanceof Date ? patientData.dateOfBirth : new Date(patientData.dateOfBirth),
+      gender: patientData.gender,
+    },
+  })
+  
+  // Trigger validation for all fields after population
+  await form.validate()
+}
+
 const onSubmit = form.handleSubmit((values) => {
   // Values already match AddPatient interface
   const patientData: AddPatient = {
@@ -134,6 +150,7 @@ const onSubmit = form.handleSubmit((values) => {
 // Expose form methods for parent components
 defineExpose({
   resetForm,
+  populateForm,
   canCloseDialog,
   submitForm: onSubmit,
   isValid: computed(() => form.meta.value.valid),
@@ -143,97 +160,94 @@ defineExpose({
 </script>
 
 <template>
-  <form @submit="onSubmit">
-    <div class="grid gap-6">
-      <!-- Name Fields -->
-      <div class="grid grid-cols-2 gap-6">
-        <FormField v-slot="{ componentField }" name="firstName">
-          <FormItem>
-            <FormLabel>First Name</FormLabel>
-            <FormControl>
-              <Input type="text" placeholder="Enter first name" v-bind="componentField" />
-            </FormControl>
-            <FormMessage />
-          </FormItem>
-        </FormField>
+  <div class="grid gap-6">
+    <!-- Name Fields -->
+    <div class="grid grid-cols-2 gap-6">
+      <FormField v-slot="{ componentField }" name="firstName">
+        <FormItem>
+          <FormLabel>First Name</FormLabel>
+          <FormControl>
+            <Input type="text" placeholder="Enter first name" v-bind="componentField" />
+          </FormControl>
+          <FormMessage />
+        </FormItem>
+      </FormField>
 
-        <FormField v-slot="{ componentField }" name="lastName">
-          <FormItem>
-            <FormLabel>Last Name</FormLabel>
-            <FormControl>
-              <Input type="text" placeholder="Enter last name" v-bind="componentField" />
-            </FormControl>
-            <FormMessage />
-          </FormItem>
-        </FormField>
-      </div>
-
-      <!-- Date and Gender -->
-      <div class="grid grid-cols-2 gap-6">
-        <FormField v-slot="{ field }" name="dateOfBirth">
-          <FormItem>
-            <FormLabel>Date of Birth</FormLabel>
-            <FormControl>
-              <VueDatePicker
-                :model-value="field.value"
-                @update:model-value="field.onChange"
-                :enable-time-picker="false"
-                auto-apply
-                format="yyyy-MM-dd"
-                placeholder="Select date of birth..."
-              />
-            </FormControl>
-            <FormMessage />
-          </FormItem>
-        </FormField>
-
-        <FormField v-slot="{ componentField }" name="gender">
-          <FormItem>
-            <FormLabel>Gender</FormLabel>
-            <Select v-bind="componentField">
-              <FormControl>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select gender" />
-                </SelectTrigger>
-              </FormControl>
-              <SelectContent>
-                <SelectItem
-                  v-for="option in GENDER_OPTIONS"
-                  :key="option.value"
-                  :value="option.value"
-                >
-                  {{ option.label }}
-                </SelectItem>
-              </SelectContent>
-            </Select>
-            <FormMessage />
-          </FormItem>
-        </FormField>
-      </div>
-
-      <!-- Contact Fields -->
-      <div class="grid grid-cols-2 gap-6">
-        <FormField v-slot="{ componentField }" name="phoneNumber">
-          <FormItem>
-            <FormLabel>Phone</FormLabel>
-            <FormControl>
-              <Input type="tel" placeholder="Enter phone number" v-bind="componentField" />
-            </FormControl>
-            <FormMessage />
-          </FormItem>
-        </FormField>
-
-        <FormField v-slot="{ componentField }" name="email">
-          <FormItem>
-            <FormLabel>Email</FormLabel>
-            <FormControl>
-              <Input type="email" placeholder="Enter email address" v-bind="componentField" />
-            </FormControl>
-            <FormMessage />
-          </FormItem>
-        </FormField>
-      </div>
-
+      <FormField v-slot="{ componentField }" name="lastName">
+        <FormItem>
+          <FormLabel>Last Name</FormLabel>
+          <FormControl>
+            <Input type="text" placeholder="Enter last name" v-bind="componentField" />
+          </FormControl>
+          <FormMessage />
+        </FormItem>
+      </FormField>
     </div>
-  </form>
+
+    <!-- Date and Gender -->
+    <div class="grid grid-cols-2 gap-6">
+      <FormField v-slot="{ field }" name="dateOfBirth">
+        <FormItem>
+          <FormLabel>Date of Birth</FormLabel>
+          <FormControl>
+            <VueDatePicker
+              :model-value="field.value"
+              @update:model-value="field.onChange"
+              :enable-time-picker="false"
+              auto-apply
+              format="yyyy-MM-dd"
+              placeholder="Select date of birth..."
+            />
+          </FormControl>
+          <FormMessage />
+        </FormItem>
+      </FormField>
+
+      <FormField v-slot="{ componentField }" name="gender">
+        <FormItem>
+          <FormLabel>Gender</FormLabel>
+          <Select v-bind="componentField">
+            <FormControl>
+              <SelectTrigger>
+                <SelectValue placeholder="Select gender" />
+              </SelectTrigger>
+            </FormControl>
+            <SelectContent>
+              <SelectItem
+                v-for="option in GENDER_OPTIONS"
+                :key="option.value"
+                :value="option.value"
+              >
+                {{ option.label }}
+              </SelectItem>
+            </SelectContent>
+          </Select>
+          <FormMessage />
+        </FormItem>
+      </FormField>
+    </div>
+
+    <!-- Contact Fields -->
+    <div class="grid grid-cols-2 gap-6">
+      <FormField v-slot="{ componentField }" name="phoneNumber">
+        <FormItem>
+          <FormLabel>Phone</FormLabel>
+          <FormControl>
+            <Input type="tel" placeholder="Enter phone number" v-bind="componentField" />
+          </FormControl>
+          <FormMessage />
+        </FormItem>
+      </FormField>
+
+      <FormField v-slot="{ componentField }" name="email">
+        <FormItem>
+          <FormLabel>Email</FormLabel>
+          <FormControl>
+            <Input type="email" placeholder="Enter email address" v-bind="componentField" />
+          </FormControl>
+          <FormMessage />
+        </FormItem>
+      </FormField>
+    </div>
+  </div>
 </template>

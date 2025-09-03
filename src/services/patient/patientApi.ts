@@ -1,4 +1,10 @@
-import type { AddPatient, Patient, PatientDetails, PatientFilters } from '@/types/patient/patient'
+import type {
+  AddPatient,
+  Patient,
+  PatientDetails,
+  PatientFilters,
+  UpdatePatient,
+} from '@/types/patient/patient'
 import { api } from '../api'
 
 // API Response types
@@ -11,7 +17,7 @@ interface ApiResponse<T> {
 
 // Types for API operations
 type CreatePatientData = AddPatient
-type UpdatePatientData = Partial<Omit<Patient, 'id' | 'creationDate'>>
+type UpdatePatientData = UpdatePatient
 class RealPatientApi {
   async getPatients(filters?: PatientFilters): Promise<ApiResponse<Patient[]>> {
     try {
@@ -45,7 +51,7 @@ class RealPatientApi {
 
   async createPatient(patientData: AddPatient): Promise<ApiResponse<Patient>> {
     try {
-      const data = await api.post<Patient>('/api/patients', patientData)
+      const data = await api.put<Patient>('/api/patients', patientData)
 
       return {
         data,
@@ -63,7 +69,7 @@ class RealPatientApi {
 
   async updatePatient(id: string, patientData: UpdatePatientData): Promise<ApiResponse<Patient>> {
     try {
-      const data = await api.patch<Patient>(`/api/patients/${id}`, patientData)
+      const data = await api.put<Patient>(`/api/patients/${id}`, patientData)
 
       return {
         data,

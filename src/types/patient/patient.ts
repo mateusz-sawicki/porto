@@ -1,7 +1,7 @@
 import type { Gender } from './gender'
 
 export interface Patient {
-  id: string // GUID
+  id: string
   firstName: string
   lastName: string
   isActive: boolean
@@ -10,6 +10,16 @@ export interface Patient {
 }
 
 export interface AddPatient {
+  firstName: string
+  lastName: string
+  dateOfBirth: Date
+  phoneNumber: string
+  gender: Gender
+  email: string
+}
+
+export interface UpdatePatient {
+  id: string
   firstName: string
   lastName: string
   dateOfBirth: Date

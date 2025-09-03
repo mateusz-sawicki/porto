@@ -2,7 +2,7 @@
 import { ref } from 'vue'
 import StatsCards from '@/components/patient/StatsCards.vue'
 import PatientManagementCard from '@/components/patient/PatientManagementCard.vue'
-import AddPatientDialog from '@/components/patient/AddPatientDialog.vue'
+import PatientDialog from '@/components/patient/PatientDialog.vue'
 import { usePatients } from '@/composables/patient/usePatients'
 
 // Use patients composable
@@ -64,7 +64,7 @@ const handlePatientCreated = async (patientData: any) => {
     />
 
     <!-- Add Patient Dialog -->
-    <AddPatientDialog
+    <PatientDialog
       :open="isAddPatientDialogOpen"
       @close="closeAddPatientDialog"
       @save="handlePatientCreated"

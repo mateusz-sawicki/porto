@@ -249,89 +249,15 @@
         </DialogContent>
       </Dialog>
 
-      <!-- Edit Patient Dialog -->
-      <Dialog v-model:open="editPatientDialog.open">
-        <DialogContent class="sm:max-w-[800px]">
-          <DialogHeader>
-            <DialogTitle class="flex items-center gap-2">
-              <Edit class="w-5 h-5" />
-              Edit Patient Information
-            </DialogTitle>
-          </DialogHeader>
-          <div class="grid gap-6 py-6">
-            <div class="grid grid-cols-2 gap-6">
-              <div class="grid gap-2">
-                <Label for="first-name">First Name</Label>
-                <Input
-                  id="first-name"
-                  v-model="editPatientDialog.firstName"
-                  placeholder="Enter first name"
-                />
-              </div>
-              <div class="grid gap-2">
-                <Label for="last-name">Last Name</Label>
-                <Input
-                  id="last-name"
-                  v-model="editPatientDialog.lastName"
-                  placeholder="Enter last name"
-                />
-              </div>
-            </div>
-            <div class="grid grid-cols-2 gap-6">
-              <div class="grid gap-2">
-                <Label for="date-of-birth">Date of Birth</Label>
-                <VueDatePicker
-                  id="date-of-birth"
-                  v-model="editPatientDialog.dateOfBirth"
-                  :enable-time-picker="false"
-                  auto-apply
-                  format="yyyy-MM-dd"
-                  class="w-full"
-                />
-              </div>
-              <div class="grid gap-2">
-                <Label for="gender">Gender</Label>
-                <Select v-model="editPatientDialog.gender">
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select gender" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="Male">Male</SelectItem>
-                    <SelectItem value="Female">Female</SelectItem>
-                    <SelectItem value="Other">Other</SelectItem>
-                    <SelectItem value="Prefer not to say">Prefer not to say</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-            <div class="grid grid-cols-2 gap-6">
-              <div class="grid gap-2">
-                <Label for="phone">Phone</Label>
-                <Input
-                  id="phone"
-                  v-model="editPatientDialog.phone"
-                  placeholder="Enter phone number"
-                />
-              </div>
-              <div class="grid gap-2">
-                <Label for="email">Email</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  v-model="editPatientDialog.email"
-                  placeholder="Enter email address"
-                />
-              </div>
-            </div>
-          </div>
-          <DialogFooter>
-            <Button variant="outline" @click="cancelEditPatient"> Cancel </Button>
-            <Button @click="savePatientChanges" :disabled="!isPatientFormValid">
-              Save Changes
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      <!-- Patient Edit Dialog -->
+      <PatientDialog
+        :open="editPatientDialog.open"
+        mode="edit"
+        :patient-id="route.params.id as string"
+        :patient-data="editPatientDialog.patientData"
+        @close="closeEditPatient"
+        @update="handlePatientUpdate"
+      />
 
       <!-- New Treatment Plan Dialog -->
       <Dialog v-model:open="treatmentPlanDialog.open">
@@ -425,6 +351,7 @@ import { Label } from '@/components/ui/label'
 import { User, Phone, Heart, FileText, Plus, Edit, Eye, Trash2 } from 'lucide-vue-next'
 import { patientApi } from '@/services/patient/patientApi'
 import type { Patient, PatientDetails } from '@/types/patient/patient'
+import PatientDialog from '@/components/patient/PatientDialog.vue'
 
 // Type definitions
 
@@ -546,12 +473,7 @@ const deleteDialog = ref({
 // Edit patient dialog state
 const editPatientDialog = ref({
   open: false,
-  firstName: '',
-  lastName: '',
-  dateOfBirth: '',
-  gender: '',
-  phone: '',
-  email: '',
+  patientData: null as any,
 })
 
 // Treatment plan dialog state
@@ -703,12 +625,14 @@ const editPatient = () => {
   // Populate dialog with current patient data
   editPatientDialog.value = {
     open: true,
-    firstName: patient.value.basicData.firstName,
-    lastName: patient.value.basicData.lastName,
-    dateOfBirth: patient.value.basicData.dateOfBirth.toString(),
-    gender: patient.value.basicData.gender.toString(),
-    phone: patient.value.contactData.phoneNumber,
-    email: patient.value.contactData.email,
+    patientData: {
+      firstName: patient.value.basicData.firstName,
+      lastName: patient.value.basicData.lastName,
+      dateOfBirth: patient.value.basicData.dateOfBirth,
+      gender: patient.value.basicData.gender,
+      phoneNumber: patient.value.contactData.phoneNumber,
+      email: patient.value.contactData.email,
+    }
   }
 }
 
@@ -866,50 +790,31 @@ const cancelDeleteNote = () => {
 }
 
 // Patient edit handlers
-const savePatientChanges = () => {
+const closeEditPatient = () => {
+  editPatientDialog.value = {
+    open: false,
+    patientData: null,
+  }
+}
+
+const handlePatientUpdate = (updatedData: any) => {
   if (!patient.value) return
 
   // Update patient data
   patient.value.basicData = {
     ...patient.value.basicData,
-    firstName: editPatientDialog.value.firstName,
-    lastName: editPatientDialog.value.lastName,
-    dateOfBirth: new Date(editPatientDialog.value.dateOfBirth),
-    gender: Number(editPatientDialog.value.gender),
+    firstName: updatedData.firstName,
+    lastName: updatedData.lastName,
+    dateOfBirth: updatedData.dateOfBirth,
+    gender: updatedData.gender,
   }
 
   patient.value.contactData = {
     ...patient.value.contactData,
-    phoneNumber: editPatientDialog.value.phone,
-    email: editPatientDialog.value.email,
-  }
-
-  cancelEditPatient()
-}
-
-const cancelEditPatient = () => {
-  editPatientDialog.value = {
-    open: false,
-    firstName: '',
-    lastName: '',
-    dateOfBirth: '',
-    gender: '',
-    phone: '',
-    email: '',
+    phoneNumber: updatedData.phoneNumber,
+    email: updatedData.email,
   }
 }
-
-// Form validation
-const isPatientFormValid = computed(() => {
-  return (
-    editPatientDialog.value.firstName.trim() &&
-    editPatientDialog.value.lastName.trim() &&
-    editPatientDialog.value.dateOfBirth &&
-    editPatientDialog.value.gender &&
-    editPatientDialog.value.phone.trim() &&
-    editPatientDialog.value.email.trim()
-  )
-})
 
 // Load data on component mount
 onMounted(() => {

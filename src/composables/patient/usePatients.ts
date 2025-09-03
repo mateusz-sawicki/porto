@@ -5,6 +5,7 @@ import type {
   PatientFilters,
   PatientSortOptions,
   PatientTableRow,
+  UpdatePatient,
 } from '@/types/patient/patient'
 import { ref, computed, reactive, readonly } from 'vue'
 
@@ -170,10 +171,7 @@ export function usePatients() {
     }
   }
 
-  async function updatePatient(
-    id: string,
-    patientData: Partial<Omit<Patient, 'id' | 'creationDate'>>,
-  ): Promise<Patient | null> {
+  async function updatePatient(id: string, patientData: UpdatePatient): Promise<Patient | null> {
     loading.value = true
     error.value = null
 
