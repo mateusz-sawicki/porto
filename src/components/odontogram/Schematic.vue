@@ -54,6 +54,7 @@ import * as LucideIcons from 'lucide-vue-next'
 import { Svg, SVG } from '@svgdotjs/svg.js'
 import ProcedureIcon from './ProcedureIcon.vue'
 import { ProcedureIconSource } from '@/types/odontogram/odontogram'
+import { ToothType, ProcedureVisualType } from '@/types/odontogram/tooth'
 
 interface Props {
   number: string
@@ -72,7 +73,7 @@ const emit = defineEmits<Emits>()
 const svgRef = ref<HTMLElement | SVGSVGElement>()
 
 // 🎯 THIS DETERMINES IF TOOTH IS MOLAR OR INCISOR
-const getToothType = (number: string): 'molar' | 'incisor' => {
+const getToothType = (number: string): ToothType => {
   const molars = [
     '16',
     '17',
@@ -95,7 +96,7 @@ const getToothType = (number: string): 'molar' | 'incisor' => {
     '84',
     '85',
   ]
-  return molars.includes(number.replace(/[+-]\d+$/, '')) ? 'molar' : 'incisor'
+  return molars.includes(number.replace(/[+-]\d+$/, '')) ? ToothType.Molar : ToothType.Incisor
 }
 
 // 🎯 THIS GETS YOUR SCHEMATIC SVG COMPONENT FROM THE MAP
@@ -126,7 +127,7 @@ const procedureColors = computed(() => {
   Object.values(assignments.value)
     .flat()
     .forEach((p: any) => {
-      if (p.visual.visualType === 'Color') {
+      if (p.visual.visualType === ProcedureVisualType.Color) {
         colors[p.name] = p.visual.value
       }
     })
@@ -144,7 +145,7 @@ const { assignedProcedures, showTooltip } = useInteractiveSvg({
 
 // Find all surfaces with a procedure that has visualType 'Icon'
 const iconSurfaces = computed(() => {
-  return props.schemaProcedures.filter((a) => a.procedure.visual.visualType === 'Icon')
+  return props.schemaProcedures.filter((a) => a.procedure.visual.visualType === ProcedureVisualType.Icon)
 })
 
 // Store icon positions for each observed surface

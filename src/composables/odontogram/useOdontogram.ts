@@ -3,6 +3,7 @@ import { ref, computed } from 'vue'
 import type { ToothData, Procedure, ProcedureTargetMap } from '@/types/odontogram/odontogram'
 import type { ProcedureWithTarget } from '@/services/procedure/procedureApi'
 import { ExtraToothDirection, ProcedureIconSource } from '@/types/odontogram/odontogram'
+import { ProcedureVisualType as ProcedureVisualTypeEnum, ToothPart } from '@/types/odontogram/tooth'
 import {
   convertToothType,
   getAvailableConversions,
@@ -162,11 +163,11 @@ export function useOdontogram(isPediatric = false) {
   )
 
   // Static procedure palette
-  const procedurePalette = computed<ProcedureWithTarget[]>(() => [
+  const procedurePalette = computed((): ProcedureWithTarget[] => [
     {
       name: 'Wypełnienie',
       behavior: 'None',
-      visual: { visualType: 'Color', value: '#3b82f6' },
+      visual: { visualType: ProcedureVisualTypeEnum.Color, value: '#3b82f6' },
       targets: ['Mesial', 'Distal', 'Buccal', 'Lingual', 'Incisal'],
       category: 'Restorative',
       description: 'Dental filling procedure for cavities and tooth restoration',
@@ -175,7 +176,7 @@ export function useOdontogram(isPediatric = false) {
     {
       name: 'Ekstrakcja',
       behavior: 'CrossOutTooth',
-      visual: { visualType: 'ToothShape', value: 'X' },
+      visual: { visualType: ProcedureVisualTypeEnum.ToothShape, value: 'X' },
       targets: 'Tooth',
       category: 'Surgical',
       description: 'Tooth extraction procedure',
@@ -184,7 +185,7 @@ export function useOdontogram(isPediatric = false) {
     {
       name: 'Leczenie kanałowe',
       behavior: 'None',
-      visual: { visualType: 'Color', value: '#ef4444' },
+      visual: { visualType: ProcedureVisualTypeEnum.Color, value: '#ef4444' },
       targets: 'Root',
       category: 'Endodontic',
       description: 'Root canal treatment procedure',
@@ -193,7 +194,7 @@ export function useOdontogram(isPediatric = false) {
     {
       name: 'Korona',
       behavior: 'None',
-      visual: { visualType: 'Color', value: '#eab308' },
+      visual: { visualType: ProcedureVisualTypeEnum.Color, value: '#eab308' },
       targets: 'Crown',
       category: 'Restorative',
       description: 'Dental crown placement for tooth protection and restoration',
@@ -202,7 +203,7 @@ export function useOdontogram(isPediatric = false) {
     {
       name: 'Próchnica',
       behavior: 'None',
-      visual: { visualType: 'Color', value: '#ec4899' },
+      visual: { visualType: ProcedureVisualTypeEnum.Color, value: '#ec4899' },
       targets: ['Root', 'Mesial', 'Distal', 'Buccal', 'Lingual', 'Incisal'],
       category: 'Diagnostic',
       description: 'Caries detection and marking',
@@ -211,7 +212,7 @@ export function useOdontogram(isPediatric = false) {
     {
       name: 'Recesja',
       behavior: 'None',
-      visual: { visualType: 'GumShape', value: '#000000' },
+      visual: { visualType: ProcedureVisualTypeEnum.GumShape, value: '#000000' },
       targets: 'Tooth',
       category: 'Periodontal',
       description: 'Gum recession marking',
@@ -220,7 +221,7 @@ export function useOdontogram(isPediatric = false) {
     {
       name: 'Implant',
       behavior: 'Implant',
-      visual: { visualType: 'Color', value: '#9a9a9a' },
+      visual: { visualType: ProcedureVisualTypeEnum.Color, value: '#9a9a9a' },
       targets: 'Tooth',
       category: 'Surgical',
       description: 'Dental implant placement',
@@ -229,7 +230,7 @@ export function useOdontogram(isPediatric = false) {
     {
       name: 'Brak zęba',
       behavior: 'HideTooth',
-      visual: { visualType: 'ToothShape', value: 'Ø' },
+      visual: { visualType: ProcedureVisualTypeEnum.ToothShape, value: 'Ø' },
       targets: 'Tooth',
       category: 'Diagnostic',
       description: 'Missing tooth marking',
@@ -238,7 +239,7 @@ export function useOdontogram(isPediatric = false) {
     {
       name: 'tylko korzeń',
       behavior: 'RootOnly',
-      visual: { visualType: 'Icon', value: 'R' },
+      visual: { visualType: ProcedureVisualTypeEnum.Icon, value: 'R' },
       targets: 'Tooth',
       category: 'Diagnostic',
       description: 'Root only tooth marking',
@@ -248,7 +249,7 @@ export function useOdontogram(isPediatric = false) {
     {
       name: 'Ząb zatrzymany',
       behavior: 'ImpactedTooth',
-      visual: { visualType: 'Icon', value: '↓' },
+      visual: { visualType: ProcedureVisualTypeEnum.Icon, value: '↓' },
       targets: 'Tooth',
       category: 'Diagnostic',
       description: 'Impacted tooth marking',
@@ -258,7 +259,7 @@ export function useOdontogram(isPediatric = false) {
     {
       name: 'Obserwacja',
       behavior: 'None',
-      visual: { visualType: 'Icon', value: 'Eye', iconSource: ProcedureIconSource.Lucide },
+      visual: { visualType: ProcedureVisualTypeEnum.Icon, value: 'Eye', iconSource: ProcedureIconSource.Lucide },
       targets: ['Mesial', 'Distal', 'Buccal', 'Lingual', 'Incisal'],
       category: 'Diagnostic',
       description: 'Observation marking for monitoring',
@@ -269,7 +270,7 @@ export function useOdontogram(isPediatric = false) {
       name: 'Ruchomość',
       behavior: 'None',
       visual: {
-        visualType: 'Icon',
+        visualType: ProcedureVisualTypeEnum.Icon,
         value: 'ArrowLeftRight',
         iconSource: ProcedureIconSource.Lucide,
       },
@@ -282,7 +283,7 @@ export function useOdontogram(isPediatric = false) {
       name: 'XD',
       behavior: 'None',
       visual: {
-        visualType: 'Icon',
+        visualType: ProcedureVisualTypeEnum.Icon,
         value: 'ArrowLeftRight',
         iconSource: ProcedureIconSource.Lucide,
       },
@@ -295,7 +296,7 @@ export function useOdontogram(isPediatric = false) {
       name: 'XD1',
       behavior: 'None',
       visual: {
-        visualType: 'Icon',
+        visualType: ProcedureVisualTypeEnum.Icon,
         value: 'ArrowLeftRight',
         iconSource: ProcedureIconSource.Lucide,
       },
@@ -308,7 +309,7 @@ export function useOdontogram(isPediatric = false) {
       name: 'XD2',
       behavior: 'None',
       visual: {
-        visualType: 'Icon',
+        visualType: ProcedureVisualTypeEnum.Icon,
         value: 'ArrowLeftRight',
         iconSource: ProcedureIconSource.Lucide,
       },
@@ -321,7 +322,7 @@ export function useOdontogram(isPediatric = false) {
       name: 'Ubytek klinowy',
       behavior: 'None',
       visual: {
-        visualType: 'Icon',
+        visualType: ProcedureVisualTypeEnum.Icon,
         value: 'TriangleRight',
         iconSource: ProcedureIconSource.Lucide,
       },
@@ -333,7 +334,7 @@ export function useOdontogram(isPediatric = false) {
     {
       name: 'Starcie',
       behavior: 'None',
-      visual: { visualType: 'Icon', value: 'IconTilde', iconSource: ProcedureIconSource.Tabler },
+      visual: { visualType: ProcedureVisualTypeEnum.Icon, value: 'IconTilde', iconSource: ProcedureIconSource.Tabler },
       targets: ['Tooth', 'Crown', 'Root', 'Mesial', 'Distal', 'Buccal', 'Lingual', 'Incisal'],
       category: 'Diagnostic',
       description: 'Tooth wear/attrition marking',
@@ -437,7 +438,7 @@ export function useOdontogram(isPediatric = false) {
         ) {
           tooth.toothProcedures.push({
             procedure,
-            toothPart: 'Tooth',
+            toothPart: ToothPart.Tooth,
           })
         }
       }

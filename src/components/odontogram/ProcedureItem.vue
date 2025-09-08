@@ -11,12 +11,12 @@
       <!-- Visual Representation -->
       <div class="flex-shrink-0">
         <div
-          v-if="procedure.visual!.visualType === 'Color' && procedure.visual!.value"
+          v-if="procedure.visual!.visualType === ProcedureVisualType.Color && procedure.visual!.value"
           class="w-6 h-6 rounded-sm border border-border"
           :style="{ backgroundColor: procedure.visual!.value }"
         />
         <ProcedureIcon
-          v-else-if="procedure.visual!.visualType === 'Icon' && procedure.visual!.value"
+          v-else-if="procedure.visual!.visualType === ProcedureVisualType.Icon && procedure.visual!.value"
           :icon-name="procedure.visual!.value"
           :icon-source="procedure.visual!.iconSource!"
           class="w-6 h-6"
@@ -58,6 +58,7 @@
 import { Check } from 'lucide-vue-next'
 import { Badge } from '@/components/ui/badge'
 import type { ProcedureWithTarget } from '@/services/procedure/procedureApi'
+import { ProcedureVisualType } from '@/types/odontogram/tooth'
 import ProcedureIcon from './ProcedureIcon.vue'
 
 interface Props {

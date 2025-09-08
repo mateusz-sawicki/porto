@@ -6,7 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button'
 import { Users, UserCheck, UserX, RefreshCw, Database, Plus } from 'lucide-vue-next'
 import { usePatients } from '@/composables/patient/usePatients'
-import AddPatientDialog from './AddPatientDialog.vue'
+import PatientDialog from './PatientDialog.vue'
 
 // Use patients composable
 const { patients, stats, loading, error, refreshPatients, deletePatient } = usePatients()
@@ -121,6 +121,6 @@ const handleCloseDialog = () => {
     </Card>
 
     <!-- Add Patient Dialog -->
-    <AddPatientDialog :open="showAddPatientDialog" @close="handleCloseDialog" />
+    <PatientDialog :open="showAddPatientDialog" @close="handleCloseDialog" />
   </div>
 </template>

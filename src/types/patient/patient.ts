@@ -1,4 +1,6 @@
 import type { Gender } from './gender'
+import type { SortDirection } from '../common/sort'
+import type { PatientStatus } from '../common/status'
 
 export interface Patient {
   id: string
@@ -37,13 +39,13 @@ export interface PatientFilters {
 
 export interface PatientSortOptions {
   field: keyof Patient
-  direction: 'asc' | 'desc'
+  direction: SortDirection
 }
 
 // Helper type for table display
 export interface PatientTableRow extends Patient {
   fullName: string
-  status: 'Active' | 'Inactive'
+  status: PatientStatus
   formattedCreationDate: string
   formattedUpdateDate: string
 }

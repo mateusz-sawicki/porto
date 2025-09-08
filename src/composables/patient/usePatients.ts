@@ -7,6 +7,8 @@ import type {
   PatientTableRow,
   UpdatePatient,
 } from '@/types/patient/patient'
+import { SortDirection } from '@/types/common/sort'
+import { PatientStatus } from '@/types/common/status'
 import { ref, computed, reactive, readonly } from 'vue'
 
 export function usePatients() {
@@ -26,7 +28,7 @@ export function usePatients() {
 
   const sortOptions = ref<PatientSortOptions>({
     field: 'createdAt',
-    direction: 'desc',
+    direction: SortDirection.Desc,
   })
 
   // Computed filtered and sorted patients
@@ -73,21 +75,21 @@ export function usePatients() {
       if (aValue instanceof Date && bValue instanceof Date) {
         const aTime = aValue.getTime()
         const bTime = bValue.getTime()
-        return direction === 'asc' ? aTime - bTime : bTime - aTime
+        return direction === SortDirection.Asc ? aTime - bTime : bTime - aTime
       }
 
       // Handle strings
       if (typeof aValue === 'string' && typeof bValue === 'string') {
         const aLower = aValue.toLowerCase()
         const bLower = bValue.toLowerCase()
-        if (aLower < bLower) return direction === 'asc' ? -1 : 1
-        if (aLower > bLower) return direction === 'asc' ? 1 : -1
+        if (aLower < bLower) return direction === SortDirection.Asc ? -1 : 1
+        if (aLower > bLower) return direction === SortDirection.Asc ? 1 : -1
         return 0
       }
 
       // Handle booleans and other types
-      if (aValue < bValue) return direction === 'asc' ? -1 : 1
-      if (aValue > bValue) return direction === 'asc' ? 1 : -1
+      if (aValue < bValue) return direction === SortDirection.Asc ? -1 : 1
+      if (aValue > bValue) return direction === SortDirection.Asc ? 1 : -1
       return 0
     })
 
@@ -99,7 +101,7 @@ export function usePatients() {
     return sortedPatients.value.map((patient) => ({
       ...patient,
       fullName: `${patient.firstName} ${patient.lastName}`,
-      status: patient.isActive ? 'Active' : ('Inactive' as 'Active' | 'Inactive'),
+      status: patient.isActive ? PatientStatus.Active : PatientStatus.Inactive,
       formattedCreationDate: patient.createdAt.toLocaleDateString(),
       formattedUpdateDate: patient.updatedAt.toLocaleDateString(),
     }))
@@ -243,7 +245,7 @@ export function usePatients() {
     filters.dateTo = undefined
   }
 
-  function setSorting(field: keyof Patient, direction: 'asc' | 'desc') {
+  function setSorting(field: keyof Patient, direction: SortDirection) {
     sortOptions.value = { field, direction }
   }
 

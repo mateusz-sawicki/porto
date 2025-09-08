@@ -7,12 +7,15 @@ import type { Patient } from '@/types/patient/patient'
 import { RouterLink, useRouter } from 'vue-router'
 import { useDialog } from '@/composables/useDialog'
 import { patientApi } from '@/services/patient/patientApi'
+import { SortDirection } from '@/types/common/sort'
+import { PatientStatus } from '@/types/common/status'
+import { Size, Variant } from '@/types/ui/common'
 
 // Helper function to get the correct sort icon
 function getSortIcon(column: any) {
   const sortDirection = column.getIsSorted()
-  if (sortDirection === 'asc') return ArrowUp
-  if (sortDirection === 'desc') return ArrowDown
+  if (sortDirection === SortDirection.Asc) return ArrowUp
+  if (sortDirection === SortDirection.Desc) return ArrowDown
   return ArrowUpDown
 }
 const DEFAULT_COLUMN_WIDTH = 150
@@ -64,8 +67,8 @@ export function createColumns(deletePatientFn: (id: string) => Promise<boolean>)
       return h(
         Button,
         {
-          variant: 'ghost',
-          onClick: () => column.toggleSorting(column.getIsSorted() === 'asc'),
+          variant: Variant.Ghost,
+          onClick: () => column.toggleSorting(column.getIsSorted() === SortDirection.Asc),
           class: 'hover:bg-muted',
         },
         () => [
@@ -97,8 +100,8 @@ export function createColumns(deletePatientFn: (id: string) => Promise<boolean>)
       return h(
         Button,
         {
-          variant: 'ghost',
-          onClick: () => column.toggleSorting(column.getIsSorted() === 'asc'),
+          variant: Variant.Ghost,
+          onClick: () => column.toggleSorting(column.getIsSorted() === SortDirection.Asc),
           class: 'hover:bg-muted',
         },
         () => [
@@ -114,12 +117,12 @@ export function createColumns(deletePatientFn: (id: string) => Promise<boolean>)
       return h(
         Badge,
         {
-          variant: isActive ? 'default' : 'secondary',
+          variant: isActive ? Variant.Default : Variant.Secondary,
           class: isActive
             ? 'mx-2 bg-green-100 text-green-800 hover:bg-green-100'
             : 'mx-2 bg-red-100 text-red-800 hover:bg-red-100',
         },
-        () => (isActive ? 'Active' : 'Inactive'),
+        () => (isActive ? PatientStatus.Active : PatientStatus.Inactive),
       )
     },
     filterFn: (row, id, value) => {
@@ -137,8 +140,8 @@ export function createColumns(deletePatientFn: (id: string) => Promise<boolean>)
       return h(
         Button,
         {
-          variant: 'ghost',
-          onClick: () => column.toggleSorting(column.getIsSorted() === 'asc'),
+          variant: Variant.Ghost,
+          onClick: () => column.toggleSorting(column.getIsSorted() === SortDirection.Asc),
           class: 'hover:bg-muted',
         },
         () => [
@@ -162,8 +165,8 @@ export function createColumns(deletePatientFn: (id: string) => Promise<boolean>)
       return h(
         Button,
         {
-          variant: 'ghost',
-          onClick: () => column.toggleSorting(column.getIsSorted() === 'asc'),
+          variant: Variant.Ghost,
+          onClick: () => column.toggleSorting(column.getIsSorted() === SortDirection.Asc),
           class: 'hover:bg-muted',
         },
         () => [
@@ -189,8 +192,8 @@ export function createColumns(deletePatientFn: (id: string) => Promise<boolean>)
         h(
           Button,
           {
-            variant: 'ghost',
-            size: 'sm',
+            variant: Variant.Ghost,
+            size: Size.Small,
             class: 'h-8 w-8 p-0 hover:bg-blue-100 hover:text-blue-600 cursor-pointer',
             onClick: () => handleViewPatient(patient),
           },
@@ -199,8 +202,8 @@ export function createColumns(deletePatientFn: (id: string) => Promise<boolean>)
         h(
           Button,
           {
-            variant: 'ghost',
-            size: 'sm',
+            variant: Variant.Ghost,
+            size: Size.Small,
             class: 'h-8 w-8 p-0 hover:bg-red-100 hover:text-red-600 cursor-pointer',
             onClick: () => handleDeletePatient(patient),
           },

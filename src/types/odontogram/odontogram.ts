@@ -1,4 +1,5 @@
 // types/odontogram.ts
+import { ToothPart, ToothPosition, ToothSurface, ProcedureVisualType as ProcedureVisualTypeEnum } from './tooth'
 export interface ToothData {
   number: string
   position?: number // Anatomical position 1-8 (1=center, 8=back), optional for backward compatibility
@@ -10,13 +11,13 @@ export interface ToothData {
 
 export interface ToothProcedureAssignment {
   procedure: Procedure
-  toothPart: 'Tooth' | 'Crown' | 'Root'
-  position?: 'Top' | 'Middle' | 'Bottom'
+  toothPart: ToothPart
+  position?: ToothPosition
 }
 
 export interface SchemaProcedureAssignment {
   procedure: Procedure
-  surface: 'Mesial' | 'Distal' | 'Buccal' | 'Lingual'
+  surface: ToothSurface
 }
 
 export interface Procedure {
@@ -33,7 +34,7 @@ export interface Procedure {
 }
 
 export interface ProcedureVisualType {
-  visualType: 'Color' | 'Icon' | 'GumShape' | 'ToothShape'
+  visualType: ProcedureVisualTypeEnum
   /**
    * For visualType 'Color', value is a color string.
    * For visualType 'Icon', value is a lucide icon name (e.g., 'Eye', 'ArrowLeftRight').

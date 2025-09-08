@@ -65,6 +65,7 @@ import * as LucideIcons from 'lucide-vue-next'
 import DynamicLucideIcon from './DynamicLucideIcon.vue'
 import { ToothContainerDirection } from '@/types/odontogram/odontogram'
 import type { ProcedureIconSource, ToothProcedureAssignment } from '@/types/odontogram/odontogram'
+import { ProcedureVisualType } from '@/types/odontogram/tooth'
 import { useInteractiveSvg } from '@/composables/odontogram/useInteractiveSvg'
 import { getToothSvgComponent } from '@/utils/toothSvgMap'
 import { Svg, SVG } from '@svgdotjs/svg.js'
@@ -123,7 +124,7 @@ const procedureColors = computed(() => {
   Object.values(assignments.value)
     .flat()
     .forEach((p: any) => {
-      if (p.visual.visualType === 'Color') {
+      if (p.visual.visualType === ProcedureVisualType.Color) {
         colors[p.name] = p.visual.value
       }
     })
@@ -141,7 +142,7 @@ const { assignedProcedures, showTooltip } = useInteractiveSvg({
 
 // Find all parts with a procedure that has visualType 'Icon'
 const iconParts = computed(() => {
-  return props.toothProcedures.filter((a) => a.procedure.visual.visualType === 'Icon')
+  return props.toothProcedures.filter((a) => a.procedure.visual.visualType === ProcedureVisualType.Icon)
 })
 
 const iconPositions = ref<

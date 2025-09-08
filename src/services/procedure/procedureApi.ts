@@ -11,6 +11,7 @@ export interface ProcedureWithTarget extends Procedure {
   targets: string | string[]
   description?: string
   isActive?: boolean
+  category?: string
 }
 
 // API Response types

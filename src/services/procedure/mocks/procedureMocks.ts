@@ -1,5 +1,6 @@
 import type { ProcedureWithTarget } from '../procedureApi'
 import { ProcedureIconSource } from '@/types/odontogram/odontogram'
+import { ProcedureVisualType } from '@/types/odontogram/tooth'
 
 export function createMockProcedures(): ProcedureWithTarget[] {
   return [
@@ -7,7 +8,7 @@ export function createMockProcedures(): ProcedureWithTarget[] {
     {
       name: 'Wypełnienie',
       behavior: 'None',
-      visual: { visualType: 'Color', value: '#3b82f6' },
+      visual: { visualType: ProcedureVisualType.Color, value: '#3b82f6' },
       targets: ['Mesial', 'Distal', 'Buccal', 'Lingual', 'Incisal'],
       description: 'Dental filling procedure for cavities and tooth restoration',
       isActive: true,
@@ -15,7 +16,7 @@ export function createMockProcedures(): ProcedureWithTarget[] {
     {
       name: 'Korona',
       behavior: 'None',
-      visual: { visualType: 'Color', value: '#eab308' },
+      visual: { visualType: ProcedureVisualType.Color, value: '#eab308' },
       targets: 'Crown',
       description: 'Dental crown placement for tooth protection and restoration',
       isActive: true,
@@ -23,7 +24,7 @@ export function createMockProcedures(): ProcedureWithTarget[] {
     {
       name: 'Próchnica',
       behavior: 'None',
-      visual: { visualType: 'Color', value: '#ec4899' },
+      visual: { visualType: ProcedureVisualType.Color, value: '#ec4899' },
       targets: ['Root', 'Mesial', 'Distal', 'Buccal', 'Lingual', 'Incisal'],
       description: 'Caries detection and marking',
       isActive: true,
@@ -33,7 +34,7 @@ export function createMockProcedures(): ProcedureWithTarget[] {
     {
       name: 'Leczenie kanałowe',
       behavior: 'None',
-      visual: { visualType: 'Color', value: '#ef4444' },
+      visual: { visualType: ProcedureVisualType.Color, value: '#ef4444' },
       targets: 'Root',
       description: 'Root canal treatment procedure',
       isActive: true,
@@ -43,7 +44,7 @@ export function createMockProcedures(): ProcedureWithTarget[] {
     {
       name: 'Ekstrakcja',
       behavior: 'CrossOutTooth',
-      visual: { visualType: 'ToothShape', value: 'X' },
+      visual: { visualType: ProcedureVisualType.ToothShape, value: 'X' },
       targets: 'Tooth',
       description: 'Tooth extraction procedure',
       isActive: true,
@@ -51,7 +52,7 @@ export function createMockProcedures(): ProcedureWithTarget[] {
     {
       name: 'Ząb zatrzymany',
       behavior: 'ImpactedTooth',
-      visual: { visualType: 'ToothShape' },
+      visual: { visualType: ProcedureVisualType.ToothShape },
       targets: 'Tooth',
       description: 'Impacted tooth marking',
       isActive: true,
@@ -59,7 +60,7 @@ export function createMockProcedures(): ProcedureWithTarget[] {
     {
       name: 'Implant',
       behavior: 'Implant',
-      visual: { visualType: 'ToothShape' },
+      visual: { visualType: ProcedureVisualType.ToothShape },
       targets: 'Tooth',
       description: 'Dental implant placement',
       isActive: true,
@@ -69,7 +70,7 @@ export function createMockProcedures(): ProcedureWithTarget[] {
     {
       name: 'Recesja',
       behavior: 'None',
-      visual: { visualType: 'GumShape' },
+      visual: { visualType: ProcedureVisualType.GumShape },
       targets: 'Tooth',
       description: 'Gingival recession marking',
       isActive: true,
@@ -79,7 +80,7 @@ export function createMockProcedures(): ProcedureWithTarget[] {
     {
       name: 'Brak zęba',
       behavior: 'HideTooth',
-      visual: { visualType: 'ToothShape' },
+      visual: { visualType: ProcedureVisualType.ToothShape },
       targets: 'Tooth',
       description: 'Missing tooth marking',
       isActive: true,
@@ -87,7 +88,7 @@ export function createMockProcedures(): ProcedureWithTarget[] {
     {
       name: 'tylko korzeń',
       behavior: 'RootOnly',
-      visual: { visualType: 'ToothShape' },
+      visual: { visualType: ProcedureVisualType.ToothShape },
       targets: 'Tooth',
       description: 'Root only remaining',
       isActive: true,
@@ -97,7 +98,7 @@ export function createMockProcedures(): ProcedureWithTarget[] {
     {
       name: 'Obserwacja',
       behavior: 'None',
-      visual: { visualType: 'Icon', value: 'Eye', iconSource: ProcedureIconSource.Lucide },
+      visual: { visualType: ProcedureVisualType.Icon, value: 'Eye', iconSource: ProcedureIconSource.Lucide },
       targets: ['Mesial', 'Distal', 'Buccal', 'Lingual', 'Incisal'],
       description: 'Observation and monitoring marking',
       isActive: true,
@@ -106,7 +107,7 @@ export function createMockProcedures(): ProcedureWithTarget[] {
       name: 'Ruchomość',
       behavior: 'None',
       visual: {
-        visualType: 'Icon',
+        visualType: ProcedureVisualType.Icon,
         value: 'ArrowLeftRight',
         iconSource: ProcedureIconSource.Lucide,
       },
@@ -120,7 +121,7 @@ export function createMockProcedures(): ProcedureWithTarget[] {
       name: 'XD',
       behavior: 'None',
       visual: {
-        visualType: 'Icon',
+        visualType: ProcedureVisualType.Icon,
         value: 'ArrowLeftRight',
         iconSource: ProcedureIconSource.Lucide,
       },
@@ -132,7 +133,7 @@ export function createMockProcedures(): ProcedureWithTarget[] {
       name: 'XD1',
       behavior: 'None',
       visual: {
-        visualType: 'Icon',
+        visualType: ProcedureVisualType.Icon,
         value: 'ArrowLeftRight',
         iconSource: ProcedureIconSource.Lucide,
       },
@@ -144,7 +145,7 @@ export function createMockProcedures(): ProcedureWithTarget[] {
       name: 'XD2',
       behavior: 'None',
       visual: {
-        visualType: 'Icon',
+        visualType: ProcedureVisualType.Icon,
         value: 'ArrowLeftRight',
         iconSource: ProcedureIconSource.Lucide,
       },
@@ -156,7 +157,7 @@ export function createMockProcedures(): ProcedureWithTarget[] {
       name: 'XD3',
       behavior: 'None',
       visual: {
-        visualType: 'Icon',
+        visualType: ProcedureVisualType.Icon,
         value: 'ArrowLeftRight',
         iconSource: ProcedureIconSource.Lucide,
       },
@@ -168,7 +169,7 @@ export function createMockProcedures(): ProcedureWithTarget[] {
       name: 'XD4',
       behavior: 'None',
       visual: {
-        visualType: 'Icon',
+        visualType: ProcedureVisualType.Icon,
         value: 'ArrowLeftRight',
         iconSource: ProcedureIconSource.Lucide,
       },
@@ -181,7 +182,7 @@ export function createMockProcedures(): ProcedureWithTarget[] {
     {
       name: 'Starcie',
       behavior: 'None',
-      visual: { visualType: 'Icon', value: 'IconTilde', iconSource: ProcedureIconSource.Tabler },
+      visual: { visualType: ProcedureVisualType.Icon, value: 'IconTilde', iconSource: ProcedureIconSource.Tabler },
       targets: ['Tooth', 'Crown', 'Root', 'Mesial', 'Distal', 'Buccal', 'Lingual', 'Incisal'],
       description: 'Tooth wear and abrasion marking',
       isActive: true,
@@ -190,7 +191,7 @@ export function createMockProcedures(): ProcedureWithTarget[] {
       name: 'Ubytek klinowy',
       behavior: 'None',
       visual: {
-        visualType: 'Icon',
+        visualType: ProcedureVisualType.Icon,
         value: 'TriangleRight',
         iconSource: ProcedureIconSource.Lucide,
       },

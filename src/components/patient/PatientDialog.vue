@@ -11,13 +11,14 @@ import { Button } from '@/components/ui/button'
 import { Plus } from 'lucide-vue-next'
 import AddPatientForm from './AddPatientForm.vue'
 import type { AddPatient, UpdatePatient } from '@/types/patient/patient'
+import { DialogMode } from '@/types/common/status'
 import { preventDialogClose, useApiCall } from '@/composables/useApiCall'
 import { usePatients } from '@/composables/patient/usePatients'
 import { patientApi } from '@/services/patient/patientApi'
 
 interface Props {
   open: boolean
-  mode?: 'add' | 'edit'
+  mode?: DialogMode
   patientId?: string
   patientData?: {
     firstName: string
@@ -35,7 +36,7 @@ interface Emits {
 }
 
 const props = withDefaults(defineProps<Props>(), {
-  mode: 'add'
+  mode: DialogMode.Add
 })
 const emit = defineEmits<Emits>()
 
@@ -52,7 +53,7 @@ watch(
     if (isOpen) {
       await nextTick()
       if (addPatientFormRef.value) {
-        if (props.mode === 'edit' && props.patientData) {
+        if (props.mode === DialogMode.Edit && props.patientData) {
           await addPatientFormRef.value.populateForm(props.patientData)
         } else {
           addPatientFormRef.value.resetForm()
@@ -73,7 +74,7 @@ const handleSubmit = () => {
 }
 
 const handleSave = async (patientData: AddPatient) => {
-  if (props.mode === 'edit' && props.patientId) {
+  if (props.mode === DialogMode.Edit && props.patientId) {
     // For edit mode, convert AddPatient to UpdatePatient and call updatePatient API
     const updateData: UpdatePatient = {
       id: props.patientId,
@@ -119,7 +120,7 @@ const dialogOpen = computed({
       <DialogHeader>
         <DialogTitle class="flex items-center gap-2">
           <Plus class="w-5 h-5" />
-          {{ mode === 'edit' ? 'Edit Patient' : 'Add New Patient' }}
+          {{ mode === DialogMode.Edit ? 'Edit Patient' : 'Add New Patient' }}
         </DialogTitle>
       </DialogHeader>
 
@@ -136,8 +137,8 @@ const dialogOpen = computed({
         >
           {{ 
             addPatientFormRef?.isSubmitting 
-              ? (mode === 'edit' ? 'Saving...' : 'Adding...') 
-              : (mode === 'edit' ? 'Save Changes' : 'Add Patient')
+              ? (mode === DialogMode.Edit ? 'Saving...' : 'Adding...') 
+              : (mode === DialogMode.Edit ? 'Save Changes' : 'Add Patient')
           }}
         </Button>
       </DialogFooter>

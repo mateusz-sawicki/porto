@@ -1,10 +1,11 @@
 import { api } from '../api'
+import { TreatmentPlanStatus } from '../../types/common/status'
 
 // Types
 export interface TreatmentPlan {
   id: string
   name: string
-  status: 'Draft' | 'InProgress' | 'Completed' | 'Cancelled'
+  status: TreatmentPlanStatus
   patientId: string
   formTemplateId: string
   currentStepOrder?: number

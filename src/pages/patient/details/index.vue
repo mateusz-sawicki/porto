@@ -252,7 +252,7 @@
       <!-- Patient Edit Dialog -->
       <PatientDialog
         :open="editPatientDialog.open"
-        mode="edit"
+        :mode="DialogMode.Edit"
         :patient-id="route.params.id as string"
         :patient-data="editPatientDialog.patientData"
         @close="closeEditPatient"
@@ -352,6 +352,7 @@ import { User, Phone, Heart, FileText, Plus, Edit, Eye, Trash2 } from 'lucide-vu
 import { patientApi } from '@/services/patient/patientApi'
 import type { Patient, PatientDetails } from '@/types/patient/patient'
 import PatientDialog from '@/components/patient/PatientDialog.vue'
+import { DialogMode } from '@/types/common/status'
 
 // Type definitions
 
@@ -632,7 +633,7 @@ const editPatient = () => {
       gender: patient.value.basicData.gender,
       phoneNumber: patient.value.contactData.phoneNumber,
       email: patient.value.contactData.email,
-    }
+    },
   }
 }
 

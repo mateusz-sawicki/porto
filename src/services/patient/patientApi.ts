@@ -51,7 +51,7 @@ class RealPatientApi {
 
   async createPatient(patientData: AddPatient): Promise<ApiResponse<Patient>> {
     try {
-      const data = await api.put<Patient>('/api/patients', patientData)
+      const data = await api.post<Patient>('/api/patients', patientData)
 
       return {
         data,
