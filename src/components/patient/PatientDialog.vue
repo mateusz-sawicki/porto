@@ -85,7 +85,7 @@ const handleSave = async (patientData: AddPatient) => {
       overlayMessage: 'Updating patient...',
     })
 
-    if (result) {
+    if (result && result.success) {
       emit('update', patientData)
       emit('close')
     }
