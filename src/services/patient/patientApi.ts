@@ -120,6 +120,141 @@ class RealPatientApi {
       }
     }
   }
+
+  // Treatment Plans
+  async getTreatmentPlans(patientId: string): Promise<ApiResponse<any[]>> {
+    try {
+      const data = await api.get<any[]>(`/api/patients/${patientId}/treatment-plans`)
+
+      return {
+        data,
+        success: true,
+        message: 'Treatment plans retrieved successfully',
+      }
+    } catch (error) {
+      return {
+        data: [],
+        success: false,
+        error: error instanceof Error ? error.message : 'Failed to fetch treatment plans',
+      }
+    }
+  }
+
+  async createTreatmentPlan(
+    patientId: string,
+    planData: { name: string; isChild: boolean },
+  ): Promise<ApiResponse<any>> {
+    try {
+      const data = await api.post<any>('/api/treatment-plans', {
+        Name: planData.name,
+        PatientId: patientId,
+        IsPediatric: planData.isChild,
+      })
+
+      return {
+        data,
+        success: true,
+        message: 'Treatment plan created successfully',
+      }
+    } catch (error) {
+      return {
+        data: {},
+        success: false,
+        error: error instanceof Error ? error.message : 'Failed to create treatment plan',
+      }
+    }
+  }
+
+  async deleteTreatmentPlan(planId: string): Promise<ApiResponse<null>> {
+    try {
+      await api.delete(`/api/treatment-plans/${planId}`)
+
+      return {
+        data: null,
+        success: true,
+        message: 'Treatment plan deleted successfully',
+      }
+    } catch (error) {
+      return {
+        data: null,
+        success: false,
+        error: error instanceof Error ? error.message : 'Failed to delete treatment plan',
+      }
+    }
+  }
+
+  // Notes
+  async getNotes(patientId: string): Promise<ApiResponse<any[]>> {
+    try {
+      const data = await api.get<any[]>(`/api/patients/${patientId}/notes`)
+
+      return {
+        data,
+        success: true,
+        message: 'Notes retrieved successfully',
+      }
+    } catch (error) {
+      return {
+        data: [],
+        success: false,
+        error: error instanceof Error ? error.message : 'Failed to fetch notes',
+      }
+    }
+  }
+
+  async createNote(patientId: string, content: string): Promise<ApiResponse<any>> {
+    try {
+      const data = await api.post<any>(`/api/patients/${patientId}/notes`, { content })
+
+      return {
+        data,
+        success: true,
+        message: 'Note created successfully',
+      }
+    } catch (error) {
+      return {
+        data: {},
+        success: false,
+        error: error instanceof Error ? error.message : 'Failed to create note',
+      }
+    }
+  }
+
+  async updateNote(patientId: string, noteId: string, content: string): Promise<ApiResponse<any>> {
+    try {
+      const data = await api.put<any>(`/api/patients/${patientId}/notes/${noteId}`, { content })
+
+      return {
+        data,
+        success: true,
+        message: 'Note updated successfully',
+      }
+    } catch (error) {
+      return {
+        data: {},
+        success: false,
+        error: error instanceof Error ? error.message : 'Failed to update note',
+      }
+    }
+  }
+
+  async deleteNote(patientId: string, noteId: string): Promise<ApiResponse<null>> {
+    try {
+      await api.delete(`/api/patients/${patientId}/notes/${noteId}`)
+
+      return {
+        data: null,
+        success: true,
+        message: 'Note deleted successfully',
+      }
+    } catch (error) {
+      return {
+        data: null,
+        success: false,
+        error: error instanceof Error ? error.message : 'Failed to delete note',
+      }
+    }
+  }
 }
 
 export const patientApi = new RealPatientApi()

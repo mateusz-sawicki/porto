@@ -260,56 +260,12 @@
       />
 
       <!-- New Treatment Plan Dialog -->
-      <Dialog v-model:open="treatmentPlanDialog.open">
-        <DialogContent class="sm:max-w-[500px]">
-          <DialogHeader>
-            <DialogTitle class="flex items-center gap-2">
-              <Plus class="w-5 h-5" />
-              New Treatment Plan
-            </DialogTitle>
-          </DialogHeader>
-          <div class="grid gap-4 py-4">
-            <div class="grid gap-2">
-              <Label for="treatment-plan-name">Treatment Plan Name</Label>
-              <Input
-                id="treatment-plan-name"
-                v-model="treatmentPlanDialog.name"
-                placeholder="Enter treatment plan name"
-                :disabled="treatmentPlanDialog.isCreating"
-              />
-            </div>
-            <div class="flex items-center space-x-2">
-              <Checkbox
-                id="is-pediatric"
-                :checked="treatmentPlanDialog.isChild"
-                @update:checked="(checked: boolean) => (treatmentPlanDialog.isChild = checked)"
-                :disabled="treatmentPlanDialog.isCreating"
-              />
-              <Label
-                for="is-pediatric"
-                class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-              >
-                Is pediatric?
-              </Label>
-            </div>
-          </div>
-          <DialogFooter>
-            <Button
-              variant="outline"
-              @click="cancelTreatmentPlan"
-              :disabled="treatmentPlanDialog.isCreating"
-            >
-              Cancel
-            </Button>
-            <Button
-              @click="saveTreatmentPlan"
-              :disabled="!treatmentPlanDialog.name.trim() || treatmentPlanDialog.isCreating"
-            >
-              {{ treatmentPlanDialog.isCreating ? 'Creating...' : 'Create Treatment Plan' }}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      <TreatmentPlanDialog
+        v-model:open="treatmentPlanDialog.open"
+        :is-creating="treatmentPlanDialog.isCreating"
+        @save="saveTreatmentPlan"
+        @cancel="cancelTreatmentPlan"
+      />
     </div>
   </div>
 </template>
@@ -335,8 +291,6 @@ import {
   DialogFooter,
 } from '@/components/ui/dialog'
 import { Textarea } from '@/components/ui/textarea'
-import { Input } from '@/components/ui/input'
-import { Checkbox } from '@/components/ui/checkbox'
 import VueDatePicker from '@vuepic/vue-datepicker'
 import '@vuepic/vue-datepicker/dist/main.css'
 import {
@@ -352,6 +306,7 @@ import { User, Phone, Heart, FileText, Plus, Edit, Eye, Trash2 } from 'lucide-vu
 import { patientApi } from '@/services/patient/patientApi'
 import type { Patient, PatientDetails } from '@/types/patient/patient'
 import PatientDialog from '@/components/patient/PatientDialog.vue'
+import TreatmentPlanDialog from '@/components/treatment-plan/TreatmentPlanDialog.vue'
 import { DialogMode } from '@/types/common/status'
 
 // Type definitions
@@ -375,77 +330,6 @@ interface Note {
   createdBy: string
   updatedAt?: string
 }
-
-const mockTreatmentPlans: TreatmentPlan[] = [
-  {
-    id: 'tp-001',
-    name: 'Post-Surgery Recovery Protocol',
-    condition: 'Knee Replacement Recovery',
-    provider: 'Dr. Smith (Orthopedics)',
-    startDate: '2024-01-15',
-    endDate: '2024-07-15',
-    status: 'Active',
-    progress: 75,
-    description: 'Comprehensive recovery plan including physical therapy and pain management',
-  },
-  {
-    id: 'tp-002',
-    name: 'Physical Therapy - Lower Back',
-    condition: 'Chronic Lower Back Pain',
-    provider: 'Sarah Williams, PT',
-    startDate: '2024-02-01',
-    endDate: null,
-    status: 'Active',
-    progress: 45,
-    description: 'Targeted exercises to strengthen core and improve mobility',
-  },
-  {
-    id: 'tp-003',
-    name: 'Diabetes Management Program',
-    condition: 'Type 2 Diabetes',
-    provider: 'Dr. Johnson (Endocrinology)',
-    startDate: '2023-11-20',
-    endDate: '2024-05-20',
-    status: 'Completed',
-    progress: 100,
-    description: 'Comprehensive diabetes education and medication optimization',
-  },
-  {
-    id: 'tp-004',
-    name: 'Hypertension Control Plan',
-    condition: 'High Blood Pressure',
-    provider: 'Dr. Brown (Cardiology)',
-    startDate: '2024-03-10',
-    endDate: null,
-    status: 'On Hold',
-    progress: 20,
-    description: 'Lifestyle modifications and medication management',
-  },
-]
-
-const mockNotes: Note[] = [
-  {
-    id: 'note-001',
-    content:
-      'Patient reports significant improvement in knee mobility following physical therapy sessions. Range of motion has increased by approximately 30% since last visit. Continuing with current exercise regimen.',
-    createdAt: '2024-06-10T14:30:00Z',
-    createdBy: 'Dr. Smith',
-  },
-  {
-    id: 'note-002',
-    content:
-      'Blood pressure readings have been consistently elevated over the past month. Patient admits to not taking medication as prescribed. Discussed importance of medication compliance and scheduled follow-up in 2 weeks.',
-    createdAt: '2024-06-08T09:15:00Z',
-    createdBy: 'Dr. Brown',
-  },
-  {
-    id: 'note-003',
-    content:
-      'Patient expressed concerns about managing diabetes during upcoming vacation. Provided travel guidelines and adjusted insulin timing. Emergency contact information updated.',
-    createdAt: '2024-05-28T16:45:00Z',
-    createdBy: 'Dr. Johnson',
-  },
-]
 
 // Reactive state
 const route = useRoute()
@@ -480,8 +364,6 @@ const editPatientDialog = ref({
 // Treatment plan dialog state
 const treatmentPlanDialog = ref({
   open: false,
-  name: '',
-  isChild: false,
   isCreating: false,
 })
 
@@ -514,52 +396,21 @@ const fetchPatient = async (patientId: string): Promise<PatientDetails> => {
 }
 
 const fetchTreatmentPlans = async (patientId: string): Promise<TreatmentPlan[]> => {
-  // Simulate API call delay
-  await new Promise((resolve) => setTimeout(resolve, 500))
-
-  // Always return the same mock treatment plans for development
-  return mockTreatmentPlans
+  const response = await patientApi.getTreatmentPlans(patientId)
+  if (!response.success) {
+    throw new Error(response.error || 'Failed to fetch treatment plans')
+  }
+  return response.data
 }
 
 const fetchNotes = async (patientId: string): Promise<Note[]> => {
-  // Simulate API call delay
-  await new Promise((resolve) => setTimeout(resolve, 300))
-
-  // Always return the same mock notes for development
-  return mockNotes
-}
-
-// Mock API for creating treatment plan
-const createTreatmentPlanApi = async (
-  patientId: string,
-  planData: { name: string; isChild: boolean },
-) => {
-  // Simulate API call delay
-  await new Promise((resolve) => setTimeout(resolve, 1000))
-
-  // Generate a mock plan ID
-  const planId = `tp-${Date.now()}`
-
-  console.log('Creating treatment plan:', {
-    patientId,
-    planId,
-    planData,
-  })
-
-  // Simulate success response
-  return {
-    success: true,
-    planId,
-    data: {
-      id: planId,
-      name: planData.name,
-      isChild: planData.isChild,
-      patientId,
-      createdAt: new Date().toISOString(),
-      status: 'Draft',
-    },
+  const response = await patientApi.getNotes(patientId)
+  if (!response.success) {
+    throw new Error(response.error || 'Failed to fetch notes')
   }
+  return response.data
 }
+
 
 // Load patient data
 const fetchPatientData = async () => {
@@ -570,18 +421,22 @@ const fetchPatientData = async () => {
     const patientId = route.params.id as string
 
     // Fetch patient, treatment plans, and notes in parallel
-    const [patientData, treatmentPlansData, notesData] = await Promise.all([
+    const [
+      patientData,
+      treatmentPlansData,
+      //, notesData
+    ] = await Promise.all([
       fetchPatient(patientId),
       fetchTreatmentPlans(patientId),
-      fetchNotes(patientId),
+      //fetchNotes(patientId),
     ])
 
     patient.value = patientData
     treatmentPlans.value = treatmentPlansData
-    notes.value = notesData
+    //notes.value = notesData
   } catch (err) {
     error.value = (err as Error).message || 'Failed to load patient data'
-    console.error('Error fetching patient data:', err)
+    //console.error('Error fetching patient data:', err)
   } finally {
     loading.value = false
   }
@@ -638,35 +493,27 @@ const editPatient = () => {
 }
 
 const createTreatmentPlan = () => {
-  treatmentPlanDialog.value = {
-    open: true,
-    name: '',
-    isChild: false,
-    isCreating: false,
-  }
+  treatmentPlanDialog.value.open = true
 }
 
 // Treatment plan handlers
-const saveTreatmentPlan = async () => {
-  if (!treatmentPlanDialog.value.name.trim()) return
-
+const saveTreatmentPlan = async (planData: { name: string; isChild: boolean }) => {
   treatmentPlanDialog.value.isCreating = true
 
   try {
     const patientId = route.params.id as string
-    const planData = {
-      name: treatmentPlanDialog.value.name,
-      isChild: treatmentPlanDialog.value.isChild,
-    }
-
-    const response = await createTreatmentPlanApi(patientId, planData)
+    const response = await patientApi.createTreatmentPlan(patientId, planData)
 
     if (response.success) {
       // Close dialog
       cancelTreatmentPlan()
 
       // Navigate to treatment plan creation page
-      await router.push(`/patient/${patientId}/treatment-plan/${response.planId}`)
+      const planId = response.data.id || response.data.Id
+      await router.push(`/patients/${patientId}/treatment-plan/${planId}`)
+    } else {
+      // Show error message to user
+      alert(`Failed to create treatment plan: ${response.error || 'Unknown error'}`)
     }
   } catch (error) {
     console.error('Failed to create treatment plan:', error)
@@ -678,12 +525,8 @@ const saveTreatmentPlan = async () => {
 }
 
 const cancelTreatmentPlan = () => {
-  treatmentPlanDialog.value = {
-    open: false,
-    name: '',
-    isChild: false,
-    isCreating: false,
-  }
+  treatmentPlanDialog.value.open = false
+  treatmentPlanDialog.value.isCreating = false
 }
 
 const viewPlan = (planId: string) => {
@@ -696,12 +539,25 @@ const editPlan = (planId: string) => {
   // Navigate to edit treatment plan form
 }
 
-const deletePlan = (planId: string) => {
-  console.log('Delete treatment plan:', planId)
-  // Show confirmation dialog and delete
-  const planIndex = treatmentPlans.value.findIndex((plan) => plan.id === planId)
-  if (planIndex !== -1) {
-    treatmentPlans.value.splice(planIndex, 1)
+const deletePlan = async (planId: string) => {
+  if (!confirm('Are you sure you want to delete this treatment plan?')) {
+    return
+  }
+
+  try {
+    const response = await patientApi.deleteTreatmentPlan(planId)
+
+    if (response.success) {
+      const planIndex = treatmentPlans.value.findIndex((plan) => plan.id === planId)
+      if (planIndex !== -1) {
+        treatmentPlans.value.splice(planIndex, 1)
+      }
+    } else {
+      alert(`Failed to delete treatment plan: ${response.error || 'Unknown error'}`)
+    }
+  } catch (error) {
+    console.error('Error deleting treatment plan:', error)
+    alert('Failed to delete treatment plan. Please try again.')
   }
 }
 
@@ -724,34 +580,44 @@ const editNote = (note: Note) => {
   }
 }
 
-const saveNote = () => {
+const saveNote = async () => {
   const content = noteDialog.value.content.trim()
-
   if (!content) return
 
-  if (noteDialog.value.mode === 'add') {
-    // Add new note
-    const newNote: Note = {
-      id: `note-${Date.now()}`,
-      content: content,
-      createdAt: new Date().toISOString(),
-      createdBy: 'Current User',
-    }
-    notes.value.unshift(newNote)
-  } else {
-    // Edit existing note
-    const noteIndex = notes.value.findIndex((note) => note.id === noteDialog.value.noteId)
-    if (noteIndex !== -1) {
-      notes.value[noteIndex] = {
-        ...notes.value[noteIndex],
-        content: content,
-        updatedAt: new Date().toISOString(),
+  try {
+    const patientId = route.params.id as string
+
+    if (noteDialog.value.mode === 'add') {
+      // Add new note
+      const response = await patientApi.createNote(patientId, content)
+
+      if (response.success) {
+        notes.value.unshift(response.data)
+      } else {
+        alert(`Failed to save note: ${response.error || 'Unknown error'}`)
+        return
+      }
+    } else {
+      // Edit existing note
+      const response = await patientApi.updateNote(patientId, noteDialog.value.noteId!, content)
+
+      if (response.success) {
+        const noteIndex = notes.value.findIndex((note) => note.id === noteDialog.value.noteId)
+        if (noteIndex !== -1) {
+          notes.value[noteIndex] = response.data
+        }
+      } else {
+        alert(`Failed to save note: ${response.error || 'Unknown error'}`)
+        return
       }
     }
-  }
 
-  // Close dialog and reset
-  cancelNoteDialog()
+    // Close dialog and reset
+    cancelNoteDialog()
+  } catch (error) {
+    console.error('Error saving note:', error)
+    alert('Failed to save note. Please try again.')
+  }
 }
 
 const cancelNoteDialog = () => {
@@ -774,12 +640,24 @@ const deleteNote = (noteId: string) => {
   }
 }
 
-const confirmDeleteNote = () => {
-  const noteIndex = notes.value.findIndex((note) => note.id === deleteDialog.value.noteId)
-  if (noteIndex !== -1) {
-    notes.value.splice(noteIndex, 1)
+const confirmDeleteNote = async () => {
+  try {
+    const patientId = route.params.id as string
+    const response = await patientApi.deleteNote(patientId, deleteDialog.value.noteId!)
+
+    if (response.success) {
+      const noteIndex = notes.value.findIndex((note) => note.id === deleteDialog.value.noteId)
+      if (noteIndex !== -1) {
+        notes.value.splice(noteIndex, 1)
+      }
+      cancelDeleteNote()
+    } else {
+      alert(`Failed to delete note: ${response.error || 'Unknown error'}`)
+    }
+  } catch (error) {
+    console.error('Error deleting note:', error)
+    alert('Failed to delete note. Please try again.')
   }
-  cancelDeleteNote()
 }
 
 const cancelDeleteNote = () => {
