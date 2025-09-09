@@ -1,6 +1,17 @@
 <template>
   <div class="bg-muted/50 p-6">
-    <div class="mx-auto">
+    <!-- Loading state -->
+    <div v-if="isLoading" class="mx-auto">
+      <Card class="mb-8">
+        <CardContent class="p-8 text-center">
+          <Loader2 class="w-8 h-8 animate-spin mx-auto mb-4" />
+          <p>Loading treatment plan...</p>
+        </CardContent>
+      </Card>
+    </div>
+
+    <!-- Main content - only render when data is loaded -->
+    <div v-else class="mx-auto">
       <!-- Header -->
       <div class="mb-8">
         <div class="flex flex-col xl:flex-row xl:items-center xl:justify-between gap-4">
@@ -218,41 +229,41 @@
         </div>
       </div>
     </div>
-
-    <!-- Remove Confirmation Dialog -->
-    <AlertDialog :open="showRemoveConfirmation" @update:open="showRemoveConfirmation = $event">
-      <AlertDialogContent>
-        <AlertDialogHeader>
-          <AlertDialogTitle class="flex items-center gap-2">
-            <AlertTriangle class="w-5 h-5 text-destructive" />
-            Remove Treatment Plan
-          </AlertDialogTitle>
-          <AlertDialogDescription>
-            Are you sure you want to remove this treatment plan? This action cannot be undone and
-            all data will be permanently deleted.
-          </AlertDialogDescription>
-        </AlertDialogHeader>
-        <AlertDialogFooter>
-          <AlertDialogCancel :disabled="isRemoving">Cancel</AlertDialogCancel>
-          <AlertDialogAction
-            @click="removeTreatmentPlan"
-            :disabled="isRemoving"
-            variant="destructive"
-            class="flex items-center gap-2"
-          >
-            <Trash2 v-if="!isRemoving" class="w-4 h-4" />
-            <Loader2 v-else class="w-4 h-4 animate-spin" />
-            {{ isRemoving ? 'Removing...' : 'Remove Plan' }}
-          </AlertDialogAction>
-        </AlertDialogFooter>
-      </AlertDialogContent>
-    </AlertDialog>
   </div>
+
+  <!-- Remove Confirmation Dialog -->
+  <AlertDialog :open="showRemoveConfirmation" @update:open="showRemoveConfirmation = $event">
+    <AlertDialogContent>
+      <AlertDialogHeader>
+        <AlertDialogTitle class="flex items-center gap-2">
+          <AlertTriangle class="w-5 h-5 text-destructive" />
+          Remove Treatment Plan
+        </AlertDialogTitle>
+        <AlertDialogDescription>
+          Are you sure you want to remove this treatment plan? This action cannot be undone and all
+          data will be permanently deleted.
+        </AlertDialogDescription>
+      </AlertDialogHeader>
+      <AlertDialogFooter>
+        <AlertDialogCancel :disabled="isRemoving">Cancel</AlertDialogCancel>
+        <AlertDialogAction
+          @click="removeTreatmentPlan"
+          :disabled="isRemoving"
+          variant="destructive"
+          class="flex items-center gap-2"
+        >
+          <Trash2 v-if="!isRemoving" class="w-4 h-4" />
+          <Loader2 v-else class="w-4 h-4 animate-spin" />
+          {{ isRemoving ? 'Removing...' : 'Remove Plan' }}
+        </AlertDialogAction>
+      </AlertDialogFooter>
+    </AlertDialogContent>
+  </AlertDialog>
 </template>
 
 <script setup lang="ts">
-import { ref, computed, provide, withDefaults, defineProps } from 'vue'
-import { useRouter } from 'vue-router'
+import { ref, computed, provide, withDefaults, defineProps, onMounted } from 'vue'
+import { useRouter, useRoute } from 'vue-router'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import {
@@ -281,13 +292,12 @@ import {
   Loader2,
 } from 'lucide-vue-next'
 import { useOdontogram } from '@/composables/odontogram/useOdontogram'
-import BasicInformationStep from './steps/medical-interview/MedicalInterviewStep.vue'
 import OdontogramStep from './steps/OdontogramStep.vue'
 import MeasurementsStep from './steps/MeasurementsStep.vue'
 import AssessmentStep from './steps/AssessmentStep.vue'
 import DocumentsStep from './steps/DocumentsStep.vue'
 import ReviewStep from './steps/ReviewStep.vue'
-import UserRegistrationForm from '@/components/forms/UserRegistrationForm.vue'
+import { api } from '@/services/api'
 import MedicalInterviewStep from './steps/medical-interview/MedicalInterviewStep.vue'
 
 // Types
@@ -316,10 +326,55 @@ interface AssessmentQuestion {
   text: string
 }
 
-interface MeasurementItem {
-  label: string
-  value: string
-  unit: string
+interface TreatmentPlanData {
+  id: string
+  name: string
+  createdAt: string
+  modifiedAt: string
+  currentStep: number
+  isActive: boolean
+  isPediatric: boolean
+  patientId: string
+  formTemplateConfig: Record<string, any>
+  medicalInterviewStepData?: {
+    infancy?: any
+    medicalHistory?: any
+    dentalInterview?: any
+    allergicProblems?: any
+  }
+  basicInfoData?: {
+    planName?: string
+    patientType?: string
+    treatmentCategory?: string
+    estimatedDuration?: string
+    assignedProvider?: string
+    description?: string
+  }
+  measurementsData?: {
+    dosage?: string
+    frequency?: string
+    duration?: string
+    weight?: string
+    height?: string
+    targetValue?: string
+    currentValue?: string
+    maximumValue?: string
+  }
+  assessmentData?: {
+    question1?: string
+    question1Details?: string
+    question2?: string
+    question2Details?: string
+    question3?: string
+    question3Details?: string
+    question4?: string
+    question4Details?: string
+  }
+  uploadedFiles?: {
+    medicalReports?: File[]
+    treatmentImages?: File[]
+  }
+  teethData?: any[]
 }
 
 // Props (if patient ID is passed as prop)
@@ -333,14 +388,16 @@ const props = withDefaults(defineProps<Props>(), {
 
 // Router for navigation
 const router = useRouter()
+const route = useRoute()
 
 // Reactive state
 const currentStep = ref(1)
-const isLoading = ref(false)
+const isLoading = ref(true) // Start with loading true
 const isSaving = ref(false)
 const isRemoving = ref(false)
 const showRemoveConfirmation = ref(false)
 const lastSaved = ref<Date | null>(null)
+const error = ref<string | null>(null)
 
 // Separate data objects for each step
 const basicInfoData = ref({
@@ -718,9 +775,6 @@ const handleRemoveProcedure = (toothNumber: string, procedure: Procedure) => {
 }
 
 // Update methods for each step
-const updateBasicInfo = (data: typeof basicInfoData.value) => {
-  basicInfoData.value = data
-}
 
 const updateMeasurements = (data: typeof measurementsData.value) => {
   measurementsData.value = data
@@ -732,6 +786,77 @@ const updateAssessment = (data: typeof assessmentData.value) => {
 
 const updateUploadedFiles = (files: typeof uploadedFiles.value) => {
   uploadedFiles.value = files
+}
+
+// Fetch treatment plan data from API
+const fetchTreatmentPlan = async () => {
+  try {
+    isLoading.value = true
+    error.value = null
+
+    const treatmentPlanId = route.params.planId
+
+    if (!treatmentPlanId) {
+      error.value = 'Treatment plan ID not found in route parameters'
+      return
+    }
+
+    console.log('Fetching treatment plan:', treatmentPlanId)
+
+    const treatmentPlan = (await api.get(
+      `/api/treatment-plans/${treatmentPlanId}`,
+    )) as TreatmentPlanData
+    console.log('Fetched treatment plan data:', treatmentPlan)
+
+    // Update all form data with fetched data
+    if (treatmentPlan.medicalInterviewStepData) {
+      // Update formData with medicalInterviewStepData - preserve the nested structure
+      formData.value = {
+        medicalHistory: treatmentPlan.medicalInterviewStepData.medicalHistory || {},
+        infancy: treatmentPlan.medicalInterviewStepData.infancy || {},
+        dentalInterview: treatmentPlan.medicalInterviewStepData.dentalInterview || {},
+        allergicProblems: treatmentPlan.medicalInterviewStepData.allergicProblems || {},
+      }
+      console.log('Main component - setting formData to:', formData.value)
+      console.log('Example boolean field - heartDisease:', treatmentPlan.medicalInterviewStepData.medicalHistory?.patientDiseases?.heartDisease)
+    }
+
+    // Update basic info data if available
+    if (treatmentPlan.basicInfoData) {
+      basicInfoData.value = { ...basicInfoData.value, ...treatmentPlan.basicInfoData }
+    }
+
+    // Update measurements data if available
+    if (treatmentPlan.measurementsData) {
+      measurementsData.value = { ...measurementsData.value, ...treatmentPlan.measurementsData }
+    }
+
+    // Update assessment data if available
+    if (treatmentPlan.assessmentData) {
+      assessmentData.value = { ...assessmentData.value, ...treatmentPlan.assessmentData }
+    }
+
+    // Update uploaded files if available
+    if (treatmentPlan.uploadedFiles) {
+      uploadedFiles.value = { ...uploadedFiles.value, ...treatmentPlan.uploadedFiles }
+    }
+
+    // Update odontogram data if available
+    if (treatmentPlan.teethData && odontogram.teeth.value) {
+      // Update teeth data in odontogram
+      odontogram.teeth.value = treatmentPlan.teethData
+    }
+
+    // Set current step from API response
+    if (treatmentPlan.currentStep) {
+      currentStep.value = treatmentPlan.currentStep
+    }
+  } catch (err) {
+    console.error('Error fetching treatment plan:', err)
+    error.value = err instanceof Error ? err.message : 'Failed to load treatment plan'
+  } finally {
+    isLoading.value = false
+  }
 }
 
 const createTreatmentPlan = () => {
@@ -748,9 +873,17 @@ const createTreatmentPlan = () => {
 
 const formData = ref({
   medicalHistory: {},
+  infancy: {},
+  dentalInterview: {},
+  allergicProblems: {},
+})
+
+// Fetch treatment plan data when component mounts
+onMounted(() => {
+  fetchTreatmentPlan()
 })
 
 const handleFormUpdate = (data: { medicalHistory: any }) => {
-  formData.value = data
+  formData.value.medicalHistory = data
 }
 </script>

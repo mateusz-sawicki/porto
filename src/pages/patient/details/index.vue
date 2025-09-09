@@ -411,7 +411,6 @@ const fetchNotes = async (patientId: string): Promise<Note[]> => {
   return response.data
 }
 
-
 // Load patient data
 const fetchPatientData = async () => {
   try {
@@ -530,8 +529,8 @@ const cancelTreatmentPlan = () => {
 }
 
 const viewPlan = (planId: string) => {
-  console.log('View treatment plan:', planId)
-  // Navigate to treatment plan details
+  const patientId = route.params.id as string
+  router.push(`/patients/${patientId}/treatment-plan/${planId}`)
 }
 
 const editPlan = (planId: string) => {

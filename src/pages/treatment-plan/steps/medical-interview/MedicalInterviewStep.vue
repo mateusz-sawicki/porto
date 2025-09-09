@@ -71,15 +71,19 @@
         </div>
       </div>
 
-      <Button type="submit" class="max-w-md"> Wyślij formularz </Button>
+      <Button type="submit" class="max-w-md" :disabled="isLoading">
+        {{ isLoading ? 'Wysyłanie...' : 'Wyślij formularz' }}
+      </Button>
     </form>
   </div>
 </template>
 
 <script setup lang="ts">
+import { ref, watch, withDefaults, defineProps, defineEmits } from 'vue'
 import { useForm } from 'vee-validate'
 import { toTypedSchema } from '@vee-validate/zod'
 import * as z from 'zod'
+import { useRoute, useRouter } from 'vue-router'
 
 import { Button } from '@/components/ui/button'
 import ConditionalFormField from '@/components/forms/ConditionalFormField.vue'
@@ -87,6 +91,36 @@ import TextareaFormField from '@/components/forms/TextareaFormField.vue'
 import CheckBoxFormField from '@/components/forms/CheckBoxFormField.vue'
 import RadioFormField from '@/components/forms/RadioFormField.vue'
 import { fieldConfigs } from './medicalInterviewConfig'
+import { api, API_URL } from '@/services/api'
+
+// Props
+interface Props {
+  formData?: {
+    medicalHistory?: any
+    infancy?: any
+    dentalInterview?: any
+    allergicProblems?: any
+  }
+}
+
+const props = withDefaults(defineProps<Props>(), {
+  formData: () => ({
+    medicalHistory: {},
+    infancy: {},
+    dentalInterview: {},
+    allergicProblems: {},
+  })
+})
+
+// Emits
+const emit = defineEmits<{
+  'update:form-data': [data: any]
+}>()
+
+// Router and state
+const route = useRoute()
+const router = useRouter()
+const isLoading = ref(false)
 
 const createConditionalFormFieldSchema = (fields: any[]) => {
   const schemaObj: any = {}
@@ -116,13 +150,18 @@ const createConditionalFormFieldSchema = (fields: any[]) => {
       if (field.conditionalFields && Array.isArray(field.conditionalFields)) {
         field.conditionalFields.forEach((conditionalField: any, index: number) => {
           const suffix = field.conditionalFields.length === 1 ? 'Value' : `Value${index + 1}`
-          schemaObj[`${field.name}${suffix}`] = createSchemaForConditionalFieldType(conditionalField)
-          
+          schemaObj[`${field.name}${suffix}`] =
+            createSchemaForConditionalFieldType(conditionalField)
+
           // If it's a nested conditional field, we need to recursively create schemas for its conditional fields
           if (conditionalField.type === 'conditionalField' && conditionalField.conditionalFields) {
             conditionalField.conditionalFields.forEach((nestedField: any, nestedIndex: number) => {
-              const nestedSuffix = conditionalField.conditionalFields.length === 1 ? 'Value' : `Value${nestedIndex + 1}`
-              schemaObj[`${field.name}${suffix}${nestedSuffix}`] = createSchemaForConditionalFieldType(nestedField)
+              const nestedSuffix =
+                conditionalField.conditionalFields.length === 1
+                  ? 'Value'
+                  : `Value${nestedIndex + 1}`
+              schemaObj[`${field.name}${suffix}${nestedSuffix}`] =
+                createSchemaForConditionalFieldType(nestedField)
             })
           }
         })
@@ -168,9 +207,72 @@ const formSchema = toTypedSchema(generateFormSchema())
 
 const form = useForm({
   validationSchema: formSchema,
+  initialValues: props.formData,
 })
 
-const onSubmit = form.handleSubmit((values) => {
-  console.log('Form values:', values)
+// Watch for changes in formData prop and update form values
+watch(
+  () => props.formData,
+  (newFormData) => {
+    console.log('MedicalInterviewStep - formData changed:', newFormData)
+    if (newFormData && Object.keys(newFormData).length > 0) {
+      console.log('MedicalInterviewStep - setting form values:', newFormData)
+      // Try resetForm instead of setValues to ensure proper reactivity
+      form.resetForm({
+        values: newFormData,
+      })
+      console.log('MedicalInterviewStep - current form values after resetForm:', form.values)
+    }
+  },
+  { deep: true, immediate: true }
+)
+
+const onSubmit = form.handleSubmit(async (values) => {
+  try {
+    isLoading.value = true
+    console.log(route)
+    // Get treatment plan ID from route parameters
+    const treatmentPlanId = route.params.planId
+    console.log('Route params:', route.params)
+    console.log('Treatment plan ID:', treatmentPlanId)
+
+    if (!treatmentPlanId) {
+      alert('Treatment plan ID not found')
+      return
+    }
+
+    // Get current step (assume this is step 1)
+    const targetStep = 2 // Next step after Basic Information
+
+    // Make PUT request to API
+    console.log('API Base URL:', API_URL)
+    console.log('Making API call to:', `/api/treatment-plans/${treatmentPlanId}`)
+    console.log('Full URL will be:', `${API_URL}/api/treatment-plans/${treatmentPlanId}`)
+    console.log('Sending data:', { targetStep: targetStep, formData: values })
+
+    console.log('About to call api.put...')
+    try {
+      const result = await api.put(`/api/treatment-plans/${treatmentPlanId}`, {
+        targetStep: targetStep,
+        medicalInterviewStepData: values,
+      })
+      console.log('API call completed successfully:', result)
+      console.log('Medical interview submitted successfully:', result)
+    } catch (apiError) {
+      console.error('API call failed:', apiError)
+      throw apiError
+    }
+
+    // Show success message
+    alert('Medical interview submitted successfully!')
+
+    // Navigate back to patient details or stay on current page
+    // You can modify this behavior as needed
+  } catch (error) {
+    console.error('Error submitting medical interview:', error)
+    alert('Failed to submit medical interview. Please try again.')
+  } finally {
+    isLoading.value = false
+  }
 })
 </script>
