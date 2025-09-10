@@ -1,4 +1,7 @@
-<template>
+<!-- <template>
+  <Vueform>
+    <TextElement name="hello_world" label="Hello" placeholder="World" />
+  </Vueform>
   <div class="p-6 space-y-6">
     <form :validation-schema="formSchema" @submit="onSubmit" class="space-y-8">
       <div class="grid grid-cols-1 gap-8">
@@ -109,7 +112,7 @@ const props = withDefaults(defineProps<Props>(), {
     infancy: {},
     dentalInterview: {},
     allergicProblems: {},
-  })
+  }),
 })
 
 // Emits
@@ -224,7 +227,7 @@ watch(
       console.log('MedicalInterviewStep - current form values after resetForm:', form.values)
     }
   },
-  { deep: true, immediate: true }
+  { deep: true, immediate: true },
 )
 
 const onSubmit = form.handleSubmit(async (values) => {
@@ -275,4 +278,309 @@ const onSubmit = form.handleSubmit(async (values) => {
     isLoading.value = false
   }
 })
+</script> -->
+
+<template>
+  <div class="container">
+    <h1>Rejestracja użytkownika - Multi-step</h1>
+
+    <Vueform
+      ref="form$"
+      :schema="schema"
+      @submit="handleSubmit"
+      @step="handleStepChange"
+      :steps="steps"
+      sync
+    >
+      <!-- Niestandardowy progress bar -->
+      <template #step-controls="{ steps, current$ }">
+        <div class="progress-bar">
+          <div
+            v-for="(step, index) in steps"
+            :key="step.name"
+            class="progress-step"
+            :class="{
+              active: current$.index >= index,
+              current: current$.index === index,
+            }"
+          >
+            <div class="step-number">{{ index + 1 }}</div>
+            <div class="step-label">{{ step.label }}</div>
+          </div>
+        </div>
+      </template>
+    </Vueform>
+
+    <!-- Debug panel -->
+    <div class="debug-panel" v-if="form$">
+      <h3>Aktualne dane:</h3>
+      <pre>{{ JSON.stringify(form$.data, null, 2) }}</pre>
+    </div>
+  </div>
+</template>
+
+<script setup>
+import { ref } from 'vue'
+import PreviewComponent from './PreviewComponent.vue'
+
+const form$ = ref(null)
+
+// Definicja kroków
+const steps = [
+  {
+    name: 'personal',
+    label: 'Dane osobowe',
+  },
+  {
+    name: 'account',
+    label: 'Konto',
+  },
+  {
+    name: 'preferences',
+    label: 'Preferencje',
+  },
+  {
+    name: 'review',
+    label: 'Podsumowanie',
+  },
+]
+
+// Schema formularza
+const schema = {
+  // KROK 1: Dane osobowe
+  firstName: {
+    type: 'text',
+    label: 'Imię',
+    rules: 'required|min:2',
+    step: 'personal',
+  },
+  lastName: {
+    type: 'text',
+    label: 'Nazwisko',
+    rules: 'required|min:2',
+    step: 'personal',
+  },
+  birthDate: {
+    type: 'date',
+    label: 'Data urodzenia',
+    rules: 'required|before:today',
+    step: 'personal',
+  },
+  gender: {
+    type: 'radio',
+    label: 'Płeć',
+    items: {
+      male: 'Mężczyzna',
+      female: 'Kobieta',
+      other: 'Inna',
+    },
+    step: 'personal',
+  },
+
+  // KROK 2: Konto
+  email: {
+    type: 'text',
+    inputType: 'email',
+    label: 'Email',
+    rules: 'required|email',
+    step: 'account',
+  },
+  password: {
+    type: 'text',
+    inputType: 'password',
+    label: 'Hasło',
+    rules: 'required|min:8',
+    step: 'account',
+  },
+  passwordConfirm: {
+    type: 'text',
+    inputType: 'password',
+    label: 'Potwierdź hasło',
+    rules: 'required|confirmed:password',
+    step: 'account',
+  },
+  username: {
+    type: 'text',
+    label: 'Nazwa użytkownika',
+    rules: 'required|min:3|max:20',
+    step: 'account',
+  },
+
+  // KROK 3: Preferencje
+  interests: {
+    type: 'checkboxes',
+    label: 'Zainteresowania',
+    items: {
+      technology: 'Technologia',
+      sports: 'Sport',
+      music: 'Muzyka',
+      travel: 'Podróże',
+      cooking: 'Gotowanie',
+      reading: 'Czytanie',
+    },
+    step: 'preferences',
+  },
+  newsletter: {
+    type: 'checkbox',
+    label: 'Chcę otrzymywać newsletter',
+    step: 'preferences',
+  },
+  notifications: {
+    type: 'object',
+    label: 'Powiadomienia',
+    step: 'preferences',
+    conditions: [['newsletter', true]],
+    schema: {
+      email: {
+        type: 'checkbox',
+        text: 'Email',
+        default: true,
+      },
+      sms: {
+        type: 'checkbox',
+        text: 'SMS',
+      },
+      push: {
+        type: 'checkbox',
+        text: 'Push notifications',
+      },
+    },
+  },
+  language: {
+    type: 'select',
+    label: 'Preferowany język',
+    items: {
+      pl: 'Polski',
+      en: 'English',
+      de: 'Deutsch',
+      es: 'Español',
+    },
+    default: 'pl',
+    step: 'preferences',
+  },
+
+  // KROK 4: Podsumowanie - komponent podglądu
+  preview: {
+    type: 'static',
+    component: PreviewComponent,
+    step: 'review',
+    props: {
+      formData: () => form$.value?.data || {},
+    },
+  },
+  terms: {
+    type: 'checkbox',
+    label: 'Akceptuję regulamin i politykę prywatności',
+    rules: 'accepted',
+    step: 'review',
+  },
+}
+
+// Handlers
+function handleSubmit() {
+  console.log('Formularz wysłany!', form$.value.data)
+  alert('Rejestracja zakończona pomyślnie!')
+}
+
+function handleStepChange(step) {
+  console.log('Zmiana kroku na:', step)
+}
 </script>
+
+<style scoped>
+.container {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.progress-bar {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 40px;
+  padding: 20px 0;
+}
+
+.progress-step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex: 1;
+  position: relative;
+}
+
+.progress-step:not(:last-child)::after {
+  content: '';
+  position: absolute;
+  top: 20px;
+  left: 60%;
+  right: -40%;
+  height: 2px;
+  background: #e0e0e0;
+  z-index: 1;
+}
+
+.progress-step.active:not(:last-child)::after {
+  background: #4f46e5;
+}
+
+.step-number {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: #e0e0e0;
+  color: #666;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  position: relative;
+  z-index: 2;
+  margin-bottom: 8px;
+}
+
+.progress-step.active .step-number {
+  background: #4f46e5;
+  color: white;
+}
+
+.progress-step.current .step-number {
+  background: #4f46e5;
+  color: white;
+  box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.2);
+}
+
+.step-label {
+  font-size: 14px;
+  color: #666;
+  text-align: center;
+}
+
+.progress-step.active .step-label {
+  color: #4f46e5;
+  font-weight: 500;
+}
+
+.debug-panel {
+  margin-top: 40px;
+  padding: 20px;
+  background: #f5f5f5;
+  border-radius: 8px;
+  border: 1px solid #ddd;
+}
+
+.debug-panel h3 {
+  margin-top: 0;
+  color: #333;
+}
+
+.debug-panel pre {
+  background: white;
+  padding: 15px;
+  border-radius: 4px;
+  overflow-x: auto;
+  font-size: 12px;
+  max-height: 300px;
+  overflow-y: auto;
+}
+</style>

@@ -136,7 +136,7 @@
             :form-data="basicInfoData"
             @update:form-data="updateBasicInfo"
           /> -->
-          <MedicalInterviewStep
+          <PreviewComponent
             v-if="currentStep === 1"
             :form-data="formData"
             @update:form-data="handleFormUpdate"
@@ -299,6 +299,7 @@ import DocumentsStep from './steps/DocumentsStep.vue'
 import ReviewStep from './steps/ReviewStep.vue'
 import { api } from '@/services/api'
 import MedicalInterviewStep from './steps/medical-interview/MedicalInterviewStep.vue'
+import PreviewComponent from './steps/medical-interview/PreviewComponent.vue'
 
 // Types
 interface Procedure {
@@ -818,7 +819,10 @@ const fetchTreatmentPlan = async () => {
         allergicProblems: treatmentPlan.medicalInterviewStepData.allergicProblems || {},
       }
       console.log('Main component - setting formData to:', formData.value)
-      console.log('Example boolean field - heartDisease:', treatmentPlan.medicalInterviewStepData.medicalHistory?.patientDiseases?.heartDisease)
+      console.log(
+        'Example boolean field - heartDisease:',
+        treatmentPlan.medicalInterviewStepData.medicalHistory?.patientDiseases?.heartDisease,
+      )
     }
 
     // Update basic info data if available
