@@ -1,7 +1,7 @@
 <template>
   <component :is="elementLayout" ref="container">
     <template #element>
-      <div :class="classes.wrapper" :aria-labelledby="labelId" role="radiogroup" class="">
+      <div :class="classes.wrapper" :aria-labelledby="labelId" role="radiogroup">
         <RadiogroupRadio
           v-for="(item, index, key) in resolvedOptions"
           :items="resolvedOptions"
@@ -21,9 +21,9 @@
     </template>
 
     <!-- Default element slots -->
-    <template v-for="(component, slot) in elementSlots" #[slot]
-      ><slot :name="slot" :el$="el$"><component :is="component" :el$="el$" /></slot
-    ></template>
+    <template v-for="(component, slot) in elementSlots" #[slot]>
+      <slot :name="slot" :el$="el$"><component :is="component" :el$="el$" /></slot>
+    </template>
   </component>
 </template>
 
@@ -35,7 +35,7 @@ export default {
       merge: true,
       defaultClasses: {
         container: '',
-        wrapper: '',
+        wrapper: 'horizontal-radiogroup',
       },
     }
   },
@@ -43,7 +43,7 @@ export default {
 </script>
 
 <style lang="scss">
-[role='radiogroup'] {
+.horizontal-radiogroup {
   display: flex !important;
   flex-direction: row !important;
   gap: 1.5rem !important;

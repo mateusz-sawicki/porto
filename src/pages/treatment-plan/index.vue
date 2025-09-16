@@ -1,8 +1,21 @@
 <script setup lang="ts">
 import { Check, Circle, Dot } from 'lucide-vue-next'
-import { ref, reactive } from 'vue'
+import { ref, onMounted, watch } from 'vue'
+import { useRoute } from 'vue-router'
 import { Button } from '@/components/ui/button'
 import OdontogramStep from './steps/OdontogramStep.vue'
+// import { medicalInterviewSchema } from './schema.js' // Now using dynamic schema from API
+import { treatmentPlanApi, type TreatmentPlan } from '@/services/treatmentPlan/treatmentPlanApi'
+
+const route = useRoute()
+
+// Vueform prepare function - transforms data before submission
+function prepareFormData(data: any) {
+  // This function receives clean data from Vueform and can transform it before API submission
+  return data
+}
+
+// Note: Flatten function removed as stepsData should already be in correct flat format
 
 const stepIndex = ref(1)
 const steps = [
@@ -18,88 +31,53 @@ const steps = [
   },
 ]
 
-const formData = ref({})
+const formData = ref({
+  container: {},
+  container_1: {},
+  container_2: {},
+  container_3: {},
+})
 const vueformRef = ref<any>(null)
+const isLoading = ref(false)
+const treatmentPlan = ref<TreatmentPlan | null>(null)
+const isLoadingData = ref(true)
+const formDataModel = ref({})
+const dynamicSchema = ref({})
 
 function handleNextStep() {
+  console.log('handleNextStep called')
   if (vueformRef.value) {
-    vueformRef.value.submit()
+    // Use form$.data to get current form data instead of submit event
+    const formData = vueformRef.value.data
+    console.log('Form data:', formData)
+    onSubmitStep1(formData)
+  } else {
+    console.log('vueformRef.value is null')
   }
 }
 
-const treatmentPlanSchema = {
-  patientName: {
-    type: 'text',
-    label: 'Patient Name',
-    placeholder: 'Enter patient name',
-    rules: ['required'],
-  },
-  treatmentDate: {
-    type: 'date',
-    label: 'Treatment Date',
-    rules: ['required'],
-  },
-  treatmentType: {
-    type: 'select',
-    label: 'Treatment Type',
-    placeholder: 'Select treatment type',
-    rules: ['required'],
-    items: [
-      { value: 'cleaning', label: 'Cleaning' },
-      { value: 'filling', label: 'Filling' },
-      { value: 'crown', label: 'Crown' },
-      { value: 'extraction', label: 'Extraction' },
-      { value: 'root_canal', label: 'Root Canal' },
-      { value: 'orthodontics', label: 'Orthodontics' },
-      { value: 'implant', label: 'Implant' },
-      { value: 'other', label: 'Other' },
-    ],
-  },
-  priority: {
-    type: 'radiogroup',
-    label: 'Priority Level',
-    rules: ['required'],
-    items: [
-      { value: 'low', label: 'Low' },
-      { value: 'medium', label: 'Medium' },
-      { value: 'high', label: 'High' },
-      { value: 'urgent', label: 'Urgent' },
-    ],
-  },
-  description: {
-    type: 'textarea',
-    label: 'Treatment Description',
-    placeholder: 'Enter detailed treatment description',
-    rules: ['required'],
-    rows: 4,
-  },
-  estimatedCost: {
-    type: 'text',
-    label: 'Estimated Cost',
-    placeholder: '0.00',
-    inputType: 'number',
-    step: 0.01,
-  },
-  notes: {
-    type: 'textarea',
-    label: 'Additional Notes',
-    placeholder: 'Any additional notes or special instructions',
-    rows: 3,
-  },
-  followUpRequired: {
-    type: 'checkbox',
-    text: 'Follow-up required',
-  },
-  followUpDate: {
-    type: 'date',
-    label: 'Follow-up Date',
-    conditions: [['followUpRequired', true]],
-  },
-}
+async function onSubmitStep1(data: any) {
+  console.log('onSubmitStep1 called with data:', data)
+  isLoading.value = true
 
-function onSubmitStep1(data: any) {
-  formData.value = { ...formData.value, ...data }
-  nextStep()
+  try {
+    // Data is already clean from Vueform
+    // Store the form data
+    formData.value = data
+
+    // Prepare form data using our prepare function
+    const medicalInterviewStepData = prepareFormData(data)
+
+    console.log('Form data prepared:', medicalInterviewStepData)
+
+    // Proceed to next step without API call
+    nextStep()
+  } catch (error) {
+    console.error('Error processing form data:', error)
+    nextStep()
+  } finally {
+    isLoading.value = false
+  }
 }
 
 function onFinalSubmit() {
@@ -117,11 +95,88 @@ function prevStep() {
     stepIndex.value--
   }
 }
+
+async function fetchTreatmentPlan() {
+  try {
+    isLoadingData.value = true
+    const planId = route.params.planId as string
+    treatmentPlan.value = await treatmentPlanApi.getTreatmentPlanById(planId)
+    console.log('Treatment plan fetched:', treatmentPlan.value)
+
+    // Extract dynamic schema for current step
+    if (treatmentPlan.value && treatmentPlan.value.stepsConfig) {
+      const currentStepConfig = treatmentPlan.value.stepsConfig[stepIndex.value.toString()]
+      if (currentStepConfig) {
+        dynamicSchema.value = currentStepConfig
+        console.log('Dynamic schema loaded:', dynamicSchema.value)
+      }
+    }
+
+    // Load data into reactive model from stepsData
+    if (treatmentPlan.value && treatmentPlan.value.stepsData) {
+      const currentStepData = treatmentPlan.value.stepsData[stepIndex.value.toString()]
+      if (currentStepData && Object.keys(currentStepData).length > 0) {
+        // Data exists for this step, use it directly (it should already be in flat format)
+        formDataModel.value = { ...currentStepData }
+        console.log('Form data model updated from stepsData:', formDataModel.value)
+      } else {
+        // No data for this step yet, initialize empty
+        formDataModel.value = {}
+        console.log('No existing data for step, initialized empty form')
+      }
+    }
+  } catch (error) {
+    console.error('Error fetching treatment plan:', error)
+  } finally {
+    isLoadingData.value = false
+  }
+}
+
+async function loadFormData() {
+  if (treatmentPlan.value && treatmentPlan.value.stepsData) {
+    const currentStepData = treatmentPlan.value.stepsData[stepIndex.value.toString()]
+    console.log('Form data to load:', currentStepData)
+    console.log('VueformRef available:', !!vueformRef.value)
+
+    if (vueformRef.value && currentStepData && Object.keys(currentStepData).length > 0) {
+      try {
+        vueformRef.value.load(currentStepData)
+        console.log('Data loaded into form successfully')
+        console.log('Current form data after load:', vueformRef.value.data)
+      } catch (error) {
+        console.error('Error loading data into form:', error)
+      }
+    } else {
+      console.log('VueformRef not available or no data to load, retrying...')
+      // Retry after a short delay if form ref is not available
+      if (!vueformRef.value) {
+        setTimeout(() => loadFormData(), 100)
+      }
+    }
+  }
+}
+
+// Watch for when both treatment plan is loaded and form is ready
+watch([() => treatmentPlan.value, () => vueformRef.value], ([plan, form]) => {
+  if (plan && form && plan.stepsData && !isLoadingData.value) {
+    loadFormData()
+  }
+})
+
+onMounted(() => {
+  fetchTreatmentPlan()
+})
 </script>
 
 <template>
   <div class="w-full">
-    <div class="block w-full">
+    <!-- Loading state -->
+    <div v-if="isLoadingData" class="flex justify-center items-center h-64">
+      <div class="text-lg">Loading treatment plan...</div>
+    </div>
+
+    <!-- Main content -->
+    <div v-else class="block w-full">
       <!-- Custom stepper header -->
       <div class="flex w-full flex-start gap-2 mb-6">
         <div
@@ -174,17 +229,20 @@ function prevStep() {
           <div class="space-y-4">
             <Vueform
               ref="vueformRef"
-              v-model="formData"
-              :schema="treatmentPlanSchema"
-              @submit="onSubmitStep1"
+              v-model="formDataModel"
+              :schema="dynamicSchema"
+              :prepare="prepareFormData"
               :endpoint="false"
               :submit-button="false"
               size="lg"
+              sync
             />
 
             <div class="flex items-center justify-between pt-4">
               <Button disabled variant="outline" size="sm"> Back </Button>
-              <Button size="sm" @click="handleNextStep"> Next </Button>
+              <Button size="sm" @click="handleNextStep" :disabled="isLoading">
+                {{ isLoading ? 'Saving...' : 'Next' }}
+              </Button>
             </div>
           </div>
         </div>

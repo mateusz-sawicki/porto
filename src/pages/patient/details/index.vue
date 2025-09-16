@@ -509,7 +509,7 @@ const saveTreatmentPlan = async (planData: { name: string; isChild: boolean }) =
 
       // Navigate to treatment plan creation page
       const planId = response.data.id || response.data.Id
-      await router.push(`/patients/${patientId}/treatment-plan/${planId}`)
+      await router.push(`/patients/${patientId}/treatment-plans/${planId}`)
     } else {
       // Show error message to user
       alert(`Failed to create treatment plan: ${response.error || 'Unknown error'}`)
@@ -530,7 +530,7 @@ const cancelTreatmentPlan = () => {
 
 const viewPlan = (planId: string) => {
   const patientId = route.params.id as string
-  router.push(`/patients/${patientId}/treatment-plan/${planId}`)
+  router.push(`/patients/${patientId}/treatment-plans/${planId}`)
 }
 
 const editPlan = (planId: string) => {

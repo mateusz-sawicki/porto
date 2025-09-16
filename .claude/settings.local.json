@@ -19,7 +19,8 @@
       "WebFetch(domain:www.shadcn-vue.com)",
       "WebFetch(domain:github.com)",
       "Bash(npm install:*)",
-      "WebFetch(domain:vueform.com)"
+      "WebFetch(domain:vueform.com)",
+      "Bash(sed:*)"
     ],
     "deny": [],
     "defaultMode": "acceptEdits",

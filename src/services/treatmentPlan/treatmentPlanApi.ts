@@ -5,12 +5,14 @@ import { TreatmentPlanStatus } from '../../types/common/status'
 export interface TreatmentPlan {
   id: string
   name: string
-  status: TreatmentPlanStatus
+  createdAt: string
+  modifiedAt: string
+  currentStep: number
+  isPediatric: boolean
   patientId: string
-  formTemplateId: string
-  currentStepOrder?: number
-  createdDate: string
-  updatedDate: string
+  isActive: boolean
+  stepsData: { [stepNumber: string]: any }
+  stepsConfig: { [stepNumber: string]: any }
 }
 
 export interface TreatmentPlanFormTemplate {
@@ -61,11 +63,17 @@ export class TreatmentPlanApiService {
     return api.get(`/api/clinics/${clinicId}/form-templates`)
   }
 
-  async getFormTemplateById(clinicId: string, templateId: string): Promise<TreatmentPlanFormTemplate> {
+  async getFormTemplateById(
+    clinicId: string,
+    templateId: string,
+  ): Promise<TreatmentPlanFormTemplate> {
     return api.get(`/api/clinics/${clinicId}/form-templates/${templateId}`)
   }
 
-  async createFormTemplate(clinicId: string, template: CreateFormTemplateRequest): Promise<TreatmentPlanFormTemplate> {
+  async createFormTemplate(
+    clinicId: string,
+    template: CreateFormTemplateRequest,
+  ): Promise<TreatmentPlanFormTemplate> {
     return api.post(`/api/clinics/${clinicId}/form-templates`, template)
   }
 
@@ -78,17 +86,41 @@ export class TreatmentPlanApiService {
     return api.get(`/api/treatment-plans/${planId}`)
   }
 
-  async createTreatmentPlan(patientId: string, plan: CreateTreatmentPlanRequest): Promise<TreatmentPlan> {
+  async createTreatmentPlan(
+    patientId: string,
+    plan: CreateTreatmentPlanRequest,
+  ): Promise<TreatmentPlan> {
     return api.post(`/api/patients/${patientId}/treatment-plans`, plan)
   }
 
   // Step Data
-  async saveStepData(patientId: string, planId: string, stepName: string, data: any): Promise<void> {
-    return api.put(`/api/patients/${patientId}/treatment-plans/${planId}/steps/${stepName}/data`, data)
+  async saveStepData(
+    patientId: string,
+    planId: string,
+    stepName: string,
+    medicalInterviewStepData: any,
+  ): Promise<void> {
+    return api.put(
+      `/api/patients/${patientId}/treatment-plans/${planId}/steps/${stepName}/data`,
+      medicalInterviewStepData,
+    )
   }
 
   async completeStep(patientId: string, planId: string, stepName: string): Promise<void> {
-    return api.post(`/api/patients/${patientId}/treatment-plans/${planId}/steps/${stepName}/complete`)
+    return api.post(
+      `/api/patients/${patientId}/treatment-plans/${planId}/steps/${stepName}/complete`,
+    )
+  }
+
+  async updateTreatmentPlanProgress(
+    planId: string,
+    targetStep: number,
+    medicalInterviewStepData: any,
+  ): Promise<any> {
+    return api.put(`/api/treatment-plans/${planId}`, {
+      targetStep,
+      medicalInterviewStepData,
+    })
   }
 }
 

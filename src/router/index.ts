@@ -26,12 +26,12 @@ const router = createRouter({
       component: PatientDetails,
     },
     {
-      path: '/patients/:patientId/treatment-plan/:planId',
+      path: '/patients/:patientId/treatment-plans/:planId',
       name: 'treatment-plan',
       component: TreatmentPlan,
     },
     {
-      path: '/patients/:patientId/treatment-plan/edit/:planId',
+      path: '/patients/:patientId/treatment-plans/edit/:planId',
       name: 'treatment-plan-edit',
       component: TreatmentPlanEdit,
     },
