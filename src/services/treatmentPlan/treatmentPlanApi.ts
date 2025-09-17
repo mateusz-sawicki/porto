@@ -122,6 +122,10 @@ export class TreatmentPlanApiService {
       medicalInterviewStepData,
     })
   }
+
+  async saveProgress(planId: string, stepData: any): Promise<void> {
+    return api.put(`/api/treatment-plans/${planId}/save-progress`, { stepData })
+  }
 }
 
 // Export singleton instance
