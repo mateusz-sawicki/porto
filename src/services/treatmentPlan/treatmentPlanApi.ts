@@ -11,7 +11,7 @@ export interface TreatmentPlan {
   isPediatric: boolean
   patientId: string
   isActive: boolean
-  stepsData: { [stepNumber: string]: any }
+  stepsDetails: { detailsStep: number; detailsData: any }[]
   stepsConfig: { [stepNumber: string]: any }
 }
 
@@ -123,8 +123,8 @@ export class TreatmentPlanApiService {
     })
   }
 
-  async saveProgress(planId: string, stepData: any): Promise<void> {
-    return api.put(`/api/treatment-plans/${planId}/save-progress`, { stepData })
+  async saveProgress(planId: string, stepDetailsData: any): Promise<void> {
+    return api.put(`/api/treatment-plans/${planId}/save-progress`, { stepDetailsData })
   }
 }
 

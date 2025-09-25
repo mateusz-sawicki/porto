@@ -221,6 +221,13 @@ const getTransformedBoundingBox = (element: SVGGraphicsElement, svgElement: SVGS
   }
 }
 
+const safeUpdateIconPositions = () => {
+  nextTick(() => {
+    if (!svgRef.value) return
+    updateIconPositions()
+  })
+}
+
 const updateIconPositions = () => {
   let svgEl = svgRef.value as any
   if (svgEl && svgEl.$el) svgEl = svgEl.$el
@@ -228,7 +235,6 @@ const updateIconPositions = () => {
     svgEl = svgEl.querySelector && svgEl.querySelector('svg')
   }
   if (!svgEl || typeof svgEl.querySelector !== 'function') {
-    console.warn('[Tooth.vue] Could not find SVG element')
     return
   }
 
@@ -317,7 +323,7 @@ const validIconPositions = computed(() => iconPositions.value.filter((pos) => po
 onMounted(() => {
   nextTick(() => {
     updateSvgDimensions()
-    updateIconPositions()
+    safeUpdateIconPositions()
     // Hide implants for pediatric teeth (any element with id containing 'implant')
     if (props.isPediatric) {
       let svgEl = svgRef.value as any
@@ -338,7 +344,7 @@ onMounted(() => {
 watch([iconParts, () => props.number], () =>
   nextTick(() => {
     updateSvgDimensions()
-    updateIconPositions()
+    safeUpdateIconPositions()
   }),
 )
 
@@ -348,7 +354,7 @@ watch([containerRef], () => {
     const resizeObserver = new ResizeObserver(() => {
       nextTick(() => {
         updateSvgDimensions()
-        updateIconPositions()
+        safeUpdateIconPositions()
       })
     })
     resizeObserver.observe(containerRef.value)
