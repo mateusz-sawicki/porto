@@ -16,7 +16,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, provide, withDefaults } from 'vue'
+import { computed, provide, withDefaults, watch } from 'vue'
 import { useOdontogram } from '@/composables/odontogram/useOdontogram'
 import Odontogram from '@/components/odontogram/Odontogram.vue'
 import ToothProceduresSummary from '@/components/odontogram/ToothProcedureSummary.vue'
@@ -38,6 +38,8 @@ interface ToothWithProcedures {
 
 interface Props {
   isPediatric?: boolean
+  treatmentPlan?: any
+  stepIndex?: number
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -118,4 +120,45 @@ const handleRemoveProcedure = (toothNumber: string, procedure: Procedure) => {
     tooth.schemaProcedures.splice(schemaProcIndex, 1)
   }
 }
+
+// Function to get form data for API submission
+const getFormData = () => {
+  return {
+    teeth: odontogram.teeth.value,
+    teethWithProcedures: teethWithProcedures.value,
+  }
+}
+
+// Function to load data from treatment plan into odontogram
+const loadOdontogramData = () => {
+  if (props.treatmentPlan && props.treatmentPlan.currentStepDetail) {
+    const currentStep = props.treatmentPlan.currentStepDetail
+
+    // Check if this is the correct step for current stepIndex
+    if (currentStep && currentStep.detailsStep === props.stepIndex) {
+      const stepData = currentStep.detailsData
+      console.log('Loading odontogram data:', stepData)
+
+      // Load teeth data if available
+      if (stepData && stepData.teeth && Array.isArray(stepData.teeth)) {
+        odontogram.teeth.value = stepData.teeth
+        console.log('Loaded teeth data into odontogram')
+      }
+    } else {
+      console.log('No data for current step, using empty odontogram')
+    }
+  }
+}
+
+// Watch for changes in treatment plan data
+watch(() => props.treatmentPlan, (plan) => {
+  if (plan && plan.currentStepDetail) {
+    loadOdontogramData()
+  }
+}, { deep: true, immediate: true })
+
+// Expose methods to parent component
+defineExpose({
+  getFormData,
+})
 </script>

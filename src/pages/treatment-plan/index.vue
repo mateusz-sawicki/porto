@@ -73,6 +73,7 @@ const treatmentPlan = ref<TreatmentPlan | null>(null)
 const isLoadingData = ref<boolean>(true)
 const isSaving = ref<boolean>(false)
 const medicalInterviewStepRef = ref<MedicalInterviewStepRef | null>(null)
+const odontogramStepRef = ref<any | null>(null)
 
 // Computed property that merges treatment plan with current steps data
 const treatmentPlanWithSteps = computed(() => {
@@ -112,7 +113,10 @@ async function saveProgress(): Promise<void> {
 
     if (stepIndex.value === 1 && medicalInterviewStepRef.value) {
       currentStepData = medicalInterviewStepRef.value.getFormData()
-      console.log('Got form data from ref:', currentStepData)
+      console.log('Got form data from medical interview step:', currentStepData)
+    } else if (stepIndex.value === 2 && odontogramStepRef.value) {
+      currentStepData = odontogramStepRef.value.getFormData()
+      console.log('Got form data from odontogram step:', currentStepData)
     }
 
     if (treatmentPlan.value?.id) {
@@ -158,7 +162,10 @@ async function nextStep(): Promise<void> {
 
       if (stepIndex.value === 1 && medicalInterviewStepRef.value) {
         currentStepData = medicalInterviewStepRef.value.getFormData()
-        console.log('Got form data from ref for next step:', currentStepData)
+        console.log('Got form data from medical interview step for next step:', currentStepData)
+      } else if (stepIndex.value === 2 && odontogramStepRef.value) {
+        currentStepData = odontogramStepRef.value.getFormData()
+        console.log('Got form data from odontogram step for next step:', currentStepData)
       }
 
       // Calculate target step (next step)
@@ -196,7 +203,10 @@ async function prevStep(): Promise<void> {
 
       if (stepIndex.value === 1 && medicalInterviewStepRef.value) {
         currentStepData = medicalInterviewStepRef.value.getFormData()
-        console.log('Got form data from ref for prev step:', currentStepData)
+        console.log('Got form data from medical interview step for prev step:', currentStepData)
+      } else if (stepIndex.value === 2 && odontogramStepRef.value) {
+        currentStepData = odontogramStepRef.value.getFormData()
+        console.log('Got form data from odontogram step for prev step:', currentStepData)
       }
 
       // Calculate target step (previous step)
@@ -319,7 +329,12 @@ onMounted(() => {
 
         <!-- Step 2: Odontogram -->
         <div v-if="stepIndex === 2">
-          <OdontogramStep :isPediatric="true" />
+          <OdontogramStep
+            ref="odontogramStepRef"
+            :isPediatric="true"
+            :treatment-plan="treatmentPlanWithSteps"
+            :step-index="stepIndex"
+          />
         </div>
       </div>
 

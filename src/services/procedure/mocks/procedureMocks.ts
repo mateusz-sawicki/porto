@@ -98,7 +98,11 @@ export function createMockProcedures(): ProcedureWithTarget[] {
     {
       name: 'Obserwacja',
       behavior: 'None',
-      visual: { visualType: ProcedureVisualType.Icon, value: 'Eye', iconSource: ProcedureIconSource.Lucide },
+      visual: {
+        visualType: ProcedureVisualType.Icon,
+        value: 'Eye',
+        iconSource: ProcedureIconSource.Lucide,
+      },
       targets: ['Mesial', 'Distal', 'Buccal', 'Lingual', 'Incisal'],
       description: 'Observation and monitoring marking',
       isActive: true,
@@ -182,7 +186,11 @@ export function createMockProcedures(): ProcedureWithTarget[] {
     {
       name: 'Starcie',
       behavior: 'None',
-      visual: { visualType: ProcedureVisualType.Icon, value: 'IconTilde', iconSource: ProcedureIconSource.Tabler },
+      visual: {
+        visualType: ProcedureVisualType.Icon,
+        value: 'IconTilde',
+        iconSource: ProcedureIconSource.Tabler,
+      },
       targets: ['Tooth', 'Crown', 'Root', 'Mesial', 'Distal', 'Buccal', 'Lingual', 'Incisal'],
       description: 'Tooth wear and abrasion marking',
       isActive: true,
