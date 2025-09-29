@@ -53,18 +53,19 @@ function getFormData() {
 
 defineExpose({
   getFormData,
-  handleNextStep
+  handleNextStep,
 })
 
 function loadFormData() {
-  if (props.treatmentPlan && props.treatmentPlan.stepsDetails) {
-    const currentStep = props.treatmentPlan.stepsDetails.find((step: any) => step.detailsStep === props.stepIndex)
+  if (props.treatmentPlan && props.treatmentPlan.currentStepDetails) {
+    const currentStep = props.treatmentPlan.currentStepDetails
     let currentStepData = currentStep?.detailsData
 
-    // If the data is nested incorrectly (has stepsDetails property), extract the actual data
-    if (currentStepData && currentStepData.stepsDetails && Array.isArray(currentStepData.stepsDetails)) {
-      const nestedStep = currentStepData.stepsDetails.find((step: any) => step.detailsStep === props.stepIndex)
-      currentStepData = nestedStep?.detailsData || currentStepData
+    // Check if this is the correct step for current stepIndex
+    if (currentStep && currentStep.detailsStep === props.stepIndex) {
+      currentStepData = currentStep.detailsData
+    } else {
+      currentStepData = {}
     }
 
     if (vueformRef.value && currentStepData && Object.keys(currentStepData).length > 0) {
@@ -82,7 +83,7 @@ function loadFormData() {
 }
 
 watch([() => props.treatmentPlan, () => vueformRef.value], ([plan, form]) => {
-  if (plan && form && plan.stepsDetails) {
+  if (plan && form && plan.currentStepDetails) {
     loadFormData()
   }
 })
@@ -92,25 +93,27 @@ onMounted(() => {
   console.log('Treatment plan:', props.treatmentPlan)
   console.log('Step index:', props.stepIndex)
 
-  if (props.treatmentPlan && props.treatmentPlan.stepsConfig) {
-    const currentStepConfig = props.treatmentPlan.stepsConfig[props.stepIndex.toString()]
+  if (props.treatmentPlan && props.treatmentPlan.currentStepConfig) {
+    const currentStepConfig = props.treatmentPlan.currentStepConfig
     if (currentStepConfig) {
       dynamicSchema.value = currentStepConfig
     }
   }
 
-  if (props.treatmentPlan && props.treatmentPlan.stepsDetails) {
-    console.log('Steps details:', props.treatmentPlan.stepsDetails)
-    const currentStep = props.treatmentPlan.stepsDetails.find((step: any) => step.detailsStep === props.stepIndex)
+  if (props.treatmentPlan && props.treatmentPlan.currentStepDetails) {
+    console.log('Current step details:', props.treatmentPlan.currentStepDetails)
+    const currentStep = props.treatmentPlan.currentStepDetails
     console.log('Current step found:', currentStep)
     let currentStepData = currentStep?.detailsData
     console.log('Current step data (raw):', currentStepData)
 
-    // If the data is nested incorrectly (has stepsDetails property), extract the actual data
-    if (currentStepData && currentStepData.stepsDetails && Array.isArray(currentStepData.stepsDetails)) {
-      const nestedStep = currentStepData.stepsDetails.find((step: any) => step.detailsStep === props.stepIndex)
-      currentStepData = nestedStep?.detailsData || currentStepData
-      console.log('Extracted nested step data:', currentStepData)
+    // Check if this is the correct step for current stepIndex
+    if (currentStep && currentStep.detailsStep === props.stepIndex) {
+      currentStepData = currentStep.detailsData
+      console.log('Using step data for current step:', currentStepData)
+    } else {
+      currentStepData = {}
+      console.log('No data for current step, using empty object')
     }
 
     if (currentStepData && Object.keys(currentStepData).length > 0) {
@@ -136,6 +139,5 @@ onMounted(() => {
       size="lg"
       sync
     />
-
   </div>
 </template>

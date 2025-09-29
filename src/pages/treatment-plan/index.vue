@@ -65,8 +65,8 @@ const steps: Step[] = [
   },
 ]
 
-const stepsDetails = ref<StepsDetails>({
-  stepsDetails: []
+const currentStepDetails = ref<StepsDetails>({
+  currentStepDetail: null,
 })
 const isLoading = ref<boolean>(false)
 const treatmentPlan = ref<TreatmentPlan | null>(null)
@@ -80,7 +80,7 @@ const treatmentPlanWithSteps = computed(() => {
 
   return {
     ...treatmentPlan.value,
-    stepsDetails: stepsDetails.value.stepsDetails
+    currentStepDetail: currentStepDetails.value.currentStepDetail,
   }
 })
 
@@ -88,17 +88,12 @@ async function onStepSubmit(data: StepData): Promise<void> {
   isLoading.value = true
 
   try {
-    const existingIndex = stepsDetails.value.stepsDetails.findIndex(step => step.detailsStep === stepIndex.value)
     const stepDetail: StepDetails = {
       detailsStep: stepIndex.value,
-      detailsData: data
+      detailsData: data,
     }
 
-    if (existingIndex >= 0) {
-      stepsDetails.value.stepsDetails[existingIndex] = stepDetail
-    } else {
-      stepsDetails.value.stepsDetails.push(stepDetail)
-    }
+    currentStepDetails.value.currentStepDetail = stepDetail
 
     nextStep()
   } catch (error) {
@@ -120,25 +115,9 @@ async function saveProgress(): Promise<void> {
       console.log('Got form data from ref:', currentStepData)
     }
 
-    const existingIndex = stepsDetails.value.stepsDetails.findIndex(step => step.detailsStep === stepIndex.value)
-    const stepDetail: StepDetails = {
-      detailsStep: stepIndex.value,
-      detailsData: currentStepData
-    }
-
-    if (existingIndex >= 0) {
-      stepsDetails.value.stepsDetails[existingIndex] = stepDetail
-      console.log('Updated existing step at index:', existingIndex)
-    } else {
-      stepsDetails.value.stepsDetails.push(stepDetail)
-      console.log('Added new step to array')
-    }
-
-    console.log('Current stepsDetails:', stepsDetails.value)
-    console.log('treatmentPlanWithSteps computed:', treatmentPlanWithSteps.value)
-
     if (treatmentPlan.value?.id) {
       await treatmentPlanApi.saveProgress(treatmentPlan.value.id, currentStepData)
+      console.log('Saved progress with data:', currentStepData)
     }
   } catch (error) {
     console.error(STRINGS.ERROR_MESSAGES.SAVING_PROGRESS, error)
@@ -152,7 +131,7 @@ async function onFinalSubmit(): Promise<void> {
 
   try {
     if (treatmentPlan.value?.id) {
-      await treatmentPlanApi.saveProgress(treatmentPlan.value.id, stepsDetails.value)
+      await treatmentPlanApi.saveProgress(treatmentPlan.value.id, currentStepDetails.value)
     }
   } catch (error) {
     console.error(STRINGS.ERROR_MESSAGES.SUBMITTING_TREATMENT_PLAN, error)
@@ -169,15 +148,79 @@ function handleNext(): void {
   }
 }
 
-function nextStep(): void {
+async function nextStep(): Promise<void> {
   if (stepIndex.value < steps.length) {
-    stepIndex.value++
+    try {
+      isLoading.value = true
+
+      // Get current step data (only filled fields)
+      let currentStepData: StepData = {}
+
+      if (stepIndex.value === 1 && medicalInterviewStepRef.value) {
+        currentStepData = medicalInterviewStepRef.value.getFormData()
+        console.log('Got form data from ref for next step:', currentStepData)
+      }
+
+      // Calculate target step (next step)
+      const targetStep = stepIndex.value + 1
+
+      // Call API to move to next step
+      if (treatmentPlan.value?.id) {
+        await treatmentPlanApi.moveToNextStep(
+          treatmentPlan.value.id,
+          targetStep,
+          currentStepData
+        )
+
+        // Fetch updated treatment plan data for the new step
+        await fetchTreatmentPlan()
+
+        // Update step index
+        stepIndex.value = targetStep
+      }
+    } catch (error) {
+      console.error('Error moving to next step:', error)
+    } finally {
+      isLoading.value = false
+    }
   }
 }
 
-function prevStep(): void {
+async function prevStep(): Promise<void> {
   if (stepIndex.value > 1) {
-    stepIndex.value--
+    try {
+      isLoading.value = true
+
+      // Get current step data (only filled fields)
+      let currentStepData: StepData = {}
+
+      if (stepIndex.value === 1 && medicalInterviewStepRef.value) {
+        currentStepData = medicalInterviewStepRef.value.getFormData()
+        console.log('Got form data from ref for prev step:', currentStepData)
+      }
+
+      // Calculate target step (previous step)
+      const targetStep = stepIndex.value - 1
+
+      // Call API to move to previous step
+      if (treatmentPlan.value?.id) {
+        await treatmentPlanApi.moveToNextStep(
+          treatmentPlan.value.id,
+          targetStep,
+          currentStepData
+        )
+
+        // Fetch updated treatment plan data for the new step
+        await fetchTreatmentPlan()
+
+        // Update step index
+        stepIndex.value = targetStep
+      }
+    } catch (error) {
+      console.error('Error moving to previous step:', error)
+    } finally {
+      isLoading.value = false
+    }
   }
 }
 
@@ -187,9 +230,15 @@ async function fetchTreatmentPlan(): Promise<void> {
     const planId = route.params.planId as string
     treatmentPlan.value = await treatmentPlanApi.getTreatmentPlanById(planId)
 
-    // Initialize stepsDetails from treatment plan if it exists
-    if (treatmentPlan.value?.stepsDetails) {
-      stepsDetails.value.stepsDetails = treatmentPlan.value.stepsDetails
+    // Initialize currentStepDetail from treatment plan if it exists
+    if (treatmentPlan.value?.currentStepDetails) {
+      currentStepDetails.value.currentStepDetail = treatmentPlan.value.currentStepDetails
+    }
+
+    // Set step index from current step in treatment plan
+    if (treatmentPlan.value?.currentStep) {
+      stepIndex.value = treatmentPlan.value.currentStep
+      console.log('Set stepIndex from API:', stepIndex.value)
     }
   } catch (error) {
     console.error(STRINGS.ERROR_MESSAGES.FETCHING_TREATMENT_PLAN, error)

@@ -14,7 +14,7 @@ export interface StepDetails {
 }
 
 export interface StepsDetails {
-  stepsDetails: StepDetails[]
+  currentStepDetail: StepDetails | null
 }
 
 export interface MedicalInterviewStepRef {
