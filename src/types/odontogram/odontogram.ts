@@ -20,8 +20,37 @@ export interface SchemaProcedureAssignment {
   surface: ToothSurface
 }
 
+// New lightweight assignment interfaces for data storage (without visual config)
+export interface ToothProcedureReference {
+  procedureId: string
+  procedureName: string // For quick lookup/display
+  toothPart: ToothPart
+  position?: ToothPosition
+}
+
+export interface SchemaProcedureReference {
+  procedureId: string
+  procedureName: string // For quick lookup/display
+  surface: ToothSurface
+}
+
 export interface Procedure {
   name: string // Dynamic from API
+  visual: ProcedureVisualType
+  behavior:
+    | 'None'
+    | 'CrossOutTooth'
+    | 'HideTooth'
+    | 'RootOnly'
+    | 'EmphasizeSurface'
+    | 'Implant'
+    | 'ImpactedTooth'
+}
+
+// New interface for API-managed procedure configuration
+export interface ProcedureConfig {
+  id: string
+  name: string
   visual: ProcedureVisualType
   behavior:
     | 'None'

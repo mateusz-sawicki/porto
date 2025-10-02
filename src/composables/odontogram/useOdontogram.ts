@@ -1,105 +1,169 @@
 // composables/useOdontogram.ts
 import { ref, computed } from 'vue'
-import type { ToothData, Procedure, ProcedureTargetMap } from '@/types/odontogram/odontogram'
+import type { ToothData, ProcedureTargetMap } from '@/types/odontogram/odontogram'
 import type { ProcedureWithTarget } from '@/services/procedure/procedureApi'
 import { ExtraToothDirection, ProcedureIconSource } from '@/types/odontogram/odontogram'
 import { ProcedureVisualType as ProcedureVisualTypeEnum, ToothPart } from '@/types/odontogram/tooth'
 import {
-  convertToothType,
   getAvailableConversions,
   permanentToPrimary,
   primaryToPermanent,
 } from '@/utils/toothConversion'
 
+// Odontogram Schema Configurations
+const ADULT_ODONTOGRAM_SCHEMA = {
+  quadrants: [
+    {
+      id: 1,
+      teeth: [
+        // Upper Right
+        { number: '18' },
+        { number: '17' },
+        { number: '16' },
+        { number: '15' },
+        { number: '14' },
+        { number: '13' },
+        { number: '12' },
+        { number: '11' },
+      ],
+    },
+    {
+      id: 2,
+      teeth: [
+        // Upper Left
+        { number: '21' },
+        { number: '22' },
+        { number: '23' },
+        { number: '24' },
+        { number: '25' },
+        { number: '26' },
+        { number: '27' },
+        { number: '28' },
+      ],
+    },
+    {
+      id: 3,
+      teeth: [
+        // Lower Left
+        { number: '31' },
+        { number: '32' },
+        { number: '33' },
+        { number: '34' },
+        { number: '35' },
+        { number: '36' },
+        { number: '37' },
+        { number: '38' },
+      ],
+    },
+    {
+      id: 4,
+      teeth: [
+        // Lower Right
+        { number: '48' },
+        { number: '47' },
+        { number: '46' },
+        { number: '45' },
+        { number: '44' },
+        { number: '43' },
+        { number: '42' },
+        { number: '41' },
+      ],
+    },
+  ],
+}
+
+const PEDIATRIC_ODONTOGRAM_SCHEMA = {
+  quadrants: [
+    {
+      id: 5,
+      teeth: [
+        // Upper Right
+        { number: '55' },
+        { number: '54' },
+        { number: '53' },
+        { number: '52' },
+        { number: '51' },
+        { number: '16' },
+        { number: '17' },
+        { number: '18' },
+      ],
+    },
+    {
+      id: 6,
+      teeth: [
+        // Upper Left
+        { number: '61' },
+        { number: '62' },
+        { number: '63' },
+        { number: '64' },
+        { number: '65' },
+        { number: '26' },
+        { number: '27' },
+        { number: '28' },
+      ],
+    },
+    {
+      id: 7,
+      teeth: [
+        // Lower Left
+        { number: '71' },
+        { number: '72' },
+        { number: '73' },
+        { number: '74' },
+        { number: '75' },
+        { number: '36' },
+        { number: '37' },
+        { number: '38' },
+      ],
+    },
+    {
+      id: 8,
+      teeth: [
+        // Lower Right
+        { number: '85' },
+        { number: '84' },
+        { number: '83' },
+        { number: '82' },
+        { number: '81' },
+        { number: '46' },
+        { number: '47' },
+        { number: '48' },
+      ],
+    },
+  ],
+}
+
+// Utility functions
+const isEmptySlot = (toothNumber: string, isPediatric: boolean) => {
+  if (!isPediatric) return false
+  const permanentMolars = [16, 17, 18, 26, 27, 28, 36, 37, 38, 46, 47, 48]
+  return permanentMolars.includes(parseInt(toothNumber))
+}
+
+const createTeethFromSchema = (isPediatric: boolean) => {
+  const schema = isPediatric ? PEDIATRIC_ODONTOGRAM_SCHEMA : ADULT_ODONTOGRAM_SCHEMA
+  const teeth: ToothData[] = []
+
+  schema.quadrants.forEach((quadrant) => {
+    quadrant.teeth.forEach((toothConfig) => {
+      teeth.push({
+        number: toothConfig.number,
+        toothProcedures: [],
+        schemaProcedures: [],
+        isEmptySlot: isEmptySlot(toothConfig.number, isPediatric),
+      })
+    })
+  })
+
+  return teeth
+}
+
 export function getInitialPermanentTeeth(): ToothData[] {
-  return [
-    // Quadrant 1 (Upper Right)
-    { number: '18', toothProcedures: [], schemaProcedures: [] },
-    { number: '17', toothProcedures: [], schemaProcedures: [] },
-    { number: '16', toothProcedures: [], schemaProcedures: [] },
-    { number: '15', toothProcedures: [], schemaProcedures: [] },
-    { number: '14', toothProcedures: [], schemaProcedures: [] },
-    { number: '13', toothProcedures: [], schemaProcedures: [] },
-    { number: '12', toothProcedures: [], schemaProcedures: [] },
-    { number: '11', toothProcedures: [], schemaProcedures: [] },
-    // Quadrant 2 (Upper Left)
-    { number: '21', toothProcedures: [], schemaProcedures: [] },
-    { number: '22', toothProcedures: [], schemaProcedures: [] },
-    { number: '23', toothProcedures: [], schemaProcedures: [] },
-    { number: '24', toothProcedures: [], schemaProcedures: [] },
-    { number: '25', toothProcedures: [], schemaProcedures: [] },
-    { number: '26', toothProcedures: [], schemaProcedures: [] },
-    { number: '27', toothProcedures: [], schemaProcedures: [] },
-    { number: '28', toothProcedures: [], schemaProcedures: [] },
-    // Quadrant 4 (Lower Right)
-    { number: '48', toothProcedures: [], schemaProcedures: [] },
-    { number: '47', toothProcedures: [], schemaProcedures: [] },
-    { number: '46', toothProcedures: [], schemaProcedures: [] },
-    { number: '45', toothProcedures: [], schemaProcedures: [] },
-    { number: '44', toothProcedures: [], schemaProcedures: [] },
-    { number: '43', toothProcedures: [], schemaProcedures: [] },
-    { number: '42', toothProcedures: [], schemaProcedures: [] },
-    { number: '41', toothProcedures: [], schemaProcedures: [] },
-    // Quadrant 3 (Lower Left)
-    { number: '31', toothProcedures: [], schemaProcedures: [] },
-    { number: '32', toothProcedures: [], schemaProcedures: [] },
-    { number: '33', toothProcedures: [], schemaProcedures: [] },
-    { number: '34', toothProcedures: [], schemaProcedures: [] },
-    { number: '35', toothProcedures: [], schemaProcedures: [] },
-    { number: '36', toothProcedures: [], schemaProcedures: [] },
-    { number: '37', toothProcedures: [], schemaProcedures: [] },
-    { number: '38', toothProcedures: [], schemaProcedures: [] },
-  ]
+  return createTeethFromSchema(false)
 }
 
 export function getInitialPediatricTeeth(): ToothData[] {
-  const teeth: ToothData[] = []
-
-  // Quadrant 5 (Upper Right) - ordered by position from center (1,2,3,4,5,6,7,8)
-  teeth.push({ number: '51', toothProcedures: [], schemaProcedures: [] }) // Position 1 (center)
-  teeth.push({ number: '52', toothProcedures: [], schemaProcedures: [] }) // Position 2
-  teeth.push({ number: '53', toothProcedures: [], schemaProcedures: [] }) // Position 3
-  teeth.push({ number: '54', toothProcedures: [], schemaProcedures: [] }) // Position 4
-  teeth.push({ number: '55', toothProcedures: [], schemaProcedures: [] }) // Position 5
-  // Empty slots for permanent molars that aren't present yet
-  teeth.push({ number: '16', toothProcedures: [], schemaProcedures: [], isEmptySlot: true }) // Position 6 (empty)
-  teeth.push({ number: '17', toothProcedures: [], schemaProcedures: [], isEmptySlot: true }) // Position 7 (empty)
-  teeth.push({ number: '18', toothProcedures: [], schemaProcedures: [], isEmptySlot: true }) // Position 8 (empty)
-
-  // Quadrant 6 (Upper Left) - ordered by position from center (1,2,3,4,5,6,7,8)
-  teeth.push({ number: '61', toothProcedures: [], schemaProcedures: [] }) // Position 1 (center)
-  teeth.push({ number: '62', toothProcedures: [], schemaProcedures: [] }) // Position 2
-  teeth.push({ number: '63', toothProcedures: [], schemaProcedures: [] }) // Position 3
-  teeth.push({ number: '64', toothProcedures: [], schemaProcedures: [] }) // Position 4
-  teeth.push({ number: '65', toothProcedures: [], schemaProcedures: [] }) // Position 5
-  // Empty slots for permanent molars that aren't present yet
-  teeth.push({ number: '26', toothProcedures: [], schemaProcedures: [], isEmptySlot: true }) // Position 6 (empty)
-  teeth.push({ number: '27', toothProcedures: [], schemaProcedures: [], isEmptySlot: true }) // Position 7 (empty)
-  teeth.push({ number: '28', toothProcedures: [], schemaProcedures: [], isEmptySlot: true }) // Position 8 (empty)
-
-  // Quadrant 8 (Lower Right) - ordered by position from center (1,2,3,4,5,6,7,8)
-  teeth.push({ number: '81', toothProcedures: [], schemaProcedures: [] }) // Position 1 (center)
-  teeth.push({ number: '82', toothProcedures: [], schemaProcedures: [] }) // Position 2
-  teeth.push({ number: '83', toothProcedures: [], schemaProcedures: [] }) // Position 3
-  teeth.push({ number: '84', toothProcedures: [], schemaProcedures: [] }) // Position 4
-  teeth.push({ number: '85', toothProcedures: [], schemaProcedures: [] }) // Position 5
-  // Empty slots for permanent molars that aren't present yet
-  teeth.push({ number: '46', toothProcedures: [], schemaProcedures: [], isEmptySlot: true }) // Position 6 (empty)
-  teeth.push({ number: '47', toothProcedures: [], schemaProcedures: [], isEmptySlot: true }) // Position 7 (empty)
-  teeth.push({ number: '48', toothProcedures: [], schemaProcedures: [], isEmptySlot: true }) // Position 8 (empty)
-
-  // Quadrant 7 (Lower Left) - ordered by position from center (1,2,3,4,5,6,7,8)
-  teeth.push({ number: '71', toothProcedures: [], schemaProcedures: [] }) // Position 1 (center)
-  teeth.push({ number: '72', toothProcedures: [], schemaProcedures: [] }) // Position 2
-  teeth.push({ number: '73', toothProcedures: [], schemaProcedures: [] }) // Position 3
-  teeth.push({ number: '74', toothProcedures: [], schemaProcedures: [] }) // Position 4
-  teeth.push({ number: '75', toothProcedures: [], schemaProcedures: [] }) // Position 5
-  // Empty slots for permanent molars that aren't present yet
-  teeth.push({ number: '36', toothProcedures: [], schemaProcedures: [], isEmptySlot: true }) // Position 6 (empty)
-  teeth.push({ number: '37', toothProcedures: [], schemaProcedures: [], isEmptySlot: true }) // Position 7 (empty)
-  teeth.push({ number: '38', toothProcedures: [], schemaProcedures: [], isEmptySlot: true }) // Position 8 (empty)
-
-  return teeth
+  return createTeethFromSchema(true)
 }
 
 export function useOdontogram(isPediatric = false) {
@@ -259,7 +323,11 @@ export function useOdontogram(isPediatric = false) {
     {
       name: 'Obserwacja',
       behavior: 'None',
-      visual: { visualType: ProcedureVisualTypeEnum.Icon, value: 'Eye', iconSource: ProcedureIconSource.Lucide },
+      visual: {
+        visualType: ProcedureVisualTypeEnum.Icon,
+        value: 'Eye',
+        iconSource: ProcedureIconSource.Lucide,
+      },
       targets: ['Mesial', 'Distal', 'Buccal', 'Lingual', 'Incisal'],
       category: 'Diagnostic',
       description: 'Observation marking for monitoring',
@@ -334,7 +402,11 @@ export function useOdontogram(isPediatric = false) {
     {
       name: 'Starcie',
       behavior: 'None',
-      visual: { visualType: ProcedureVisualTypeEnum.Icon, value: 'IconTilde', iconSource: ProcedureIconSource.Tabler },
+      visual: {
+        visualType: ProcedureVisualTypeEnum.Icon,
+        value: 'IconTilde',
+        iconSource: ProcedureIconSource.Tabler,
+      },
       targets: ['Tooth', 'Crown', 'Root', 'Mesial', 'Distal', 'Buccal', 'Lingual', 'Incisal'],
       category: 'Diagnostic',
       description: 'Tooth wear/attrition marking',
