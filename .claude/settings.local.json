@@ -20,7 +20,8 @@
       "WebFetch(domain:github.com)",
       "Bash(npm install:*)",
       "WebFetch(domain:vueform.com)",
-      "Bash(sed:*)"
+      "Bash(sed:*)",
+      "Bash(npm run typecheck:*)"
     ],
     "deny": [],
     "defaultMode": "acceptEdits",

@@ -1,7 +1,6 @@
 import { ref, computed } from 'vue'
 import type { ProcedureConfig } from '@/types/odontogram/odontogram'
 import { api } from '../api'
-import { createMockProcedures } from './mocks/procedureMocks'
 
 // Composable for managing procedure configurations
 export function useProcedureConfig() {
@@ -34,23 +33,15 @@ export function useProcedureConfig() {
     try {
       isLoading.value = true
 
-      // TODO: Replace with real API call when ready
-      // const configs = await api.get<ProcedureConfig[]>('/api/procedures/configs')
-
-      // Convert mock procedures to ProcedureConfig format with IDs
-      const mockProcedures = createMockProcedures()
-      const configs: ProcedureConfig[] = mockProcedures.map((procedure, index) => ({
-        id: `proc_${String(index + 1).padStart(3, '0')}`, // Generate IDs: proc_001, proc_002, etc.
-        name: procedure.name,
-        visual: procedure.visual,
-        behavior: procedure.behavior
-      }))
-
+      // Fetch from real API endpoint
+      const configs = await api.get<ProcedureConfig[]>('/api/procedures/configs')
       procedureConfigs.value = configs
       isLoaded.value = true
     } catch (error) {
       console.error('Error fetching procedure configurations:', error)
-      throw error
+      // Fallback to empty array if API fails
+      procedureConfigs.value = []
+      isLoaded.value = true
     } finally {
       isLoading.value = false
     }

@@ -39,6 +39,7 @@ export interface TreatmentPlanTemplateStep {
 
 export interface CreateTreatmentPlanRequest {
   name: string
+  isPediatric?: boolean
   formTemplateId?: string
 }
 

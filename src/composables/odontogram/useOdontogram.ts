@@ -140,12 +140,13 @@ const isEmptySlot = (toothNumber: string, isPediatric: boolean) => {
   return permanentMolars.includes(parseInt(toothNumber))
 }
 
-const createTeethFromSchema = (isPediatric: boolean) => {
-  const schema = isPediatric ? PEDIATRIC_ODONTOGRAM_SCHEMA : ADULT_ODONTOGRAM_SCHEMA
+const createTeethFromSchema = (schema: any, isPediatric: boolean) => {
   const teeth: ToothData[] = []
 
-  schema.quadrants.forEach((quadrant) => {
-    quadrant.teeth.forEach((toothConfig) => {
+  // Handle both API config format and fallback schemas
+  if (schema && schema.teeth) {
+    // API format: { teeth: [{ number: "11" }, ...] }
+    schema.teeth.forEach((toothConfig: any) => {
       teeth.push({
         number: toothConfig.number,
         toothProcedures: [],
@@ -153,17 +154,35 @@ const createTeethFromSchema = (isPediatric: boolean) => {
         isEmptySlot: isEmptySlot(toothConfig.number, isPediatric),
       })
     })
-  })
+  } else if (schema && schema.quadrants) {
+    // Fallback format with quadrants
+    schema.quadrants.forEach((quadrant: any) => {
+      quadrant.teeth.forEach((toothConfig: any) => {
+        teeth.push({
+          number: toothConfig.number,
+          toothProcedures: [],
+          schemaProcedures: [],
+          isEmptySlot: isEmptySlot(toothConfig.number, isPediatric),
+        })
+      })
+    })
+  }
 
   return teeth
 }
 
-export function getInitialPermanentTeeth(): ToothData[] {
-  return createTeethFromSchema(false)
+export function getInitialPermanentTeeth(schema?: any): ToothData[] {
+  const fallbackSchema = schema || ADULT_ODONTOGRAM_SCHEMA
+  return createTeethFromSchema(fallbackSchema, false)
 }
 
-export function getInitialPediatricTeeth(): ToothData[] {
-  return createTeethFromSchema(true)
+export function getInitialPediatricTeeth(schema?: any): ToothData[] {
+  const fallbackSchema = schema || PEDIATRIC_ODONTOGRAM_SCHEMA
+  return createTeethFromSchema(fallbackSchema, true)
+}
+
+export function createTeethFromApiConfig(apiSchema: any, isPediatric: boolean): ToothData[] {
+  return createTeethFromSchema(apiSchema, isPediatric)
 }
 
 export function useOdontogram(isPediatric = false) {
@@ -560,6 +579,22 @@ export function useOdontogram(isPediatric = false) {
     selectedSegments.value = []
   }
 
+  // Reinitialize with API schema configuration
+  const reinitializeWithSchema = (apiSchema: any, isPediatricSchema: boolean) => {
+    // Use API schema to create teeth
+    teeth.value = createTeethFromApiConfig(apiSchema, isPediatricSchema)
+
+    // Clear all selections and reset state
+    selectedProcedure.value = null
+    selectedSegments.value = []
+    selectedToothNumbers.value = []
+    isDeleteMode.value = false
+    isProcedureMissing.value = false
+    search.value = ''
+
+    console.log('Odontogram has been reinitialized with API schema')
+  }
+
   // Reset all teeth data to initial state
   const resetAllTeeth = () => {
     // Clear all procedures from existing teeth
@@ -752,6 +787,7 @@ export function useOdontogram(isPediatric = false) {
     handleAddExtraTooth,
     handleProcedureSelect,
     resetAllTeeth,
+    reinitializeWithSchema,
     convertSelectedTeethToPrimary,
     convertSelectedTeethToPermanent,
     availableConversions,

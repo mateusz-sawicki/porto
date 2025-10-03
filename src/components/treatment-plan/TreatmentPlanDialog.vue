@@ -20,8 +20,7 @@
         <div class="flex items-center space-x-2">
           <Checkbox
             id="is-pediatric"
-            :checked="isChild"
-            @update:checked="(checked: boolean) => (isChild = checked)"
+            v-model="isChild"
             :disabled="isCreating"
           />
           <Label
@@ -33,17 +32,8 @@
         </div>
       </div>
       <DialogFooter>
-        <Button
-          variant="outline"
-          @click="handleCancel"
-          :disabled="isCreating"
-        >
-          Cancel
-        </Button>
-        <Button
-          @click="handleSave"
-          :disabled="!name.trim() || isCreating"
-        >
+        <Button variant="outline" @click="handleCancel" :disabled="isCreating"> Cancel </Button>
+        <Button @click="handleSave" :disabled="!name.trim() || isCreating">
           {{ isCreating ? 'Creating...' : 'Create Treatment Plan' }}
         </Button>
       </DialogFooter>
@@ -87,15 +77,15 @@ const isChild = ref(false)
 
 const isOpen = computed({
   get: () => props.open,
-  set: (value) => emit('update:open', value)
+  set: (value) => emit('update:open', value),
 })
 
 const handleSave = () => {
   if (!name.value.trim()) return
-  
+
   emit('save', {
     name: name.value.trim(),
-    isChild: isChild.value
+    isChild: isChild.value,
   })
 }
 
@@ -104,10 +94,13 @@ const handleCancel = () => {
 }
 
 // Reset form when dialog closes
-watch(() => props.open, (newValue) => {
-  if (!newValue) {
-    name.value = ''
-    isChild.value = false
-  }
-})
+watch(
+  () => props.open,
+  (newValue) => {
+    if (!newValue) {
+      name.value = ''
+      isChild.value = false
+    }
+  },
+)
 </script>

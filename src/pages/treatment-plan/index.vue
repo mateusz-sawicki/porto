@@ -331,7 +331,7 @@ onMounted(() => {
         <div v-if="stepIndex === 2">
           <OdontogramStep
             ref="odontogramStepRef"
-            :isPediatric="true"
+            :isPediatric="treatmentPlan?.isPediatric || false"
             :treatment-plan="treatmentPlanWithSteps"
             :step-index="stepIndex"
           />

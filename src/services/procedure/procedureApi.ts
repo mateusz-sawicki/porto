@@ -1,6 +1,5 @@
 import type { Procedure, ProcedureTargetMap } from '@/types/odontogram/odontogram'
 import { ProcedureIconSource } from '@/types/odontogram/odontogram'
-import { createMockProcedures } from './mocks/procedureMocks'
 
 // API Configuration
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000/api'
@@ -24,7 +23,7 @@ interface ApiResponse<T> {
 
 // Mock API implementation
 class MockProcedureApi {
-  private mockProcedures: ProcedureWithTarget[] = createMockProcedures()
+  private mockProcedures: ProcedureWithTarget[] = []
 
   private delay() {
     return new Promise((resolve) => setTimeout(resolve, 200 + Math.random() * 300))

@@ -47,7 +47,7 @@ interface Props {
 }
 
 const props = withDefaults(defineProps<Props>(), {
-  isPediatric: true,
+  isPediatric: false,
 })
 
 // Use odontogram composable to sync with chart data
@@ -160,8 +160,20 @@ const getFormData = () => {
 
 // Function to load data from treatment plan into odontogram
 const loadOdontogramData = async () => {
-  // Reset odontogram to fresh state (useOdontogram already uses schemas)
-  odontogram.resetAllTeeth()
+  // Check if we have step config from API
+  if (props.treatmentPlan && props.treatmentPlan.currentStepConfig) {
+    const stepConfig = props.treatmentPlan.currentStepConfig
+    // Reinitialize odontogram with API schema if available
+    if (stepConfig.odontogramSchema) {
+      odontogram.reinitializeWithSchema(stepConfig.odontogramSchema, props.isPediatric)
+    } else {
+      // Reset odontogram to fresh state (useOdontogram already uses schemas)
+      odontogram.resetAllTeeth()
+    }
+  } else {
+    // Reset odontogram to fresh state (useOdontogram already uses schemas)
+    odontogram.resetAllTeeth()
+  }
 
   // Ensure procedure configs are loaded
   await procedureConfigService.fetchProcedureConfigs()
