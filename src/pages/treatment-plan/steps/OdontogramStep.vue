@@ -144,7 +144,9 @@ const getFormData = () => {
       surface: assignment.surface
     }))
 
-    if (toothProcedureRefs.length > 0 || schemaProcedureRefs.length > 0) {
+    // Save teeth with procedures OR extra teeth (even without procedures)
+    const isExtraTooth = tooth.number.includes('-') || tooth.number.includes('+')
+    if (toothProcedureRefs.length > 0 || schemaProcedureRefs.length > 0 || isExtraTooth) {
       teethData.push({
         number: tooth.number,
         toothProcedureReferences: toothProcedureRefs,
