@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted, watch } from 'vue'
+import { ref, onMounted, watch, inject, nextTick } from 'vue'
 
 interface Props {
   treatmentPlan: any
@@ -13,6 +13,9 @@ const props = defineProps<Props>()
 const vueformRef = ref<any>(null)
 const formDataModel = ref({})
 const dynamicSchema = ref({})
+
+// Get function to mark data as modified from parent
+const markAsModified = inject('markAsModified') as (() => void) | undefined
 
 function getOnlyFilledValues(data: any): Record<string, any> {
   const filled: Record<string, any> = {}
@@ -77,6 +80,7 @@ function loadFormData() {
     } else {
       if (!vueformRef.value) {
         setTimeout(() => loadFormData(), 100)
+        return
       }
     }
   }
@@ -124,6 +128,7 @@ onMounted(() => {
       console.log('Form data model set to empty object')
     }
   }
+
 })
 </script>
 

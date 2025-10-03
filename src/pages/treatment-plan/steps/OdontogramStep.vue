@@ -54,6 +54,7 @@ const props = withDefaults(defineProps<Props>(), {
 const odontogram = useOdontogram(props.isPediatric)
 provide('odontogram', odontogram)
 
+
 // Compute actual procedures from teeth data (not selectedSegments)
 const teethWithProcedures = computed<ToothWithProcedures[]>(() => {
   const result: ToothWithProcedures[] = []

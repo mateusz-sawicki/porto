@@ -1,10 +1,12 @@
 <script setup lang="ts">
-import { ref, computed, onMounted, provide } from 'vue'
-import { useRoute } from 'vue-router'
+import { ref, computed, onMounted, provide, watch, nextTick } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
 import { Button } from '@/components/ui/button'
+import { ArrowLeft } from 'lucide-vue-next'
 import OdontogramStep from './steps/OdontogramStep.vue'
 import MedicalInterviewStep from './steps/MedicalInterviewStep.vue'
 import TreatmentPlanStepper from './components/TreatmentPlanStepper.vue'
+import BackToPatientDialog from '@/components/treatment-plan/BackToPatientDialog.vue'
 import { treatmentPlanApi, type TreatmentPlan } from '@/services/treatmentPlan/treatmentPlanApi'
 import type { Step, StepData, StepDetails, StepsDetails, MedicalInterviewStepRef } from './types'
 
@@ -50,6 +52,16 @@ const STRINGS = {
 } as const
 
 const route = useRoute()
+const router = useRouter()
+
+// Back to patient dialog state
+const backToPatientDialog = ref({
+  open: false,
+  isProcessing: false,
+})
+
+// Track unsaved changes by comparing original data with current data
+const originalStepData = ref<string>('')
 
 const stepIndex = ref(1)
 const steps: Step[] = [
@@ -85,6 +97,48 @@ const treatmentPlanWithSteps = computed(() => {
   }
 })
 
+// Get current step data and compare with original
+function hasUnsavedChanges(): boolean {
+  try {
+    let currentStepData: any = {}
+
+    // Get current data based on active step
+    if (stepIndex.value === 1 && medicalInterviewStepRef.value?.getFormData) {
+      currentStepData = medicalInterviewStepRef.value.getFormData()
+    } else if (stepIndex.value === 2 && odontogramStepRef.value?.getFormData) {
+      currentStepData = odontogramStepRef.value.getFormData()
+    }
+
+    const currentDataJson = JSON.stringify(currentStepData, null, 0)
+    const hasChanges = originalStepData.value !== currentDataJson
+
+
+    return hasChanges
+  } catch (error) {
+    console.error('Error checking unsaved changes:', error)
+    return false
+  }
+}
+
+// Save original step data for comparison
+function saveOriginalStepData(): void {
+  try {
+    let currentStepData: any = {}
+
+    // Get current data based on active step
+    if (stepIndex.value === 1 && medicalInterviewStepRef.value?.getFormData) {
+      currentStepData = medicalInterviewStepRef.value.getFormData()
+    } else if (stepIndex.value === 2 && odontogramStepRef.value?.getFormData) {
+      currentStepData = odontogramStepRef.value.getFormData()
+    }
+
+    originalStepData.value = JSON.stringify(currentStepData, null, 0)
+  } catch (error) {
+    console.error('Error saving original step data:', error)
+    originalStepData.value = ''
+  }
+}
+
 async function onStepSubmit(data: StepData): Promise<void> {
   isLoading.value = true
 
@@ -113,15 +167,14 @@ async function saveProgress(): Promise<void> {
 
     if (stepIndex.value === 1 && medicalInterviewStepRef.value) {
       currentStepData = medicalInterviewStepRef.value.getFormData()
-      console.log('Got form data from medical interview step:', currentStepData)
     } else if (stepIndex.value === 2 && odontogramStepRef.value) {
       currentStepData = odontogramStepRef.value.getFormData()
-      console.log('Got form data from odontogram step:', currentStepData)
     }
 
     if (treatmentPlan.value?.id) {
       await treatmentPlanApi.saveProgress(treatmentPlan.value.id, currentStepData)
-      console.log('Saved progress with data:', currentStepData)
+
+      saveOriginalStepData()
     }
   } catch (error) {
     console.error(STRINGS.ERROR_MESSAGES.SAVING_PROGRESS, error)
@@ -144,6 +197,52 @@ async function onFinalSubmit(): Promise<void> {
   }
 }
 
+// Back to patient dialog handlers
+function openBackToPatientDialog(): void {
+  if (hasUnsavedChanges()) {
+    // Show confirmation dialog if there are unsaved changes
+    backToPatientDialog.value.open = true
+  } else {
+    // Navigate directly if no unsaved changes
+    const patientId = treatmentPlan.value?.patientId
+    if (patientId) {
+      router.push(`/patients/${patientId}`)
+    }
+  }
+}
+
+async function handleSaveAndExit(): Promise<void> {
+  backToPatientDialog.value.isProcessing = true
+
+  try {
+    // Save current progress
+    await saveProgress()
+
+    // Navigate back to patient
+    const patientId = treatmentPlan.value?.patientId
+    if (patientId) {
+      await router.push(`/patients/${patientId}`)
+    }
+  } catch (error) {
+    console.error('Error saving and exiting:', error)
+  } finally {
+    backToPatientDialog.value.isProcessing = false
+    backToPatientDialog.value.open = false
+  }
+}
+
+function handleExitWithoutSave(): void {
+  const patientId = treatmentPlan.value?.patientId
+  if (patientId) {
+    router.push(`/patients/${patientId}`)
+  }
+  backToPatientDialog.value.open = false
+}
+
+function handleCancelBackToPatient(): void {
+  backToPatientDialog.value.open = false
+}
+
 function handleNext(): void {
   if (stepIndex.value === 1 && medicalInterviewStepRef.value) {
     medicalInterviewStepRef.value.handleNextStep()
@@ -162,10 +261,8 @@ async function nextStep(): Promise<void> {
 
       if (stepIndex.value === 1 && medicalInterviewStepRef.value) {
         currentStepData = medicalInterviewStepRef.value.getFormData()
-        console.log('Got form data from medical interview step for next step:', currentStepData)
       } else if (stepIndex.value === 2 && odontogramStepRef.value) {
         currentStepData = odontogramStepRef.value.getFormData()
-        console.log('Got form data from odontogram step for next step:', currentStepData)
       }
 
       // Calculate target step (next step)
@@ -173,11 +270,7 @@ async function nextStep(): Promise<void> {
 
       // Call API to move to next step
       if (treatmentPlan.value?.id) {
-        await treatmentPlanApi.moveToNextStep(
-          treatmentPlan.value.id,
-          targetStep,
-          currentStepData
-        )
+        await treatmentPlanApi.moveToNextStep(treatmentPlan.value.id, targetStep, currentStepData)
 
         // Fetch updated treatment plan data for the new step
         await fetchTreatmentPlan()
@@ -203,10 +296,8 @@ async function prevStep(): Promise<void> {
 
       if (stepIndex.value === 1 && medicalInterviewStepRef.value) {
         currentStepData = medicalInterviewStepRef.value.getFormData()
-        console.log('Got form data from medical interview step for prev step:', currentStepData)
       } else if (stepIndex.value === 2 && odontogramStepRef.value) {
         currentStepData = odontogramStepRef.value.getFormData()
-        console.log('Got form data from odontogram step for prev step:', currentStepData)
       }
 
       // Calculate target step (previous step)
@@ -214,11 +305,7 @@ async function prevStep(): Promise<void> {
 
       // Call API to move to previous step
       if (treatmentPlan.value?.id) {
-        await treatmentPlanApi.moveToNextStep(
-          treatmentPlan.value.id,
-          targetStep,
-          currentStepData
-        )
+        await treatmentPlanApi.moveToNextStep(treatmentPlan.value.id, targetStep, currentStepData)
 
         // Fetch updated treatment plan data for the new step
         await fetchTreatmentPlan()
@@ -248,8 +335,14 @@ async function fetchTreatmentPlan(): Promise<void> {
     // Set step index from current step in treatment plan
     if (treatmentPlan.value?.currentStep) {
       stepIndex.value = treatmentPlan.value.currentStep
-      console.log('Set stepIndex from API:', stepIndex.value)
     }
+
+    // Use nextTick to ensure step components are mounted and data is loaded
+    nextTick(() => {
+      setTimeout(() => {
+        saveOriginalStepData()
+      }, 500) // Give components time to load their data
+    })
   } catch (error) {
     console.error(STRINGS.ERROR_MESSAGES.FETCHING_TREATMENT_PLAN, error)
   } finally {
@@ -259,6 +352,15 @@ async function fetchTreatmentPlan(): Promise<void> {
 
 provide(STRINGS.PROVIDE_KEYS.SAVE_PROGRESS, saveProgress)
 provide(STRINGS.PROVIDE_KEYS.IS_SAVING, isSaving)
+
+// Watch for step changes and save original data after components are updated
+watch(stepIndex, () => {
+  nextTick(() => {
+    setTimeout(() => {
+      saveOriginalStepData()
+    }, 300)
+  })
+})
 
 onMounted(() => {
   fetchTreatmentPlan()
@@ -274,6 +376,19 @@ onMounted(() => {
 
     <!-- Main content -->
     <div v-else class="block w-full">
+      <!-- Back to Patient button section -->
+      <div class="mb-4">
+        <Button
+          :variant="STRINGS.BUTTON_VARIANTS.OUTLINE"
+          :size="STRINGS.BUTTON_SIZES.SM"
+          @click="openBackToPatientDialog"
+          class="flex items-center gap-2"
+        >
+          <ArrowLeft class="w-4 h-4" />
+          Back to Patient
+        </Button>
+      </div>
+
       <!-- Treatment Plan Stepper -->
       <TreatmentPlanStepper
         :steps="steps"
@@ -371,5 +486,14 @@ onMounted(() => {
         </div>
       </div>
     </div>
+
+    <!-- Back to Patient Dialog -->
+    <BackToPatientDialog
+      v-model:open="backToPatientDialog.open"
+      :is-processing="backToPatientDialog.isProcessing"
+      @save-and-exit="handleSaveAndExit"
+      @exit-without-save="handleExitWithoutSave"
+      @cancel="handleCancelBackToPatient"
+    />
   </div>
 </template>
