@@ -3,7 +3,8 @@ import { ProcedureIconSource } from '@/types/odontogram/odontogram'
 
 // API Configuration
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000/api'
-const USE_MOCK_DATA = import.meta.env.VITE_USE_MOCK_DATA === 'true' || import.meta.env.DEV
+const USE_MOCK_DATA = import.meta.env.VITE_USE_MOCK_DATA === 'true'
+
 
 // Enhanced procedure type with target information
 export interface ProcedureWithTarget extends Procedure {
@@ -94,6 +95,20 @@ class MockProcedureApi {
 
 // Real API implementation (ready for production)
 class RealProcedureApi {
+  private mapBehavior(behaviourValue: string | number): string {
+    // Map API behavior values to expected enum values
+    const behaviorMap: Record<string, string> = {
+      '0': 'None',
+      '1': 'CrossOutTooth',
+      '2': 'HideTooth',
+      '3': 'RootOnly',
+      '4': 'Implant',
+      '5': 'ImpactedTooth'
+    }
+
+    const key = String(behaviourValue || '0')
+    return behaviorMap[key] || 'None'
+  }
   private async request<T>(endpoint: string, options: RequestInit = {}): Promise<ApiResponse<T>> {
     try {
       const response = await fetch(`${API_BASE_URL}${endpoint}`, {
@@ -116,8 +131,9 @@ class RealProcedureApi {
         }
       }
 
+
       return {
-        ...data,
+        data: data, // Assuming API returns array directly, not wrapped in {data: ...}
         success: true,
       }
     } catch (error) {
@@ -130,12 +146,56 @@ class RealProcedureApi {
   }
 
   async getProcedures(): Promise<ApiResponse<ProcedureWithTarget[]>> {
-    return this.request<ProcedureWithTarget[]>('/procedures')
+    const response = await this.request<any>('/api/conditions')
+
+    if (response.success && response.data) {
+      let apiData = response.data
+
+      // Check if response.data is an object with numeric keys (convert to array)
+      if (!Array.isArray(apiData) && typeof apiData === 'object') {
+        apiData = Object.values(apiData)
+      }
+
+      // Ensure we have an array
+      if (!Array.isArray(apiData)) {
+        console.error('API response is not an array:', apiData)
+        return {
+          data: [],
+          success: false,
+          error: 'Invalid API response format'
+        }
+      }
+
+      // Transform API data to expected format
+      const transformedData: ProcedureWithTarget[] = apiData.map((item: any) => ({
+        id: item.id,
+        name: item.name,
+        targets: item.targets,
+        category: item.categoryName,
+        description: item.categoryName, // Use category as description
+        isActive: true,
+        visual: {
+          visualType: item.visual?.type || 'Color',
+          value: item.visual?.value || '#3b82f6',
+          iconSource: item.visual?.iconSource
+        },
+        behavior: this.mapBehavior(item.visual?.behaviour)
+      }))
+
+
+      return {
+        data: transformedData,
+        success: true,
+        message: response.message
+      }
+    }
+
+    return response as ApiResponse<ProcedureWithTarget[]>
   }
 
 
   async searchProcedures(query: string): Promise<ApiResponse<ProcedureWithTarget[]>> {
-    return this.request<ProcedureWithTarget[]>(`/procedures/search?q=${encodeURIComponent(query)}`)
+    return this.request<ProcedureWithTarget[]>(`/api/conditions/search?q=${encodeURIComponent(query)}`)
   }
 
   async getProcedureTargets(): Promise<ApiResponse<ProcedureTargetMap>> {

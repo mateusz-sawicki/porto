@@ -10,129 +10,6 @@ import {
   primaryToPermanent,
 } from '@/utils/toothConversion'
 
-// Odontogram Schema Configurations
-const ADULT_ODONTOGRAM_SCHEMA = {
-  quadrants: [
-    {
-      id: 1,
-      teeth: [
-        // Upper Right
-        { number: '18' },
-        { number: '17' },
-        { number: '16' },
-        { number: '15' },
-        { number: '14' },
-        { number: '13' },
-        { number: '12' },
-        { number: '11' },
-      ],
-    },
-    {
-      id: 2,
-      teeth: [
-        // Upper Left
-        { number: '21' },
-        { number: '22' },
-        { number: '23' },
-        { number: '24' },
-        { number: '25' },
-        { number: '26' },
-        { number: '27' },
-        { number: '28' },
-      ],
-    },
-    {
-      id: 3,
-      teeth: [
-        // Lower Left
-        { number: '31' },
-        { number: '32' },
-        { number: '33' },
-        { number: '34' },
-        { number: '35' },
-        { number: '36' },
-        { number: '37' },
-        { number: '38' },
-      ],
-    },
-    {
-      id: 4,
-      teeth: [
-        // Lower Right
-        { number: '48' },
-        { number: '47' },
-        { number: '46' },
-        { number: '45' },
-        { number: '44' },
-        { number: '43' },
-        { number: '42' },
-        { number: '41' },
-      ],
-    },
-  ],
-}
-
-const PEDIATRIC_ODONTOGRAM_SCHEMA = {
-  quadrants: [
-    {
-      id: 5,
-      teeth: [
-        // Upper Right
-        { number: '55' },
-        { number: '54' },
-        { number: '53' },
-        { number: '52' },
-        { number: '51' },
-        { number: '16' },
-        { number: '17' },
-        { number: '18' },
-      ],
-    },
-    {
-      id: 6,
-      teeth: [
-        // Upper Left
-        { number: '61' },
-        { number: '62' },
-        { number: '63' },
-        { number: '64' },
-        { number: '65' },
-        { number: '26' },
-        { number: '27' },
-        { number: '28' },
-      ],
-    },
-    {
-      id: 7,
-      teeth: [
-        // Lower Left
-        { number: '71' },
-        { number: '72' },
-        { number: '73' },
-        { number: '74' },
-        { number: '75' },
-        { number: '36' },
-        { number: '37' },
-        { number: '38' },
-      ],
-    },
-    {
-      id: 8,
-      teeth: [
-        // Lower Right
-        { number: '85' },
-        { number: '84' },
-        { number: '83' },
-        { number: '82' },
-        { number: '81' },
-        { number: '46' },
-        { number: '47' },
-        { number: '48' },
-      ],
-    },
-  ],
-}
-
 // Utility functions
 const isEmptySlot = (toothNumber: string, isPediatric: boolean) => {
   if (!isPediatric) return false
@@ -172,13 +49,15 @@ const createTeethFromSchema = (schema: any, isPediatric: boolean) => {
 }
 
 export function getInitialPermanentTeeth(schema?: any): ToothData[] {
-  const fallbackSchema = schema || ADULT_ODONTOGRAM_SCHEMA
-  return createTeethFromSchema(fallbackSchema, false)
+  // Return empty array if no schema provided - teeth will be loaded from API
+  if (!schema) return []
+  return createTeethFromSchema(schema, false)
 }
 
 export function getInitialPediatricTeeth(schema?: any): ToothData[] {
-  const fallbackSchema = schema || PEDIATRIC_ODONTOGRAM_SCHEMA
-  return createTeethFromSchema(fallbackSchema, true)
+  // Return empty array if no schema provided - teeth will be loaded from API
+  if (!schema) return []
+  return createTeethFromSchema(schema, true)
 }
 
 export function createTeethFromApiConfig(apiSchema: any, isPediatric: boolean): ToothData[] {
@@ -603,8 +482,8 @@ export function useOdontogram(isPediatric = false) {
       tooth.schemaProcedures = []
     })
 
-    // Reset to original 32 permanent teeth (in case extra teeth were added)
-    teeth.value = isPediatric ? getInitialPediatricTeeth() : getInitialPermanentTeeth()
+    // Don't reset teeth array - keep existing teeth from API schema
+    // Only clear procedures and reset UI state
 
     // Clear all selections and reset state
     selectedProcedure.value = null
@@ -614,7 +493,7 @@ export function useOdontogram(isPediatric = false) {
     isProcedureMissing.value = false
     search.value = ''
 
-    console.log('All teeth data has been reset to initial state')
+    console.log('All teeth procedures cleared, keeping teeth from API schema')
   }
 
   // Convert selected teeth between permanent and primary

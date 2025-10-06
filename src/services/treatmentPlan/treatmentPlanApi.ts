@@ -131,7 +131,7 @@ export class TreatmentPlanApiService {
   async moveToNextStep(planId: string, targetStep: number, stepDetailsData: any): Promise<void> {
     return api.put(`/api/treatment-plans/${planId}`, {
       targetStep,
-      stepDetailsData
+      stepDetailsData,
     })
   }
 }

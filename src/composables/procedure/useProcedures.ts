@@ -14,21 +14,27 @@ export function useProcedures() {
 
   // Load all procedures
   const loadProcedures = async () => {
+    console.log('useProcedures: Starting to load procedures')
     isLoading.value = true
     error.value = null
-    
+
     try {
       const response = await procedureApi.getProcedures()
-      
+      console.log('useProcedures: API response:', response)
+
       if (response.success) {
         procedures.value = response.data
+        console.log('useProcedures: Loaded procedures:', procedures.value)
       } else {
         error.value = response.error || 'Failed to load procedures'
+        console.error('useProcedures: API error:', error.value)
       }
     } catch (err) {
       error.value = err instanceof Error ? err.message : 'Unknown error occurred'
+      console.error('useProcedures: Exception:', err)
     } finally {
       isLoading.value = false
+      console.log('useProcedures: Loading finished. isLoading:', isLoading.value, 'procedures count:', procedures.value?.length || 0)
     }
   }
 

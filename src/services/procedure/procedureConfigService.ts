@@ -11,7 +11,7 @@ export function useProcedureConfig() {
   // Computed map for quick lookup by ID
   const procedureConfigMap = computed(() => {
     const map = new Map<string, ProcedureConfig>()
-    procedureConfigs.value.forEach(config => {
+    procedureConfigs.value.forEach((config) => {
       map.set(config.id, config)
     })
     return map
@@ -20,7 +20,7 @@ export function useProcedureConfig() {
   // Computed map for quick lookup by name (for backward compatibility)
   const procedureConfigByName = computed(() => {
     const map = new Map<string, ProcedureConfig>()
-    procedureConfigs.value.forEach(config => {
+    procedureConfigs.value.forEach((config) => {
       map.set(config.name, config)
     })
     return map
@@ -34,7 +34,8 @@ export function useProcedureConfig() {
       isLoading.value = true
 
       // Fetch from real API endpoint
-      const configs = await api.get<ProcedureConfig[]>('/api/procedures/configs')
+      const configs = await api.get<ProcedureConfig[]>('/api/conditions')
+      console.log('Fetched procedure configs from API:', configs)
       procedureConfigs.value = configs
       isLoaded.value = true
     } catch (error) {
@@ -65,7 +66,7 @@ export function useProcedureConfig() {
         id: config.id,
         name: config.name,
         visual: config.visual,
-        behavior: config.behavior
+        behavior: config.behavior,
       }
     }
 
@@ -76,7 +77,7 @@ export function useProcedureConfig() {
         id: configByName.id,
         name: configByName.name,
         visual: configByName.visual,
-        behavior: configByName.behavior
+        behavior: configByName.behavior,
       }
     }
 
@@ -86,7 +87,7 @@ export function useProcedureConfig() {
       id: procedureId,
       name: procedureName,
       visual: { visualType: 'Color' as any, value: '#ff0000' },
-      behavior: 'None' as any
+      behavior: 'None' as any,
     }
   }
 
@@ -99,7 +100,7 @@ export function useProcedureConfig() {
     fetchProcedureConfigs,
     getProcedureConfigById,
     getProcedureConfigByName,
-    resolveProcedureReference
+    resolveProcedureReference,
   }
 }
 

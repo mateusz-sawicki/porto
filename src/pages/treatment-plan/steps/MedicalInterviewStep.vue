@@ -93,9 +93,6 @@ watch([() => props.treatmentPlan, () => vueformRef.value], ([plan, form]) => {
 })
 
 onMounted(() => {
-  console.log('MedicalInterviewStep mounted with props:', props)
-  console.log('Treatment plan:', props.treatmentPlan)
-  console.log('Step index:', props.stepIndex)
 
   if (props.treatmentPlan && props.treatmentPlan.currentStepConfig) {
     const currentStepConfig = props.treatmentPlan.currentStepConfig
@@ -105,27 +102,20 @@ onMounted(() => {
   }
 
   if (props.treatmentPlan && props.treatmentPlan.currentStepDetails) {
-    console.log('Current step details:', props.treatmentPlan.currentStepDetails)
     const currentStep = props.treatmentPlan.currentStepDetails
-    console.log('Current step found:', currentStep)
     let currentStepData = currentStep?.detailsData
-    console.log('Current step data (raw):', currentStepData)
 
     // Check if this is the correct step for current stepIndex
     if (currentStep && currentStep.detailsStep === props.stepIndex) {
       currentStepData = currentStep.detailsData
-      console.log('Using step data for current step:', currentStepData)
     } else {
       currentStepData = {}
-      console.log('No data for current step, using empty object')
     }
 
     if (currentStepData && Object.keys(currentStepData).length > 0) {
       formDataModel.value = { ...currentStepData }
-      console.log('Form data model set to:', formDataModel.value)
     } else {
       formDataModel.value = {}
-      console.log('Form data model set to empty object')
     }
   }
 

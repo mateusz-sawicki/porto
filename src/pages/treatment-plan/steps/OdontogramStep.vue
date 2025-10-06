@@ -166,15 +166,19 @@ const loadOdontogramData = async () => {
   // Check if we have step config from API
   if (props.treatmentPlan && props.treatmentPlan.currentStepConfig) {
     const stepConfig = props.treatmentPlan.currentStepConfig
+
     // Reinitialize odontogram with API schema if available
     if (stepConfig.odontogramSchema) {
       odontogram.reinitializeWithSchema(stepConfig.odontogramSchema, props.isPediatric)
+    } else if (stepConfig.teeth) {
+      // Use teeth array directly from stepConfig
+      odontogram.reinitializeWithSchema({ teeth: stepConfig.teeth }, props.isPediatric)
     } else {
-      // Reset odontogram to fresh state (useOdontogram already uses schemas)
+      // Keep existing teeth, just clear procedures
       odontogram.resetAllTeeth()
     }
   } else {
-    // Reset odontogram to fresh state (useOdontogram already uses schemas)
+    // Keep existing teeth, just clear procedures
     odontogram.resetAllTeeth()
   }
 
