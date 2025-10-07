@@ -476,6 +476,7 @@ import ToothLabel from './ToothLabel.vue'
 import { Plus, Minus, User, Baby, TreePine, X } from 'lucide-vue-next'
 import ProcedureIcon from './ProcedureIcon.vue'
 import type { useOdontogram } from '@/composables/odontogram/useOdontogram'
+import { useProcedures } from '@/composables/procedure/useProcedures'
 import { getAvailableConversions } from '@/utils/toothConversion'
 
 interface Props {
@@ -509,6 +510,7 @@ const emit = defineEmits<Emits>()
 
 // Inject odontogram composable for tooth actions
 const odontogram = inject<ReturnType<typeof useOdontogram>>('odontogram')
+const { procedures } = useProcedures()
 const hoveredTooth = ref<string | null>(null)
 const hoveredPopover = ref<boolean>(false)
 let mouseLeaveTimeout: number | null = null
@@ -991,7 +993,7 @@ const handleConvertSelectedToPermanent = () => {
 const handleApplyRootOnly = () => {
   if (canApplyRootOnly.value && odontogram?.handleProcedureSelect) {
     // Find the "tylko korzeń" procedure
-    const rootOnlyProcedure = odontogram.procedurePalette.value.find(
+    const rootOnlyProcedure = procedures.value.find(
       (p) => p.name === 'tylko korzeń',
     )
     if (rootOnlyProcedure) {
@@ -1005,7 +1007,7 @@ const handleApplyRootOnly = () => {
 const handleApplyRootOnlyToSelected = () => {
   if (canApplyRootOnlyToSelected.value && odontogram?.handleProcedureSelect) {
     // Find the "tylko korzeń" procedure
-    const rootOnlyProcedure = odontogram.procedurePalette.value.find(
+    const rootOnlyProcedure = procedures.value.find(
       (p) => p.name === 'tylko korzeń',
     )
     if (rootOnlyProcedure) {

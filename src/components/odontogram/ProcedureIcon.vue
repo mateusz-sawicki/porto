@@ -9,10 +9,11 @@
     <TablerIcon
       v-else-if="props.iconSource === ProcedureIconSource.Tabler"
       :icon-name="props.iconName"
+      :class="props.class"
     />
     <!-- Fallback for when iconSource is undefined or not recognized -->
     <div v-else class="flex items-center justify-center" :class="props.class">
-      <span class="text-xs font-bold">{{ props.iconName }}</span>
+      <span class="text-xs font-bold" :title="`iconSource: ${props.iconSource}, iconName: ${props.iconName}`">{{ props.iconName }}</span>
     </div>
   </div>
 </template>
@@ -35,4 +36,6 @@ const props = withDefaults(
     iconSource: undefined,
   },
 )
+
+
 </script>

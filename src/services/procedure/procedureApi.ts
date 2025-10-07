@@ -109,6 +109,20 @@ class RealProcedureApi {
     const key = String(behaviourValue || '0')
     return behaviorMap[key] || 'None'
   }
+
+  private convertIconName(iconName: string | undefined, iconSource: string | undefined): string | undefined {
+    if (!iconName || !iconSource) return iconName
+
+    const source = iconSource.toLowerCase()
+
+    // For Lucide icons: ensure PascalCase (API might send camelCase or correct format)
+    if (source === 'lucide') {
+      return iconName.charAt(0).toUpperCase() + iconName.slice(1)
+    }
+
+    // For Tabler icons: keep as-is
+    return iconName
+  }
   private async request<T>(endpoint: string, options: RequestInit = {}): Promise<ApiResponse<T>> {
     try {
       const response = await fetch(`${API_BASE_URL}${endpoint}`, {
@@ -176,8 +190,8 @@ class RealProcedureApi {
         isActive: true,
         visual: {
           visualType: item.visual?.type || 'Color',
-          value: item.visual?.value || '#3b82f6',
-          iconSource: item.visual?.iconSource
+          value: this.convertIconName(item.visual?.value, item.visual?.iconSource),
+          iconSource: item.visual?.iconSource?.toLowerCase()
         },
         behavior: this.mapBehavior(item.visual?.behaviour)
       }))
@@ -216,11 +230,11 @@ export function canAssignProcedureToTarget(
   target: string,
 ): boolean {
   if (typeof procedure.targets === 'string') {
-    return procedure.targets.toLowerCase() === target.toLowerCase()
+    return procedure.targets === target
   }
 
   if (Array.isArray(procedure.targets)) {
-    return procedure.targets.some((t) => t.toLowerCase() === target.toLowerCase())
+    return procedure.targets.includes(target)
   }
 
   return false

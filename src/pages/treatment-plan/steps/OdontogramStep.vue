@@ -16,7 +16,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, provide, withDefaults, watch, onMounted } from 'vue'
+import { computed, provide, withDefaults, watch, onMounted, nextTick } from 'vue'
 import { useOdontogram } from '@/composables/odontogram/useOdontogram'
 import Odontogram from '@/components/odontogram/Odontogram.vue'
 import ToothProceduresSummary from '@/components/odontogram/ToothProcedureSummary.vue'
@@ -162,6 +162,22 @@ const getFormData = () => {
 }
 
 // Function to load data from treatment plan into odontogram
+// Map API surface names to internal format
+const mapSurfaceName = (apiSurface: string): string => {
+  const surfaceMap: { [key: string]: string } = {
+    'MesialSurface': 'Mesial',
+    'DistalSurface': 'Distal',
+    'BuccalSurface': 'Buccal',
+    'LingualSurface': 'Lingual',
+    'IncisalSurface': 'Incisal',
+    'OcclusalSurface': 'Occlusal',
+    'LabialSurface': 'Labial',
+    'PalatalSurface': 'Palatal'
+  }
+
+  return surfaceMap[apiSurface] || apiSurface
+}
+
 const loadOdontogramData = async () => {
   // Check if we have step config from API
   if (props.treatmentPlan && props.treatmentPlan.currentStepConfig) {
@@ -228,10 +244,16 @@ const loadOdontogramData = async () => {
             if (savedTooth.schemaProcedureReferences) {
               tooth.schemaProcedures = savedTooth.schemaProcedureReferences.map((ref: SchemaProcedureReference) => ({
                 procedure: procedureConfigService.resolveProcedureReference(ref.procedureId, ref.procedureName),
-                surface: ref.surface
+                surface: mapSurfaceName(ref.surface)
               }))
             }
           }
+        })
+
+        // Force reactive update after loading all procedures
+        nextTick(() => {
+          // Force re-render by triggering reactivity
+          odontogram.teeth.value = [...odontogram.teeth.value]
         })
       }
     }

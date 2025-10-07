@@ -17,6 +17,20 @@ export enum ToothSurface {
   Lingual = 'Lingual'
 }
 
+// Target types - matching the API enum format
+export type TargetToothSurface =
+  | 'MesialSurface'
+  | 'DistalSurface'
+  | 'BuccalSurface'
+  | 'LingualSurface'
+  | 'IncisalSurface'
+  | 'OcclusalSurface'
+  | 'LabialSurface'
+  | 'PalatalSurface'
+  | 'Tooth'
+  | 'Crown'
+  | 'Root'
+
 export enum ToothType {
   Molar = 'molar',
   Incisor = 'incisor'

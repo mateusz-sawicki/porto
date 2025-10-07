@@ -1,6 +1,6 @@
 // composables/useOdontogram.ts
 import { ref, computed } from 'vue'
-import type { ToothData, ProcedureTargetMap } from '@/types/odontogram/odontogram'
+import type { ToothData } from '@/types/odontogram/odontogram'
 import type { ProcedureWithTarget } from '@/services/procedure/procedureApi'
 import { ExtraToothDirection, ProcedureIconSource } from '@/types/odontogram/odontogram'
 import { ProcedureVisualType as ProcedureVisualTypeEnum, ToothPart } from '@/types/odontogram/tooth'
@@ -99,224 +99,6 @@ export function useOdontogram(isPediatric = false) {
       : teeth.value.filter((t) => t.number[0] === '4'),
   )
 
-  // Static procedure target mapping
-  const procedureTargetMap = computed(
-    (): ProcedureTargetMap => ({
-      Korona: 'Crown',
-      'Leczenie kanałowe': 'Root',
-      Ekstrakcja: 'Tooth',
-      Wypełnienie: ['Mesial', 'Distal', 'Buccal', 'Lingual', 'Incisal'],
-      Próchnica: ['Root', 'Mesial', 'Distal', 'Buccal', 'Lingual', 'Incisal'],
-      Recesja: 'Tooth',
-      Implant: 'Tooth',
-      'Brak zęba': 'Tooth',
-      'tylko korzeń': 'Tooth',
-      'Ząb zatrzymany': 'Tooth', // 🎯 NEW: Impacted tooth targets whole tooth
-      Obserwacja: ['Mesial', 'Distal', 'Buccal', 'Lingual', 'Incisal'], // 🎯 NEW: Observation targets all parts
-      Ruchomość: ['Tooth', 'Crown', 'Root', 'Mesial', 'Distal', 'Buccal', 'Lingual', 'Incisal'],
-      XD: ['Tooth', 'Crown', 'Root', 'Mesial', 'Distal', 'Buccal', 'Lingual', 'Incisal'],
-      XD1: ['Tooth', 'Crown', 'Root', 'Mesial', 'Distal', 'Buccal', 'Lingual', 'Incisal'],
-      XD2: ['Tooth', 'Crown', 'Root', 'Mesial', 'Distal', 'Buccal', 'Lingual', 'Incisal'],
-      XD3: ['Tooth', 'Crown', 'Root', 'Mesial', 'Distal', 'Buccal', 'Lingual', 'Incisal'],
-      XD4: ['Tooth', 'Crown', 'Root', 'Mesial', 'Distal', 'Buccal', 'Lingual', 'Incisal'],
-      Starcie: ['Tooth', 'Crown', 'Root', 'Mesial', 'Distal', 'Buccal', 'Lingual', 'Incisal'],
-      'Ubytek klinowy': ['Tooth'],
-    }),
-  )
-
-  // Static procedure palette
-  const procedurePalette = computed((): ProcedureWithTarget[] => [
-    {
-      name: 'Wypełnienie',
-      behavior: 'None',
-      visual: { visualType: ProcedureVisualTypeEnum.Color, value: '#3b82f6' },
-      targets: ['Mesial', 'Distal', 'Buccal', 'Lingual', 'Incisal'],
-      category: 'Restorative',
-      description: 'Dental filling procedure for cavities and tooth restoration',
-      isActive: true,
-    },
-    {
-      name: 'Ekstrakcja',
-      behavior: 'CrossOutTooth',
-      visual: { visualType: ProcedureVisualTypeEnum.ToothShape, value: 'X' },
-      targets: 'Tooth',
-      category: 'Surgical',
-      description: 'Tooth extraction procedure',
-      isActive: true,
-    },
-    {
-      name: 'Leczenie kanałowe',
-      behavior: 'None',
-      visual: { visualType: ProcedureVisualTypeEnum.Color, value: '#ef4444' },
-      targets: 'Root',
-      category: 'Endodontic',
-      description: 'Root canal treatment procedure',
-      isActive: true,
-    },
-    {
-      name: 'Korona',
-      behavior: 'None',
-      visual: { visualType: ProcedureVisualTypeEnum.Color, value: '#eab308' },
-      targets: 'Crown',
-      category: 'Restorative',
-      description: 'Dental crown placement for tooth protection and restoration',
-      isActive: true,
-    },
-    {
-      name: 'Próchnica',
-      behavior: 'None',
-      visual: { visualType: ProcedureVisualTypeEnum.Color, value: '#ec4899' },
-      targets: ['Root', 'Mesial', 'Distal', 'Buccal', 'Lingual', 'Incisal'],
-      category: 'Diagnostic',
-      description: 'Caries detection and marking',
-      isActive: true,
-    },
-    {
-      name: 'Recesja',
-      behavior: 'None',
-      visual: { visualType: ProcedureVisualTypeEnum.GumShape, value: '#000000' },
-      targets: 'Tooth',
-      category: 'Periodontal',
-      description: 'Gum recession marking',
-      isActive: true,
-    },
-    {
-      name: 'Implant',
-      behavior: 'Implant',
-      visual: { visualType: ProcedureVisualTypeEnum.Color, value: '#9a9a9a' },
-      targets: 'Tooth',
-      category: 'Surgical',
-      description: 'Dental implant placement',
-      isActive: true,
-    },
-    {
-      name: 'Brak zęba',
-      behavior: 'HideTooth',
-      visual: { visualType: ProcedureVisualTypeEnum.ToothShape, value: 'Ø' },
-      targets: 'Tooth',
-      category: 'Diagnostic',
-      description: 'Missing tooth marking',
-      isActive: true,
-    },
-    {
-      name: 'tylko korzeń',
-      behavior: 'RootOnly',
-      visual: { visualType: ProcedureVisualTypeEnum.Icon, value: 'R' },
-      targets: 'Tooth',
-      category: 'Diagnostic',
-      description: 'Root only tooth marking',
-      isActive: true,
-    },
-    // 🎯 NEW: Impacted tooth procedure
-    {
-      name: 'Ząb zatrzymany',
-      behavior: 'ImpactedTooth',
-      visual: { visualType: ProcedureVisualTypeEnum.Icon, value: '↓' },
-      targets: 'Tooth',
-      category: 'Diagnostic',
-      description: 'Impacted tooth marking',
-      isActive: true,
-    },
-    // 🎯 NEW: Observation procedure
-    {
-      name: 'Obserwacja',
-      behavior: 'None',
-      visual: {
-        visualType: ProcedureVisualTypeEnum.Icon,
-        value: 'Eye',
-        iconSource: ProcedureIconSource.Lucide,
-      },
-      targets: ['Mesial', 'Distal', 'Buccal', 'Lingual', 'Incisal'],
-      category: 'Diagnostic',
-      description: 'Observation marking for monitoring',
-      isActive: true,
-    },
-    // Example for future: Ruchomość (mobility) with ArrowLeftRight icon, root only
-    {
-      name: 'Ruchomość',
-      behavior: 'None',
-      visual: {
-        visualType: ProcedureVisualTypeEnum.Icon,
-        value: 'ArrowLeftRight',
-        iconSource: ProcedureIconSource.Lucide,
-      },
-      targets: ['Tooth', 'Crown', 'Root', 'Mesial', 'Distal', 'Buccal', 'Lingual', 'Incisal'],
-      category: 'Diagnostic',
-      description: 'Tooth mobility assessment',
-      isActive: true,
-    },
-    {
-      name: 'XD',
-      behavior: 'None',
-      visual: {
-        visualType: ProcedureVisualTypeEnum.Icon,
-        value: 'ArrowLeftRight',
-        iconSource: ProcedureIconSource.Lucide,
-      },
-      targets: ['Tooth', 'Crown', 'Root', 'Mesial', 'Distal', 'Buccal', 'Lingual', 'Incisal'],
-      category: 'Diagnostic',
-      description: 'Diagnostic procedure XD',
-      isActive: true,
-    },
-    {
-      name: 'XD1',
-      behavior: 'None',
-      visual: {
-        visualType: ProcedureVisualTypeEnum.Icon,
-        value: 'ArrowLeftRight',
-        iconSource: ProcedureIconSource.Lucide,
-      },
-      targets: ['Tooth', 'Crown', 'Root', 'Mesial', 'Distal', 'Buccal', 'Lingual', 'Incisal'],
-      category: 'Diagnostic',
-      description: 'Diagnostic procedure XD1',
-      isActive: true,
-    },
-    {
-      name: 'XD2',
-      behavior: 'None',
-      visual: {
-        visualType: ProcedureVisualTypeEnum.Icon,
-        value: 'ArrowLeftRight',
-        iconSource: ProcedureIconSource.Lucide,
-      },
-      targets: ['Tooth', 'Crown', 'Root', 'Mesial', 'Distal', 'Buccal', 'Lingual', 'Incisal'],
-      category: 'Diagnostic',
-      description: 'Diagnostic procedure XD2',
-      isActive: true,
-    },
-    {
-      name: 'Ubytek klinowy',
-      behavior: 'None',
-      visual: {
-        visualType: ProcedureVisualTypeEnum.Icon,
-        value: 'TriangleRight',
-        iconSource: ProcedureIconSource.Lucide,
-      },
-      targets: 'Tooth',
-      category: 'Diagnostic',
-      description: 'Wedge-shaped defect marking',
-      isActive: true,
-    },
-    {
-      name: 'Starcie',
-      behavior: 'None',
-      visual: {
-        visualType: ProcedureVisualTypeEnum.Icon,
-        value: 'IconTilde',
-        iconSource: ProcedureIconSource.Tabler,
-      },
-      targets: ['Tooth', 'Crown', 'Root', 'Mesial', 'Distal', 'Buccal', 'Lingual', 'Incisal'],
-      category: 'Diagnostic',
-      description: 'Tooth wear/attrition marking',
-      isActive: true,
-    },
-  ])
-
-  // Helper function to safely get procedure target
-  const getProcedureTarget = (procedureName: string): string | string[] | undefined => {
-    return procedureTargetMap.value[procedureName]
-  }
-
   // Event handlers
   const handleSegmentClick = (segmentId: string) => {
     const index = selectedSegments.value.indexOf(segmentId)
@@ -366,20 +148,21 @@ export function useOdontogram(isPediatric = false) {
     teeth.value.splice(insertAt, 0, newTooth)
   }
 
+  // Use API target format directly (no more mapping needed)
+
   const handleProcedureSelect = (procedure: ProcedureWithTarget) => {
     // Prevent adding any procedure to a tooth that already has 'brak zęba' (HideTooth)
     const isHideToothAssigned = (tooth: ToothData) =>
       tooth.toothProcedures.some((a) => a.procedure.behavior === 'HideTooth')
 
-    const target = getProcedureTarget(procedure.name)
-    if (!target) {
+    const rawTargets = procedure.targets
+    if (!rawTargets) {
       console.warn(`No target mapping found for procedure: ${procedure.name}`)
       return
     }
 
-    const targets = Array.isArray(target)
-      ? target.map((t) => t.toLowerCase())
-      : [target.toLowerCase()]
+    // Use API format directly - no mapping needed
+    const targets = Array.isArray(rawTargets) ? rawTargets : [rawTargets]
 
     selectedToothNumbers.value.forEach((number) => {
       const tooth = teeth.value.find((t) => t.number === number)
@@ -388,22 +171,30 @@ export function useOdontogram(isPediatric = false) {
       if (targets.length === 1) {
         // If only one possible target, assign to it
         const singleTarget = targets[0]
+        const toothPart =
+          singleTarget === 'Tooth'
+            ? 'Tooth'
+            : singleTarget === 'Crown'
+              ? 'Crown'
+              : singleTarget === 'Root'
+                ? 'Root'
+                : null
         if (
+          toothPart &&
           !tooth.toothProcedures.some(
-            (a) =>
-              a.toothPart.toLowerCase() === singleTarget && a.procedure.name === procedure.name,
+            (a) => a.toothPart === toothPart && a.procedure.name === procedure.name,
           )
         ) {
           tooth.toothProcedures.push({
             procedure,
-            toothPart: (singleTarget.charAt(0).toUpperCase() + singleTarget.slice(1)) as any,
+            toothPart: toothPart as any,
           })
         }
-      } else if (targets.includes('tooth')) {
-        // If multiple targets, only assign if 'tooth' is a valid target
+      } else if (targets.includes('Tooth')) {
+        // If multiple targets, only assign if 'Tooth' is a valid target
         if (
           !tooth.toothProcedures.some(
-            (a) => a.toothPart.toLowerCase() === 'tooth' && a.procedure.name === procedure.name,
+            (a) => a.toothPart === 'Tooth' && a.procedure.name === procedure.name,
           )
         ) {
           tooth.toothProcedures.push({
@@ -418,36 +209,53 @@ export function useOdontogram(isPediatric = false) {
       const parts = segmentId.split('_')
       const number = parts.length === 3 ? parts[1] : parts[0]
       const part = parts.length === 3 ? parts[2] : parts[1]
-      const partLower = part.toLowerCase()
+      const partCapitalized = part.charAt(0).toUpperCase() + part.slice(1)
 
       const tooth = teeth.value.find((t) => t.number === number)
       if (!tooth) return
       if (isHideToothAssigned(tooth) && procedure.behavior !== 'HideTooth') return // Block if 'brak zęba' is present
-      if (['crown', 'root', 'tooth'].includes(partLower) && targets.includes(partLower)) {
+
+      // Handle tooth parts (Tooth, Crown, Root)
+      if (
+        ['Crown', 'Root', 'Tooth'].includes(partCapitalized) &&
+        targets.includes(partCapitalized)
+      ) {
         if (
           !tooth.toothProcedures.some(
-            (a) => a.toothPart.toLowerCase() === partLower && a.procedure.name === procedure.name,
+            (a) => a.toothPart === partCapitalized && a.procedure.name === procedure.name,
           )
         ) {
           tooth.toothProcedures.push({
             procedure,
-            toothPart: (partLower.charAt(0).toUpperCase() + partLower.slice(1)) as any,
+            toothPart: partCapitalized as any,
           })
         }
       }
 
-      if (
-        ['mesial', 'distal', 'buccal', 'lingual', 'incisal'].includes(partLower) &&
-        targets.includes(partLower)
-      ) {
+      // Handle surfaces (with API format like MesialSurface, DistalSurface, etc.)
+      const surfaceMap: { [key: string]: string } = {
+        mesial: 'MesialSurface',
+        distal: 'DistalSurface',
+        buccal: 'BuccalSurface',
+        lingual: 'LingualSurface',
+        incisal: 'IncisalSurface',
+        occlusal: 'OcclusalSurface',
+        labial: 'LabialSurface',
+        palatal: 'PalatalSurface',
+      }
+
+      const partLower = part.toLowerCase()
+      const apiSurface = surfaceMap[partLower]
+
+      if (apiSurface && targets.includes(apiSurface)) {
         if (
           !tooth.schemaProcedures.some(
-            (a) => a.surface.toLowerCase() === partLower && a.procedure.name === procedure.name,
+            (a) => a.surface === partCapitalized && a.procedure.name === procedure.name,
           )
         ) {
           tooth.schemaProcedures.push({
             procedure,
-            surface: (partLower.charAt(0).toUpperCase() + partLower.slice(1)) as any,
+            surface: partCapitalized as any,
           })
         }
       }
@@ -470,8 +278,6 @@ export function useOdontogram(isPediatric = false) {
     isDeleteMode.value = false
     isProcedureMissing.value = false
     search.value = ''
-
-    console.log('Odontogram has been reinitialized with API schema')
   }
 
   // Reset all teeth data to initial state
@@ -492,8 +298,6 @@ export function useOdontogram(isPediatric = false) {
     isDeleteMode.value = false
     isProcedureMissing.value = false
     search.value = ''
-
-    console.log('All teeth procedures cleared, keeping teeth from API schema')
   }
 
   // Convert selected teeth between permanent and primary
@@ -658,8 +462,6 @@ export function useOdontogram(isPediatric = false) {
     q2teeth,
     q3teeth,
     q4teeth,
-    procedureTargetMap,
-    procedurePalette,
     handleSegmentClick,
     handleToothClick,
     handleRemoveTooth,

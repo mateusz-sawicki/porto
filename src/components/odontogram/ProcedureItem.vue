@@ -18,7 +18,7 @@
         <ProcedureIcon
           v-else-if="procedure.visual!.visualType === ProcedureVisualType.Icon && procedure.visual!.value"
           :icon-name="procedure.visual!.value"
-          :icon-source="procedure.visual!.iconSource!"
+          :icon-source="procedure.visual!.iconSource"
           class="w-6 h-6"
         />
       </div>

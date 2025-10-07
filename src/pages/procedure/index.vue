@@ -223,6 +223,5 @@ const availableTargets = computed(() => {
 // Methods
 const handleProcedureSelect = (procedure: ProcedureWithTarget) => {
   selectedProcedure.value = procedure
-  console.log('Selected procedure:', procedure)
 }
 </script>

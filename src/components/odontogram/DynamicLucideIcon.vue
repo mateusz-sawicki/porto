@@ -12,6 +12,9 @@ const props = defineProps<Props>()
 
 const IconComp = computed(() => {
   const IconComponent = (LucideIcons as any)[props.icon]
+  if (!IconComponent) {
+    console.warn(`Lucide icon not found: ${props.icon}`)
+  }
   return IconComponent
 })
 </script>

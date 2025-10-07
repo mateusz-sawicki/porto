@@ -2,6 +2,21 @@ import { ref, computed } from 'vue'
 import type { ProcedureConfig } from '@/types/odontogram/odontogram'
 import { api } from '../api'
 
+// Convert icon names from API format to correct library format
+function convertIconName(iconName: string | undefined, iconSource: string | undefined): string | undefined {
+  if (!iconName || !iconSource) return iconName
+
+  const source = iconSource.toLowerCase()
+
+  // For Lucide icons: convert camelCase to PascalCase
+  if (source === 'lucide') {
+    return iconName.charAt(0).toUpperCase() + iconName.slice(1)
+  }
+
+  // For Tabler icons: keep as-is
+  return iconName
+}
+
 // Composable for managing procedure configurations
 export function useProcedureConfig() {
   const procedureConfigs = ref<ProcedureConfig[]>([])
@@ -35,7 +50,6 @@ export function useProcedureConfig() {
 
       // Fetch from real API endpoint
       const configs = await api.get<ProcedureConfig[]>('/api/conditions')
-      console.log('Fetched procedure configs from API:', configs)
       procedureConfigs.value = configs
       isLoaded.value = true
     } catch (error) {
@@ -65,8 +79,12 @@ export function useProcedureConfig() {
       return {
         id: config.id,
         name: config.name,
-        visual: config.visual,
-        behavior: config.behavior,
+        visual: {
+          visualType: (config.visual as any)?.type || 'Color',
+          value: convertIconName((config.visual as any)?.value, (config.visual as any)?.iconSource),
+          iconSource: (config.visual as any)?.iconSource?.toLowerCase()
+        },
+        behavior: (config.visual as any)?.behaviour || 'None',
       }
     }
 
@@ -76,8 +94,12 @@ export function useProcedureConfig() {
       return {
         id: configByName.id,
         name: configByName.name,
-        visual: configByName.visual,
-        behavior: configByName.behavior,
+        visual: {
+          visualType: (configByName.visual as any)?.type || 'Color',
+          value: convertIconName((configByName.visual as any)?.value, (configByName.visual as any)?.iconSource),
+          iconSource: (configByName.visual as any)?.iconSource?.toLowerCase()
+        },
+        behavior: (configByName.visual as any)?.behaviour || 'None',
       }
     }
 
