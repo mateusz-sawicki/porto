@@ -23,6 +23,7 @@ import ToothProceduresSummary from '@/components/odontogram/ToothProcedureSummar
 import { procedureConfigService } from '@/services/procedure/procedureConfigService'
 import type { ToothProcedureReference, SchemaProcedureReference } from '@/types/odontogram/odontogram'
 import { ExtraToothDirection } from '@/types/odontogram/odontogram'
+import { primaryToPermanent } from '@/utils/toothConversion'
 
 // Types
 interface Procedure {
@@ -210,19 +211,34 @@ const loadOdontogramData = async () => {
 
       // Load procedures data if available
       if (stepData && stepData.teeth && Array.isArray(stepData.teeth)) {
-        // First pass: create missing extra teeth
+        // First pass: create missing extra teeth and converted teeth
         stepData.teeth.forEach((savedTooth: any) => {
           const toothNumber = savedTooth.number
           const toothExists = odontogram.teeth.value.some(t => t.number === toothNumber)
 
-          if (!toothExists && (toothNumber.includes('-') || toothNumber.includes('+'))) {
-            // Extract base tooth number and direction
-            const isBeforeExtra = toothNumber.includes('-')
-            const baseNumber = toothNumber.split(/[-+]/)[0]
-            const direction = isBeforeExtra ? ExtraToothDirection.Before : ExtraToothDirection.After
-
-            // Add the extra tooth using the composable function
-            odontogram.handleAddExtraTooth(baseNumber, direction)
+          if (!toothExists) {
+            if (toothNumber.includes('-') || toothNumber.includes('+')) {
+              // Handle extra teeth
+              const isBeforeExtra = toothNumber.includes('-')
+              const baseNumber = toothNumber.split(/[-+]/)[0]
+              const direction = isBeforeExtra ? ExtraToothDirection.Before : ExtraToothDirection.After
+              odontogram.handleAddExtraTooth(baseNumber, direction)
+            } else {
+              // Handle converted teeth (primary teeth on adult odontogram)
+              const isPrimaryTooth = ['5', '6', '7', '8'].includes(toothNumber[0])
+              if (isPrimaryTooth) {
+                // Find the corresponding permanent tooth and convert it
+                const correspondingPermanent = primaryToPermanent(toothNumber)
+                if (correspondingPermanent) {
+                  const permanentTooth = odontogram.teeth.value.find(t => t.number === correspondingPermanent)
+                  if (permanentTooth) {
+                    // Convert the permanent tooth to primary
+                    permanentTooth.number = toothNumber
+                    permanentTooth.svgId = correspondingPermanent // Keep SVG reference
+                  }
+                }
+              }
+            }
           }
         })
 

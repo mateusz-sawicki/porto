@@ -85,7 +85,8 @@ export const getToothSvgComponent = (toothNumber: string, isPediatric = false) =
     // In pediatric mode, first check for pediatric teeth, then fall back to permanent teeth
     return PediatricToothSvgMap[baseNumber] || ToothSvgMap[baseNumber] || null
   }
-  return ToothSvgMap[baseNumber] || null
+  // For adult mode, check permanent teeth first, then primary teeth (for converted teeth)
+  return ToothSvgMap[baseNumber] || PediatricToothSvgMap[baseNumber] || null
 }
 
 export const getAvailableToothNumbers = (): string[] => {

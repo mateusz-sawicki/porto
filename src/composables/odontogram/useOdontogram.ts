@@ -77,26 +77,18 @@ export function useOdontogram(isPediatric = false) {
     isPediatric ? getInitialPediatricTeeth() : getInitialPermanentTeeth(),
   )
 
-  // Computed quadrant filters
+  // Computed quadrant filters - support mixed schemas (permanent + primary)
   const q1teeth = computed(() =>
-    isPediatric
-      ? teeth.value.filter((t) => t.number[0] === '5' || t.number[0] === '1')
-      : teeth.value.filter((t) => t.number[0] === '1'),
+    teeth.value.filter((t) => t.number[0] === '5' || t.number[0] === '1')
   )
   const q2teeth = computed(() =>
-    isPediatric
-      ? teeth.value.filter((t) => t.number[0] === '6' || t.number[0] === '2')
-      : teeth.value.filter((t) => t.number[0] === '2'),
+    teeth.value.filter((t) => t.number[0] === '6' || t.number[0] === '2')
   )
   const q3teeth = computed(() =>
-    isPediatric
-      ? teeth.value.filter((t) => t.number[0] === '7' || t.number[0] === '3')
-      : teeth.value.filter((t) => t.number[0] === '3'),
+    teeth.value.filter((t) => t.number[0] === '7' || t.number[0] === '3')
   )
   const q4teeth = computed(() =>
-    isPediatric
-      ? teeth.value.filter((t) => t.number[0] === '8' || t.number[0] === '4')
-      : teeth.value.filter((t) => t.number[0] === '4'),
+    teeth.value.filter((t) => t.number[0] === '8' || t.number[0] === '4')
   )
 
   // Event handlers
@@ -307,7 +299,11 @@ export function useOdontogram(isPediatric = false) {
       if (converted) {
         const tooth = teeth.value.find((t) => t.number === toothNumber)
         if (tooth) {
+          // Store the original SVG ID for rendering
+          const originalSvgId = tooth.number
           tooth.number = converted
+          // Add mapping for SVG rendering - use original position for converted tooth
+          tooth.svgId = originalSvgId
           // If it was an empty slot, make it a real tooth now
           if (tooth.isEmptySlot) {
             tooth.isEmptySlot = false

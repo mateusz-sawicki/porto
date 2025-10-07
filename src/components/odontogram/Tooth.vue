@@ -74,6 +74,7 @@ import ProcedureIcon from './ProcedureIcon.vue'
 
 interface Props {
   number: string
+  svgId?: string // SVG ID to use for rendering (for converted teeth)
   toothProcedures: ToothProcedureAssignment[]
   selectedSegments: string[]
   direction: ToothContainerDirection
