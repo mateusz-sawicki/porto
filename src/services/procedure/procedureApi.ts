@@ -95,9 +95,9 @@ class MockProcedureApi {
 
 // Real API implementation (ready for production)
 class RealProcedureApi {
-  private mapBehavior(behaviourValue: string | number): string {
+  private mapBehavior(behaviourValue: string | number): 'None' | 'CrossOutTooth' | 'HideTooth' | 'RootOnly' | 'EmphasizeSurface' | 'Implant' | 'ImpactedTooth' {
     // Map API behavior values to expected enum values
-    const behaviorMap: Record<string, string> = {
+    const behaviorMap: Record<string, 'None' | 'CrossOutTooth' | 'HideTooth' | 'RootOnly' | 'EmphasizeSurface' | 'Implant' | 'ImpactedTooth'> = {
       '0': 'None',
       '1': 'CrossOutTooth',
       '2': 'HideTooth',

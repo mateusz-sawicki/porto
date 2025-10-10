@@ -21,9 +21,13 @@ import { useOdontogram } from '@/composables/odontogram/useOdontogram'
 import Odontogram from '@/components/odontogram/Odontogram.vue'
 import ToothProceduresSummary from '@/components/odontogram/ToothProcedureSummary.vue'
 import { procedureConfigService } from '@/services/procedure/procedureConfigService'
-import type { ToothProcedureReference, SchemaProcedureReference } from '@/types/odontogram/odontogram'
+import type {
+  ToothProcedureReference,
+  SchemaProcedureReference,
+  ToothData,
+} from '@/types/odontogram/odontogram'
 import { ExtraToothDirection } from '@/types/odontogram/odontogram'
-import { primaryToPermanent } from '@/utils/toothConversion'
+import { primaryToPermanent, permanentToPrimary } from '@/utils/toothConversion'
 
 // Types
 interface Procedure {
@@ -40,7 +44,6 @@ interface ToothWithProcedures {
   procedures: Procedure[]
 }
 
-
 interface Props {
   isPediatric?: boolean
   treatmentPlan?: any
@@ -54,7 +57,6 @@ const props = withDefaults(defineProps<Props>(), {
 // Use odontogram composable to sync with chart data
 const odontogram = useOdontogram(props.isPediatric)
 provide('odontogram', odontogram)
-
 
 // Compute actual procedures from teeth data (not selectedSegments)
 const teethWithProcedures = computed<ToothWithProcedures[]>(() => {
@@ -133,32 +135,42 @@ const getFormData = () => {
 
   odontogram.teeth.value.forEach((tooth) => {
     // Convert current runtime assignments to lightweight references for storage
-    const toothProcedureRefs: ToothProcedureReference[] = tooth.toothProcedures.map((assignment: any) => ({
-      procedureId: assignment.procedure.id,
-      procedureName: assignment.procedure.name,
-      toothPart: assignment.toothPart,
-      position: assignment.position
-    }))
+    const toothProcedureRefs: ToothProcedureReference[] = tooth.toothProcedures.map(
+      (assignment: any) => ({
+        procedureId: assignment.procedure.id,
+        procedureName: assignment.procedure.name,
+        toothPart: assignment.toothPart,
+        position: assignment.position,
+      }),
+    )
 
-    const schemaProcedureRefs: SchemaProcedureReference[] = tooth.schemaProcedures.map((assignment: any) => ({
-      procedureId: assignment.procedure.id,
-      procedureName: assignment.procedure.name,
-      surface: assignment.surface
-    }))
+    const schemaProcedureRefs: SchemaProcedureReference[] = tooth.schemaProcedures.map(
+      (assignment: any) => ({
+        procedureId: assignment.procedure.id,
+        procedureName: assignment.procedure.name,
+        surface: assignment.surface,
+      }),
+    )
 
-    // Save teeth with procedures OR extra teeth (even without procedures)
+    // Save teeth with procedures OR extra teeth OR converted teeth (even without procedures)
     const isExtraTooth = tooth.number.includes('-') || tooth.number.includes('+')
-    if (toothProcedureRefs.length > 0 || schemaProcedureRefs.length > 0 || isExtraTooth) {
+    const isConvertedTooth = !!tooth.svgId // Has svgId means it's a converted tooth
+    if (
+      toothProcedureRefs.length > 0 ||
+      schemaProcedureRefs.length > 0 ||
+      isExtraTooth ||
+      isConvertedTooth
+    ) {
       teethData.push({
         number: tooth.number,
         toothProcedureReferences: toothProcedureRefs,
-        schemaProcedureReferences: schemaProcedureRefs
+        schemaProcedureReferences: schemaProcedureRefs,
       })
     }
   })
 
   return {
-    teeth: teethData
+    teeth: teethData,
   }
 }
 
@@ -166,33 +178,41 @@ const getFormData = () => {
 // Map API surface names to internal format
 const mapSurfaceName = (apiSurface: string): string => {
   const surfaceMap: { [key: string]: string } = {
-    'MesialSurface': 'Mesial',
-    'DistalSurface': 'Distal',
-    'BuccalSurface': 'Buccal',
-    'LingualSurface': 'Lingual',
-    'IncisalSurface': 'Incisal',
-    'OcclusalSurface': 'Occlusal',
-    'LabialSurface': 'Labial',
-    'PalatalSurface': 'Palatal'
+    MesialSurface: 'Mesial',
+    DistalSurface: 'Distal',
+    BuccalSurface: 'Buccal',
+    LingualSurface: 'Lingual',
+    IncisalSurface: 'Incisal',
+    OcclusalSurface: 'Occlusal',
+    LabialSurface: 'Labial',
+    PalatalSurface: 'Palatal',
   }
 
   return surfaceMap[apiSurface] || apiSurface
 }
 
 const loadOdontogramData = async () => {
+  const hasSavedData = props.treatmentPlan?.currentStepDetail?.detailsData?.teeth?.length > 0
+
   // Check if we have step config from API
   if (props.treatmentPlan && props.treatmentPlan.currentStepConfig) {
     const stepConfig = props.treatmentPlan.currentStepConfig
 
-    // Reinitialize odontogram with API schema if available
-    if (stepConfig.odontogramSchema) {
-      odontogram.reinitializeWithSchema(stepConfig.odontogramSchema, props.isPediatric)
-    } else if (stepConfig.teeth) {
-      // Use teeth array directly from stepConfig
-      odontogram.reinitializeWithSchema({ teeth: stepConfig.teeth }, props.isPediatric)
+    // If we have saved data, start from scratch to avoid duplicates from schema+saved data
+    if (hasSavedData) {
+      // Start with empty teeth array - we'll rebuild from saved data
+      odontogram.teeth.value = []
     } else {
-      // Keep existing teeth, just clear procedures
-      odontogram.resetAllTeeth()
+      // No saved data, use schema as starting point
+      if (stepConfig.odontogramSchema) {
+        odontogram.reinitializeWithSchema(stepConfig.odontogramSchema, props.isPediatric)
+      } else if (stepConfig.teeth) {
+        // Use teeth array directly from stepConfig
+        odontogram.reinitializeWithSchema({ teeth: stepConfig.teeth }, props.isPediatric)
+      } else {
+        // Keep existing teeth, just clear procedures
+        odontogram.resetAllTeeth()
+      }
     }
   } else {
     // Keep existing teeth, just clear procedures
@@ -214,30 +234,29 @@ const loadOdontogramData = async () => {
         // First pass: create missing extra teeth and converted teeth
         stepData.teeth.forEach((savedTooth: any) => {
           const toothNumber = savedTooth.number
-          const toothExists = odontogram.teeth.value.some(t => t.number === toothNumber)
+          const toothExists = odontogram.teeth.value.some((t) => t.number === toothNumber)
 
           if (!toothExists) {
             if (toothNumber.includes('-') || toothNumber.includes('+')) {
               // Handle extra teeth
               const isBeforeExtra = toothNumber.includes('-')
               const baseNumber = toothNumber.split(/[-+]/)[0]
-              const direction = isBeforeExtra ? ExtraToothDirection.Before : ExtraToothDirection.After
+              const direction = isBeforeExtra
+                ? ExtraToothDirection.Before
+                : ExtraToothDirection.After
               odontogram.handleAddExtraTooth(baseNumber, direction)
             } else {
-              // Handle converted teeth (primary teeth on adult odontogram)
-              const isPrimaryTooth = ['5', '6', '7', '8'].includes(toothNumber[0])
-              if (isPrimaryTooth) {
-                // Find the corresponding permanent tooth and convert it
-                const correspondingPermanent = primaryToPermanent(toothNumber)
-                if (correspondingPermanent) {
-                  const permanentTooth = odontogram.teeth.value.find(t => t.number === correspondingPermanent)
-                  if (permanentTooth) {
-                    // Convert the permanent tooth to primary
-                    permanentTooth.number = toothNumber
-                    permanentTooth.svgId = correspondingPermanent // Keep SVG reference
-                  }
-                }
+              // Handle missing teeth - add them directly as saved in API
+              const newTooth: ToothData = {
+                number: toothNumber,
+                toothProcedures: [],
+                schemaProcedures: [],
+                // For primary teeth on adult odontogram, use corresponding permanent tooth SVG
+                svgId: ['5', '6', '7', '8'].includes(toothNumber[0])
+                  ? (primaryToPermanent(toothNumber) ?? undefined)
+                  : undefined,
               }
+              odontogram.teeth.value.push(newTooth)
             }
           }
         })
@@ -249,22 +268,76 @@ const loadOdontogramData = async () => {
           if (tooth) {
             // Load tooth procedures
             if (savedTooth.toothProcedureReferences) {
-              tooth.toothProcedures = savedTooth.toothProcedureReferences.map((ref: ToothProcedureReference) => ({
-                procedure: procedureConfigService.resolveProcedureReference(ref.procedureId, ref.procedureName),
-                toothPart: ref.toothPart,
-                position: ref.position
-              }))
+              tooth.toothProcedures = savedTooth.toothProcedureReferences.map(
+                (ref: ToothProcedureReference) => ({
+                  procedure: procedureConfigService.resolveProcedureReference(
+                    ref.procedureId,
+                    ref.procedureName,
+                  ),
+                  toothPart: ref.toothPart,
+                  position: ref.position,
+                }),
+              )
             }
 
             // Load schema procedures
             if (savedTooth.schemaProcedureReferences) {
-              tooth.schemaProcedures = savedTooth.schemaProcedureReferences.map((ref: SchemaProcedureReference) => ({
-                procedure: procedureConfigService.resolveProcedureReference(ref.procedureId, ref.procedureName),
-                surface: mapSurfaceName(ref.surface)
-              }))
+              tooth.schemaProcedures = savedTooth.schemaProcedureReferences.map(
+                (ref: SchemaProcedureReference) => ({
+                  procedure: procedureConfigService.resolveProcedureReference(
+                    ref.procedureId,
+                    ref.procedureName,
+                  ),
+                  surface: mapSurfaceName(ref.surface),
+                }),
+              )
             }
           }
         })
+
+        // If we started from empty teeth array, add missing teeth from schema
+        if (hasSavedData) {
+          const stepConfig = props.treatmentPlan!.currentStepConfig!
+          let schemaTeeth: any[] = []
+
+          if (stepConfig.odontogramSchema?.teeth) {
+            schemaTeeth = stepConfig.odontogramSchema.teeth
+          } else if (stepConfig.teeth) {
+            schemaTeeth = stepConfig.teeth
+          }
+
+          // Add missing schema teeth that weren't in saved data
+          const savedTeethNumbers = stepData.teeth.map((t: any) => t.number)
+          schemaTeeth.forEach((schemaTooth: any) => {
+            const exists = odontogram.teeth.value.some((t) => t.number === schemaTooth.number)
+
+            // Check if this schema tooth is "replaced" by a converted tooth in saved data
+            const isReplacedByConvertedTooth = savedTeethNumbers.some((savedNumber: string) => {
+              // Check if saved tooth is a conversion of this schema tooth
+              const isPrimaryToPermConversion =
+                ['5', '6', '7', '8'].includes(savedNumber[0]) &&
+                primaryToPermanent(savedNumber) === schemaTooth.number
+              const isPermToPrimaryConversion =
+                ['1', '2', '3', '4'].includes(savedNumber[0]) &&
+                permanentToPrimary(savedNumber) === schemaTooth.number
+              return isPrimaryToPermConversion || isPermToPrimaryConversion
+            })
+
+            if (!exists && !isReplacedByConvertedTooth) {
+              const isPermanentMolar =
+                props.isPediatric &&
+                [16, 17, 18, 26, 27, 28, 36, 37, 38, 46, 47, 48].includes(
+                  parseInt(schemaTooth.number),
+                )
+              odontogram.teeth.value.push({
+                number: schemaTooth.number,
+                toothProcedures: [],
+                schemaProcedures: [],
+                isEmptySlot: isPermanentMolar,
+              })
+            }
+          })
+        }
 
         // Force reactive update after loading all procedures
         nextTick(() => {
@@ -277,11 +350,15 @@ const loadOdontogramData = async () => {
 }
 
 // Watch for changes in treatment plan data
-watch(() => props.treatmentPlan, (plan) => {
-  if (plan && plan.currentStepDetail) {
-    loadOdontogramData()
-  }
-}, { deep: true, immediate: true })
+watch(
+  () => props.treatmentPlan,
+  (plan) => {
+    if (plan && plan.currentStepDetail) {
+      loadOdontogramData()
+    }
+  },
+  { deep: true, immediate: true },
+)
 
 // Initialize procedure configurations on mount
 onMounted(async () => {
