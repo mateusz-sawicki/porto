@@ -78,6 +78,7 @@ export interface ProcedureVisualType {
 export enum ProcedureIconSource {
   Lucide = 'lucide',
   Tabler = 'tabler',
+  Mdi = 'mdi',
 }
 // Type for the procedure target mapping - flexible for API data
 export type ProcedureTargetMap = Record<string, string | string[]>

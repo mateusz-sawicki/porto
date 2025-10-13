@@ -1,27 +1,26 @@
 <template>
   <div>
-    <DynamicLucideIcon
-      v-if="props.iconSource === ProcedureIconSource.Lucide"
-      :icon="props.iconName"
-      :class="props.class"
-      :fill="props.fill"
-    />
-    <TablerIcon
-      v-else-if="props.iconSource === ProcedureIconSource.Tabler"
+    <!-- Use IconifyIcon for dynamic API-driven icons -->
+    <IconifyIcon
+      v-if="props.iconSource && props.iconName"
       :icon-name="props.iconName"
+      :icon-source="props.iconSource"
       :class="props.class"
     />
     <!-- Fallback for when iconSource is undefined or not recognized -->
     <div v-else class="flex items-center justify-center" :class="props.class">
-      <span class="text-xs font-bold" :title="`iconSource: ${props.iconSource}, iconName: ${props.iconName}`">{{ props.iconName }}</span>
+      <span
+        class="text-xs font-bold"
+        :title="`iconSource: ${props.iconSource}, iconName: ${props.iconName}`"
+        >{{ props.iconName }}</span
+      >
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
 import { ProcedureIconSource } from '@/types/odontogram/odontogram'
-import DynamicLucideIcon from './DynamicLucideIcon.vue'
-import TablerIcon from './TablerIcon.vue'
+import IconifyIcon from './IconifyIcon.vue'
 
 const props = withDefaults(
   defineProps<{
@@ -36,6 +35,4 @@ const props = withDefaults(
     iconSource: undefined,
   },
 )
-
-
 </script>

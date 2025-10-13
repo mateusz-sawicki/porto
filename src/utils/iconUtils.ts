@@ -7,6 +7,7 @@ export function getIconSourceName(iconSource: ProcedureIconSource): string {
   const iconSourceNames: Record<ProcedureIconSource, string> = {
     [ProcedureIconSource.Lucide]: 'Lucide',
     [ProcedureIconSource.Tabler]: 'Tabler',
+    [ProcedureIconSource.Mdi]: 'MDI',
   }
   
   return iconSourceNames[iconSource] || 'Unknown'
@@ -19,6 +20,7 @@ export function getIconSourceFromString(source: string): ProcedureIconSource | n
   const sourceMap: Record<string, ProcedureIconSource> = {
     'lucide': ProcedureIconSource.Lucide,
     'tabler': ProcedureIconSource.Tabler,
+    'mdi': ProcedureIconSource.Mdi,
   }
   
   return sourceMap[source.toLowerCase()] || null
@@ -38,5 +40,6 @@ export function getAvailableIconSources(): Array<{ value: ProcedureIconSource; l
   return [
     { value: ProcedureIconSource.Lucide, label: 'Lucide' },
     { value: ProcedureIconSource.Tabler, label: 'Tabler' },
+    { value: ProcedureIconSource.Mdi, label: 'MDI' },
   ]
 } 

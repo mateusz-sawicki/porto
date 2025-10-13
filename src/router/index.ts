@@ -6,6 +6,7 @@ import Procedure from '@/pages/procedure/index.vue'
 import Settings from '@/pages/settings/index.vue'
 import TreatmentPlan from '@/pages/treatment-plan/index.vue'
 import TreatmentPlanEdit from '@/pages/treatment-plan/edit/index.vue'
+import IconifyTest from '@/components/test/IconifyTest.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -44,6 +45,11 @@ const router = createRouter({
       path: '/settings',
       name: 'settings',
       component: Settings,
+    },
+    {
+      path: '/test-iconify',
+      name: 'test-iconify',
+      component: IconifyTest,
     },
   ],
 })
