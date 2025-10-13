@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button'
 import { ArrowLeft } from 'lucide-vue-next'
 import OdontogramStep from './steps/OdontogramStep.vue'
 import MedicalInterviewStep from './steps/MedicalInterviewStep.vue'
+import NumericAssessmentStep from './steps/NumericAssessmentStep.vue'
 import TreatmentPlanStepper from './components/TreatmentPlanStepper.vue'
 import BackToPatientDialog from '@/components/treatment-plan/BackToPatientDialog.vue'
 import { treatmentPlanApi, type TreatmentPlan } from '@/services/treatmentPlan/treatmentPlanApi'
@@ -37,10 +38,12 @@ const STRINGS = {
   STEP_TITLES: {
     TREATMENT_PLAN_INFORMATION: 'Treatment Plan Information',
     ODONTOGRAM: 'Odontogram',
+    NUMERIC_ASSESSMENT: 'Numeric Assessment',
   },
   STEP_DESCRIPTIONS: {
     PROVIDE_TREATMENT_PLAN_DETAILS: 'Provide treatment plan details',
     CONFIGURE_TOOTH_TREATMENTS: 'Configure tooth treatments',
+    NUMERIC_EVALUATION: 'Numerical evaluation of patient state',
   },
   UI_TEXT: {
     LOADING_TREATMENT_PLAN: 'Loading treatment plan...',
@@ -75,6 +78,11 @@ const steps: Step[] = [
     title: STRINGS.STEP_TITLES.ODONTOGRAM,
     description: STRINGS.STEP_DESCRIPTIONS.CONFIGURE_TOOTH_TREATMENTS,
   },
+  {
+    step: 3,
+    title: STRINGS.STEP_TITLES.NUMERIC_ASSESSMENT,
+    description: STRINGS.STEP_DESCRIPTIONS.NUMERIC_EVALUATION,
+  },
 ]
 
 const currentStepDetails = ref<StepsDetails>({
@@ -86,6 +94,7 @@ const isLoadingData = ref<boolean>(true)
 const isSaving = ref<boolean>(false)
 const medicalInterviewStepRef = ref<MedicalInterviewStepRef | null>(null)
 const odontogramStepRef = ref<any | null>(null)
+const numericAssessmentStepRef = ref<any | null>(null)
 
 // Computed property that merges treatment plan with current steps data
 const treatmentPlanWithSteps = computed(() => {
@@ -107,6 +116,8 @@ function hasUnsavedChanges(): boolean {
       currentStepData = medicalInterviewStepRef.value.getFormData()
     } else if (stepIndex.value === 2 && odontogramStepRef.value?.getFormData) {
       currentStepData = odontogramStepRef.value.getFormData()
+    } else if (stepIndex.value === 3 && numericAssessmentStepRef.value?.getFormData) {
+      currentStepData = numericAssessmentStepRef.value.getFormData()
     }
 
     const currentDataJson = JSON.stringify(currentStepData, null, 0)
@@ -130,6 +141,8 @@ function saveOriginalStepData(): void {
       currentStepData = medicalInterviewStepRef.value.getFormData()
     } else if (stepIndex.value === 2 && odontogramStepRef.value?.getFormData) {
       currentStepData = odontogramStepRef.value.getFormData()
+    } else if (stepIndex.value === 3 && numericAssessmentStepRef.value?.getFormData) {
+      currentStepData = numericAssessmentStepRef.value.getFormData()
     }
 
     originalStepData.value = JSON.stringify(currentStepData, null, 0)
@@ -246,6 +259,8 @@ function handleCancelBackToPatient(): void {
 function handleNext(): void {
   if (stepIndex.value === 1 && medicalInterviewStepRef.value) {
     medicalInterviewStepRef.value.handleNextStep()
+  } else if (stepIndex.value === 3 && numericAssessmentStepRef.value) {
+    numericAssessmentStepRef.value.handleNextStep()
   } else {
     nextStep()
   }
@@ -449,6 +464,17 @@ onMounted(() => {
             :isPediatric="treatmentPlan?.isPediatric || false"
             :treatment-plan="treatmentPlanWithSteps"
             :step-index="stepIndex"
+          />
+        </div>
+
+        <!-- Step 3: Numeric Assessment -->
+        <div v-if="stepIndex === 3">
+          <NumericAssessmentStep
+            ref="numericAssessmentStepRef"
+            :treatment-plan="treatmentPlanWithSteps"
+            :step-index="stepIndex"
+            :is-loading="isLoading"
+            :on-next="onStepSubmit"
           />
         </div>
       </div>
