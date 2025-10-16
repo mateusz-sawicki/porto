@@ -150,46 +150,49 @@ const stepConfigurations = computed(() => {
 })
 
 // Create treatment plan objects for each step component
-const createStepTreatmentPlan = (stepName: string, config: any, data: any) => {
+const createStepTreatmentPlan = (stepName: string, config: any, data: any, stepIndex: number) => {
+  const stepData = {
+    detailsStep: stepIndex, // Use correct step index for validation
+    detailsData: data
+  }
+
   return {
     ...props.treatmentPlan,
     currentStepConfig: config,
-    currentStepDetails: {
-      detailsStep: 0, // Always 0 for readonly view
-      detailsData: data
-    }
+    currentStepDetails: stepData   // Unified property for all steps
   }
 }
 
 const medicalInterviewTreatmentPlan = computed(() =>
   createStepTreatmentPlan('MedicalInterview',
     stepConfigurations.value.medicalInterview,
-    aggregatedData.value.medicalInterview)
+    aggregatedData.value.medicalInterview,
+    0) // Medical Interview is step 0
 )
 
 const odontogramTreatmentPlan = computed(() =>
   createStepTreatmentPlan('Odontogram',
     stepConfigurations.value.odontogram,
-    aggregatedData.value.odontogram)
+    aggregatedData.value.odontogram,
+    1) // Odontogram is step 1
 )
 
 const intraoralExaminationTreatmentPlan = computed(() =>
   createStepTreatmentPlan('IntraoralExamination',
     stepConfigurations.value.intraoralExamination,
-    aggregatedData.value.intraoralExamination)
+    aggregatedData.value.intraoralExamination,
+    2) // Intraoral Examination is step 2
 )
 
 const measurementsTreatmentPlan = computed(() =>
   createStepTreatmentPlan('Measurements',
     stepConfigurations.value.measurements,
-    aggregatedData.value.measurements)
+    aggregatedData.value.measurements,
+    3) // Measurements is step 3
 )
 
 onMounted(() => {
-  // Log both sources of data for debugging
-  console.log('Summary step mounted with allStepsData:', props.allStepsData)
-  console.log('Summary step mounted with treatmentPlan data:', props.treatmentPlan?.currentStepDetails?.detailsData)
-  console.log('Summary step configurations:', stepConfigurations.value)
+  // Component mounted
 })
 </script>
 
@@ -230,7 +233,7 @@ onMounted(() => {
         <div class="pointer-events-none">
           <OdontogramStep
             :treatment-plan="odontogramTreatmentPlan"
-            :step-index="0"
+            :step-index="1"
             :is-pediatric="props.treatmentPlan?.isPediatric || false"
           />
         </div>
@@ -246,7 +249,7 @@ onMounted(() => {
         <div class="pointer-events-none">
           <IntraoralExaminationStep
             :treatment-plan="intraoralExaminationTreatmentPlan"
-            :step-index="0"
+            :step-index="2"
             :on-next="() => {}"
           />
         </div>
@@ -262,7 +265,7 @@ onMounted(() => {
         <div class="pointer-events-none">
           <MeasurementsStep
             :treatment-plan="measurementsTreatmentPlan"
-            :step-index="0"
+            :step-index="3"
             :on-next="() => {}"
           />
         </div>

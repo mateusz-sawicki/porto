@@ -192,7 +192,7 @@ const mapSurfaceName = (apiSurface: string): string => {
 }
 
 const loadOdontogramData = async () => {
-  const hasSavedData = props.treatmentPlan?.currentStepDetail?.detailsData?.teeth?.length > 0
+  const hasSavedData = props.treatmentPlan?.currentStepDetails?.detailsData?.teeth?.length > 0
 
   // Check if we have step config from API
   if (props.treatmentPlan && props.treatmentPlan.currentStepConfig) {
@@ -225,8 +225,8 @@ const loadOdontogramData = async () => {
   // Ensure procedure configs are loaded
   await procedureConfigService.fetchProcedureConfigs()
 
-  if (props.treatmentPlan && props.treatmentPlan.currentStepDetail) {
-    const currentStep = props.treatmentPlan.currentStepDetail
+  if (props.treatmentPlan && props.treatmentPlan.currentStepDetails) {
+    const currentStep = props.treatmentPlan.currentStepDetails
 
     // Check if this is the correct step for current stepIndex
     if (currentStep && currentStep.detailsStep === props.stepIndex) {
@@ -358,7 +358,7 @@ const loadOdontogramData = async () => {
 watch(
   () => props.treatmentPlan,
   (plan) => {
-    if (plan && plan.currentStepDetail) {
+    if (plan && plan.currentStepDetails) {
       loadOdontogramData()
     }
   },
