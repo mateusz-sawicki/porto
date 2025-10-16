@@ -404,6 +404,42 @@ async function prevStep(): Promise<void> {
   }
 }
 
+async function goToStep(targetStep: number): Promise<void> {
+  if (targetStep >= 1 && targetStep <= steps.length && targetStep <= stepIndex.value) {
+    try {
+      isLoading.value = true
+
+      // Get current step data (only filled fields)
+      let currentStepData: StepData = {}
+
+      if (stepIndex.value === 1 && medicalInterviewStepRef.value) {
+        currentStepData = medicalInterviewStepRef.value.getFormData()
+      } else if (stepIndex.value === 2 && odontogramStepRef.value) {
+        currentStepData = odontogramStepRef.value.getFormData()
+      } else if (stepIndex.value === 3 && measurementsStepRef.value) {
+        currentStepData = measurementsStepRef.value.getFormData()
+      } else if (stepIndex.value === 4 && intraoralExaminationStepRef.value) {
+        currentStepData = intraoralExaminationStepRef.value.getFormData()
+      }
+
+      // Call API to move to target step
+      if (treatmentPlan.value?.id) {
+        await treatmentPlanApi.moveToNextStep(treatmentPlan.value.id, targetStep, currentStepData)
+
+        // Fetch updated treatment plan data for the new step
+        await fetchTreatmentPlan()
+
+        // Update step index
+        stepIndex.value = targetStep
+      }
+    } catch (error) {
+      console.error('Error moving to target step:', error)
+    } finally {
+      isLoading.value = false
+    }
+  }
+}
+
 async function fetchTreatmentPlan(): Promise<void> {
   try {
     isLoadingData.value = true
@@ -477,7 +513,7 @@ onMounted(() => {
       <TreatmentPlanStepper
         :steps="steps"
         :current-step="stepIndex"
-        :on-step-change="(step: number) => (stepIndex = step)"
+        :on-step-change="goToStep"
       />
 
       <!-- Top button section -->

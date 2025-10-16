@@ -29,7 +29,7 @@ const aggregatedData = computed(() => {
       medicalInterview: detailsData.MedicalInterview || {},
       odontogram: detailsData.Odontogram || {},
       measurements: detailsData.Measurements || {},
-      intraoralExamination: detailsData.IntraoralExamination || {}
+      intraoralExamination: detailsData.IntraoralExamination || {},
     }
   }
 
@@ -38,7 +38,7 @@ const aggregatedData = computed(() => {
     medicalInterview: props.allStepsData?.medicalInterview || {},
     odontogram: props.allStepsData?.odontogram || {},
     measurements: props.allStepsData?.measurements || {},
-    intraoralExamination: props.allStepsData?.intraoralExamination || {}
+    intraoralExamination: props.allStepsData?.intraoralExamination || {},
   }
 })
 
@@ -55,15 +55,15 @@ const measurementsSummary = computed(() => {
 
   const total = scores.reduce((sum, item) => sum + item.value, 0)
   const average = (total / scores.length).toFixed(1)
-  const highest = Math.max(...scores.map(s => s.value))
-  const lowest = Math.min(...scores.map(s => s.value))
+  const highest = Math.max(...scores.map((s) => s.value))
+  const lowest = Math.min(...scores.map((s) => s.value))
 
   return {
     scores,
     average,
     highest,
     lowest,
-    total
+    total,
   }
 })
 
@@ -79,7 +79,7 @@ const getNumericFieldLabel = (key: string): string => {
     mobilityLevel: 'Ruchomość szczęki',
     stabilityLevel: 'Stabilność uzębienia',
     symmetryLevel: 'Symetria twarzy',
-    overallSatisfaction: 'Ogólne zadowolenie'
+    overallSatisfaction: 'Ogólne zadowolenie',
   }
   return labels[key] || key
 }
@@ -98,14 +98,20 @@ const medicalInterviewSummary = computed(() => {
   if (!data || Object.keys(data).length === 0) return { filledCount: 0, totalFields: 0 }
 
   const filledFields = Object.entries(data).filter(([key, value]) => {
-    return value === true || (typeof value === 'string' && value.trim() !== '') ||
-           (value !== null && value !== undefined && value !== false && value !== '')
+    return (
+      value === true ||
+      (typeof value === 'string' && value.trim() !== '') ||
+      (value !== null && value !== undefined && value !== false && value !== '')
+    )
   })
 
   return {
     filledCount: filledFields.length,
     totalFields: Object.keys(data).length,
-    completionRate: Object.keys(data).length > 0 ? ((filledFields.length / Object.keys(data).length) * 100).toFixed(0) : 0
+    completionRate:
+      Object.keys(data).length > 0
+        ? ((filledFields.length / Object.keys(data).length) * 100).toFixed(0)
+        : 0,
   }
 })
 
@@ -115,8 +121,11 @@ const formatMedicalData = (data: any) => {
 
   return Object.entries(data)
     .filter(([key, value]) => {
-      return value === true || (typeof value === 'string' && value.trim() !== '') ||
-             (value !== null && value !== undefined && value !== false && value !== '')
+      return (
+        value === true ||
+        (typeof value === 'string' && value.trim() !== '') ||
+        (value !== null && value !== undefined && value !== false && value !== '')
+      )
     })
     .map(([key, value]) => ({ key, value }))
     .slice(0, 10) // Show first 10 filled fields
@@ -145,7 +154,7 @@ const stepConfigurations = computed(() => {
     medicalInterview: summaryConfig?.MedicalInterview || null,
     odontogram: summaryConfig?.Odontogram || null,
     intraoralExamination: summaryConfig?.IntraoralExamination || null,
-    measurements: summaryConfig?.Measurements || null
+    measurements: summaryConfig?.Measurements || null,
   }
 })
 
@@ -153,42 +162,54 @@ const stepConfigurations = computed(() => {
 const createStepTreatmentPlan = (stepName: string, config: any, data: any, stepIndex: number) => {
   const stepData = {
     detailsStep: stepIndex, // Use correct step index for validation
-    detailsData: data
+    detailsData: data,
   }
 
   return {
     ...props.treatmentPlan,
     currentStepConfig: config,
-    currentStepDetails: stepData   // Unified property for all steps
+    currentStepDetails: stepData, // Unified property for all steps
   }
 }
 
-const medicalInterviewTreatmentPlan = computed(() =>
-  createStepTreatmentPlan('MedicalInterview',
-    stepConfigurations.value.medicalInterview,
-    aggregatedData.value.medicalInterview,
-    0) // Medical Interview is step 0
+const medicalInterviewTreatmentPlan = computed(
+  () =>
+    createStepTreatmentPlan(
+      'MedicalInterview',
+      stepConfigurations.value.medicalInterview,
+      aggregatedData.value.medicalInterview,
+      0,
+    ), // Medical Interview is step 0
 )
 
-const odontogramTreatmentPlan = computed(() =>
-  createStepTreatmentPlan('Odontogram',
-    stepConfigurations.value.odontogram,
-    aggregatedData.value.odontogram,
-    1) // Odontogram is step 1
+const odontogramTreatmentPlan = computed(
+  () =>
+    createStepTreatmentPlan(
+      'Odontogram',
+      stepConfigurations.value.odontogram,
+      aggregatedData.value.odontogram,
+      1,
+    ), // Odontogram is step 1
 )
 
-const intraoralExaminationTreatmentPlan = computed(() =>
-  createStepTreatmentPlan('IntraoralExamination',
-    stepConfigurations.value.intraoralExamination,
-    aggregatedData.value.intraoralExamination,
-    2) // Intraoral Examination is step 2
+const intraoralExaminationTreatmentPlan = computed(
+  () =>
+    createStepTreatmentPlan(
+      'IntraoralExamination',
+      stepConfigurations.value.intraoralExamination,
+      aggregatedData.value.intraoralExamination,
+      2,
+    ), // Intraoral Examination is step 2
 )
 
-const measurementsTreatmentPlan = computed(() =>
-  createStepTreatmentPlan('Measurements',
-    stepConfigurations.value.measurements,
-    aggregatedData.value.measurements,
-    3) // Measurements is step 3
+const measurementsTreatmentPlan = computed(
+  () =>
+    createStepTreatmentPlan(
+      'Measurements',
+      stepConfigurations.value.measurements,
+      aggregatedData.value.measurements,
+      3,
+    ), // Measurements is step 3
 )
 
 onMounted(() => {
@@ -209,7 +230,8 @@ onMounted(() => {
         <CardTitle class="flex items-center justify-between">
           Wywiad medyczny
           <Badge variant="outline">
-            {{ medicalInterviewSummary.filledCount }} / {{ medicalInterviewSummary.totalFields }} pól
+            {{ medicalInterviewSummary.filledCount }} /
+            {{ medicalInterviewSummary.totalFields }} pól
           </Badge>
         </CardTitle>
       </CardHeader>
@@ -287,14 +309,36 @@ onMounted(() => {
           </div>
           <div class="p-4 border rounded-lg text-center">
             <h4 class="font-medium text-gray-900 mb-2">Odontogram</h4>
-            <Badge :variant="(aggregatedData.odontogram?.teeth && aggregatedData.odontogram.teeth.length > 0) ? 'default' : 'secondary'">
-              {{ (aggregatedData.odontogram?.teeth && aggregatedData.odontogram.teeth.length > 0) ? 'Zapisany' : 'Pusty' }}
+            <Badge
+              :variant="
+                aggregatedData.odontogram?.teeth && aggregatedData.odontogram.teeth.length > 0
+                  ? 'default'
+                  : 'secondary'
+              "
+            >
+              {{
+                aggregatedData.odontogram?.teeth && aggregatedData.odontogram.teeth.length > 0
+                  ? 'Zapisany'
+                  : 'Pusty'
+              }}
             </Badge>
           </div>
           <div class="p-4 border rounded-lg text-center">
             <h4 class="font-medium text-gray-900 mb-2">Badanie wewnątrzustne</h4>
-            <Badge :variant="aggregatedData.intraoralExamination && Object.keys(aggregatedData.intraoralExamination).length > 0 ? 'default' : 'secondary'">
-              {{ aggregatedData.intraoralExamination && Object.keys(aggregatedData.intraoralExamination).length > 0 ? 'Wypełniony' : 'Pusty' }}
+            <Badge
+              :variant="
+                aggregatedData.intraoralExamination &&
+                Object.keys(aggregatedData.intraoralExamination).length > 0
+                  ? 'default'
+                  : 'secondary'
+              "
+            >
+              {{
+                aggregatedData.intraoralExamination &&
+                Object.keys(aggregatedData.intraoralExamination).length > 0
+                  ? 'Wypełniony'
+                  : 'Pusty'
+              }}
             </Badge>
           </div>
           <div class="p-4 border rounded-lg text-center">
