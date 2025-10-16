@@ -14,9 +14,6 @@ const vueformRef = ref<any>(null)
 const formDataModel = ref({})
 const dynamicSchema = ref({})
 
-// Get function to mark data as modified from parent
-const markAsModified = inject('markAsModified') as (() => void) | undefined
-
 function getOnlyFilledValues(data: any): Record<string, any> {
   const filled: Record<string, any> = {}
 
@@ -94,11 +91,39 @@ watch([() => props.treatmentPlan, () => vueformRef.value], ([plan, form]) => {
 })
 
 onMounted(() => {
+  console.log('IntraoralExamination - treatmentPlan:', props.treatmentPlan)
 
+  // Load config from API - same as MedicalInterviewStep
   if (props.treatmentPlan && props.treatmentPlan.currentStepConfig) {
     const currentStepConfig = props.treatmentPlan.currentStepConfig
+    console.log('IntraoralExamination - currentStepConfig:', currentStepConfig)
+
     if (currentStepConfig) {
-      dynamicSchema.value = currentStepConfig
+      // Check if config has container structure
+      if (currentStepConfig.container?.schema) {
+        console.log('IntraoralExamination - using container.schema:', currentStepConfig.container.schema)
+        dynamicSchema.value = currentStepConfig.container.schema
+      } else if (currentStepConfig.container) {
+        console.log('IntraoralExamination - using container:', currentStepConfig.container)
+        dynamicSchema.value = currentStepConfig.container
+      } else {
+        console.log('IntraoralExamination - using direct config:', currentStepConfig)
+        dynamicSchema.value = currentStepConfig
+      }
+      console.log('IntraoralExamination - final schema:', dynamicSchema.value)
+
+      // Debug specific fields
+      Object.keys(dynamicSchema.value).forEach(key => {
+        const field = dynamicSchema.value[key]
+        if (key.includes('Description')) {
+          console.log(`Field ${key}:`, field)
+          if (field.conditions) {
+            console.log(`  - has conditions:`, field.conditions)
+          } else {
+            console.log(`  - NO conditions found!`)
+          }
+        }
+      })
     }
   }
 

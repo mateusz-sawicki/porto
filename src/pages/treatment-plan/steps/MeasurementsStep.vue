@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { ref, onMounted, watch, inject, nextTick } from 'vue'
-import { fieldConfigs } from './numeric-assessment/numericAssessmentConfig'
 
 interface Props {
   treatmentPlan: any
@@ -22,7 +21,8 @@ function getOnlyFilledValues(data: any): Record<string, any> {
     if (
       value === true ||
       (typeof value === 'string' && value.trim() !== '') ||
-      (value !== null && value !== undefined && value !== false && value !== '')
+      (Array.isArray(value) && value.length > 0) ||
+      (value !== null && value !== undefined && value !== false && value !== '' && !Array.isArray(value))
     ) {
       filled[key] = value
     }
@@ -91,8 +91,20 @@ watch([() => props.treatmentPlan, () => vueformRef.value], ([plan, form]) => {
 })
 
 onMounted(() => {
-  // Use mock config for now
-  dynamicSchema.value = fieldConfigs
+  // Load config from API - same as MedicalInterviewStep
+  if (props.treatmentPlan && props.treatmentPlan.currentStepConfig) {
+    const currentStepConfig = props.treatmentPlan.currentStepConfig
+    if (currentStepConfig) {
+      // Check if config has container structure
+      if (currentStepConfig.container?.schema) {
+        dynamicSchema.value = currentStepConfig.container.schema
+      } else if (currentStepConfig.container) {
+        dynamicSchema.value = currentStepConfig.container
+      } else {
+        dynamicSchema.value = currentStepConfig
+      }
+    }
+  }
 
   if (props.treatmentPlan && props.treatmentPlan.currentStepDetails) {
     const currentStep = props.treatmentPlan.currentStepDetails

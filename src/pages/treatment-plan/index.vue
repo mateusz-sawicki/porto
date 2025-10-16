@@ -5,7 +5,9 @@ import { Button } from '@/components/ui/button'
 import { ArrowLeft } from 'lucide-vue-next'
 import OdontogramStep from './steps/OdontogramStep.vue'
 import MedicalInterviewStep from './steps/MedicalInterviewStep.vue'
-import NumericAssessmentStep from './steps/NumericAssessmentStep.vue'
+import MeasurementsStep from './steps/MeasurementsStep.vue'
+import IntraoralExaminationStep from './steps/IntraoralExaminationStep.vue'
+import SummaryStep from './steps/SummaryStep.vue'
 import TreatmentPlanStepper from './components/TreatmentPlanStepper.vue'
 import BackToPatientDialog from '@/components/treatment-plan/BackToPatientDialog.vue'
 import { treatmentPlanApi, type TreatmentPlan } from '@/services/treatmentPlan/treatmentPlanApi'
@@ -38,12 +40,16 @@ const STRINGS = {
   STEP_TITLES: {
     TREATMENT_PLAN_INFORMATION: 'Treatment Plan Information',
     ODONTOGRAM: 'Odontogram',
-    NUMERIC_ASSESSMENT: 'Numeric Assessment',
+    MEASUREMENTS: 'Measurements',
+    INTRAORAL_EXAMINATION: 'Intraoral Examination',
+    SUMMARY: 'Summary',
   },
   STEP_DESCRIPTIONS: {
     PROVIDE_TREATMENT_PLAN_DETAILS: 'Provide treatment plan details',
     CONFIGURE_TOOTH_TREATMENTS: 'Configure tooth treatments',
-    NUMERIC_EVALUATION: 'Numerical evaluation of patient state',
+    MEASUREMENTS_EVALUATION: 'Measurements evaluation of patient state',
+    INTRAORAL_EXAMINATION_EVALUATION: 'Intraoral examination of patient state',
+    SUMMARY_OVERVIEW: 'Overview of all collected information',
   },
   UI_TEXT: {
     LOADING_TREATMENT_PLAN: 'Loading treatment plan...',
@@ -80,8 +86,18 @@ const steps: Step[] = [
   },
   {
     step: 3,
-    title: STRINGS.STEP_TITLES.NUMERIC_ASSESSMENT,
-    description: STRINGS.STEP_DESCRIPTIONS.NUMERIC_EVALUATION,
+    title: STRINGS.STEP_TITLES.MEASUREMENTS,
+    description: STRINGS.STEP_DESCRIPTIONS.MEASUREMENTS_EVALUATION,
+  },
+  {
+    step: 4,
+    title: STRINGS.STEP_TITLES.INTRAORAL_EXAMINATION,
+    description: STRINGS.STEP_DESCRIPTIONS.INTRAORAL_EXAMINATION_EVALUATION,
+  },
+  {
+    step: 5,
+    title: STRINGS.STEP_TITLES.SUMMARY,
+    description: STRINGS.STEP_DESCRIPTIONS.SUMMARY_OVERVIEW,
   },
 ]
 
@@ -94,7 +110,9 @@ const isLoadingData = ref<boolean>(true)
 const isSaving = ref<boolean>(false)
 const medicalInterviewStepRef = ref<MedicalInterviewStepRef | null>(null)
 const odontogramStepRef = ref<any | null>(null)
-const numericAssessmentStepRef = ref<any | null>(null)
+const measurementsStepRef = ref<any | null>(null)
+const intraoralExaminationStepRef = ref<any | null>(null)
+const summaryStepRef = ref<any | null>(null)
 
 // Computed property that merges treatment plan with current steps data
 const treatmentPlanWithSteps = computed(() => {
@@ -106,6 +124,37 @@ const treatmentPlanWithSteps = computed(() => {
   }
 })
 
+// Function to collect data from all steps
+function getAllStepsData() {
+  const stepsData: Record<string, any> = {}
+
+  try {
+    // Step 1: Medical Interview
+    if (medicalInterviewStepRef.value?.getFormData) {
+      stepsData.medicalInterview = medicalInterviewStepRef.value.getFormData()
+    }
+
+    // Step 2: Odontogram
+    if (odontogramStepRef.value?.getFormData) {
+      stepsData.odontogram = odontogramStepRef.value.getFormData()
+    }
+
+    // Step 3: Measurements
+    if (measurementsStepRef.value?.getFormData) {
+      stepsData.measurements = measurementsStepRef.value.getFormData()
+    }
+
+    // Step 4: Intraoral Examination
+    if (intraoralExaminationStepRef.value?.getFormData) {
+      stepsData.intraoralExamination = intraoralExaminationStepRef.value.getFormData()
+    }
+  } catch (error) {
+    console.error('Error collecting steps data:', error)
+  }
+
+  return stepsData
+}
+
 // Get current step data and compare with original
 function hasUnsavedChanges(): boolean {
   try {
@@ -116,13 +165,14 @@ function hasUnsavedChanges(): boolean {
       currentStepData = medicalInterviewStepRef.value.getFormData()
     } else if (stepIndex.value === 2 && odontogramStepRef.value?.getFormData) {
       currentStepData = odontogramStepRef.value.getFormData()
-    } else if (stepIndex.value === 3 && numericAssessmentStepRef.value?.getFormData) {
-      currentStepData = numericAssessmentStepRef.value.getFormData()
+    } else if (stepIndex.value === 3 && measurementsStepRef.value?.getFormData) {
+      currentStepData = measurementsStepRef.value.getFormData()
+    } else if (stepIndex.value === 5 && summaryStepRef.value?.getFormData) {
+      currentStepData = summaryStepRef.value.getFormData()
     }
 
     const currentDataJson = JSON.stringify(currentStepData, null, 0)
     const hasChanges = originalStepData.value !== currentDataJson
-
 
     return hasChanges
   } catch (error) {
@@ -141,8 +191,10 @@ function saveOriginalStepData(): void {
       currentStepData = medicalInterviewStepRef.value.getFormData()
     } else if (stepIndex.value === 2 && odontogramStepRef.value?.getFormData) {
       currentStepData = odontogramStepRef.value.getFormData()
-    } else if (stepIndex.value === 3 && numericAssessmentStepRef.value?.getFormData) {
-      currentStepData = numericAssessmentStepRef.value.getFormData()
+    } else if (stepIndex.value === 3 && measurementsStepRef.value?.getFormData) {
+      currentStepData = measurementsStepRef.value.getFormData()
+    } else if (stepIndex.value === 5 && summaryStepRef.value?.getFormData) {
+      currentStepData = summaryStepRef.value.getFormData()
     }
 
     originalStepData.value = JSON.stringify(currentStepData, null, 0)
@@ -182,6 +234,10 @@ async function saveProgress(): Promise<void> {
       currentStepData = medicalInterviewStepRef.value.getFormData()
     } else if (stepIndex.value === 2 && odontogramStepRef.value) {
       currentStepData = odontogramStepRef.value.getFormData()
+    } else if (stepIndex.value === 3 && measurementsStepRef.value) {
+      currentStepData = measurementsStepRef.value.getFormData()
+    } else if (stepIndex.value === 4 && intraoralExaminationStepRef.value) {
+      currentStepData = intraoralExaminationStepRef.value.getFormData()
     }
 
     if (treatmentPlan.value?.id) {
@@ -259,8 +315,12 @@ function handleCancelBackToPatient(): void {
 function handleNext(): void {
   if (stepIndex.value === 1 && medicalInterviewStepRef.value) {
     medicalInterviewStepRef.value.handleNextStep()
-  } else if (stepIndex.value === 3 && numericAssessmentStepRef.value) {
-    numericAssessmentStepRef.value.handleNextStep()
+  } else if (stepIndex.value === 3 && measurementsStepRef.value) {
+    measurementsStepRef.value.handleNextStep()
+  } else if (stepIndex.value === 4 && intraoralExaminationStepRef.value) {
+    intraoralExaminationStepRef.value.handleNextStep()
+  } else if (stepIndex.value === 5 && summaryStepRef.value) {
+    summaryStepRef.value.handleNextStep()
   } else {
     nextStep()
   }
@@ -278,6 +338,10 @@ async function nextStep(): Promise<void> {
         currentStepData = medicalInterviewStepRef.value.getFormData()
       } else if (stepIndex.value === 2 && odontogramStepRef.value) {
         currentStepData = odontogramStepRef.value.getFormData()
+      } else if (stepIndex.value === 3 && measurementsStepRef.value) {
+        currentStepData = measurementsStepRef.value.getFormData()
+      } else if (stepIndex.value === 4 && intraoralExaminationStepRef.value) {
+        currentStepData = intraoralExaminationStepRef.value.getFormData()
       }
 
       // Calculate target step (next step)
@@ -313,6 +377,10 @@ async function prevStep(): Promise<void> {
         currentStepData = medicalInterviewStepRef.value.getFormData()
       } else if (stepIndex.value === 2 && odontogramStepRef.value) {
         currentStepData = odontogramStepRef.value.getFormData()
+      } else if (stepIndex.value === 3 && measurementsStepRef.value) {
+        currentStepData = measurementsStepRef.value.getFormData()
+      } else if (stepIndex.value === 4 && intraoralExaminationStepRef.value) {
+        currentStepData = intraoralExaminationStepRef.value.getFormData()
       }
 
       // Calculate target step (previous step)
@@ -343,6 +411,7 @@ async function fetchTreatmentPlan(): Promise<void> {
     treatmentPlan.value = await treatmentPlanApi.getTreatmentPlanById(planId)
 
     // Initialize currentStepDetail from treatment plan if it exists
+    console.log(treatmentPlan.value)
     if (treatmentPlan.value?.currentStepDetails) {
       currentStepDetails.value.currentStepDetail = treatmentPlan.value.currentStepDetails
     }
@@ -467,11 +536,34 @@ onMounted(() => {
           />
         </div>
 
-        <!-- Step 3: Numeric Assessment -->
+        <!-- Step 3: Measurements -->
         <div v-if="stepIndex === 3">
-          <NumericAssessmentStep
-            ref="numericAssessmentStepRef"
+          <MeasurementsStep
+            ref="measurementsStepRef"
             :treatment-plan="treatmentPlanWithSteps"
+            :step-index="stepIndex"
+            :is-loading="isLoading"
+            :on-next="onStepSubmit"
+          />
+        </div>
+
+        <!-- Step 4: Intraoral Examination -->
+        <div v-if="stepIndex === 4">
+          <IntraoralExaminationStep
+            ref="intraoralExaminationStepRef"
+            :treatment-plan="treatmentPlanWithSteps"
+            :step-index="stepIndex"
+            :is-loading="isLoading"
+            :on-next="onStepSubmit"
+          />
+        </div>
+
+        <!-- Step 5: Summary -->
+        <div v-if="stepIndex === 5">
+          <SummaryStep
+            ref="summaryStepRef"
+            :treatment-plan="treatmentPlanWithSteps"
+            :all-steps-data="getAllStepsData()"
             :step-index="stepIndex"
             :is-loading="isLoading"
             :on-next="onStepSubmit"

@@ -206,6 +206,9 @@ const loadOdontogramData = async () => {
       // No saved data, use schema as starting point
       if (stepConfig.odontogramSchema) {
         odontogram.reinitializeWithSchema(stepConfig.odontogramSchema, props.isPediatric)
+      } else if (stepConfig.schema) {
+        // New format: { schema: { teeth: [...] } }
+        odontogram.reinitializeWithSchema(stepConfig.schema, props.isPediatric)
       } else if (stepConfig.teeth) {
         // Use teeth array directly from stepConfig
         odontogram.reinitializeWithSchema({ teeth: stepConfig.teeth }, props.isPediatric)
@@ -302,6 +305,8 @@ const loadOdontogramData = async () => {
 
           if (stepConfig.odontogramSchema?.teeth) {
             schemaTeeth = stepConfig.odontogramSchema.teeth
+          } else if (stepConfig.schema?.teeth) {
+            schemaTeeth = stepConfig.schema.teeth
           } else if (stepConfig.teeth) {
             schemaTeeth = stepConfig.teeth
           }
