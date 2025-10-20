@@ -20,6 +20,7 @@ const STRINGS = {
     SAVING: 'Saving...',
     SAVE_PROGRESS: 'Save Progress',
     SUBMIT_TREATMENT_PLAN: 'Submit Treatment Plan',
+    DOWNLOAD_PDF: 'Pobierz PDF',
   },
   BUTTON_VARIANTS: {
     OUTLINE: 'outline',
@@ -263,6 +264,17 @@ async function onFinalSubmit(): Promise<void> {
     console.error(STRINGS.ERROR_MESSAGES.SUBMITTING_TREATMENT_PLAN, error)
   } finally {
     isLoading.value = false
+  }
+}
+
+async function downloadPDF(): Promise<void> {
+  try {
+    if (treatmentPlan.value?.id) {
+      // Call API to generate and download PDF
+      await treatmentPlanApi.downloadPDF(treatmentPlan.value.id)
+    }
+  } catch (error) {
+    console.error('Error downloading PDF:', error)
   }
 }
 
@@ -528,6 +540,14 @@ onMounted(() => {
         </Button>
         <div :class="STRINGS.CSS_CLASSES.FLEX_GAP_2">
           <Button
+            v-if="stepIndex === steps.length"
+            :variant="STRINGS.BUTTON_VARIANTS.OUTLINE"
+            :size="STRINGS.BUTTON_SIZES.SM"
+            @click="downloadPDF"
+          >
+            {{ STRINGS.BUTTON_LABELS.DOWNLOAD_PDF }}
+          </Button>
+          <Button
             :variant="STRINGS.BUTTON_VARIANTS.OUTLINE"
             :size="STRINGS.BUTTON_SIZES.SM"
             @click="saveProgress"
@@ -618,6 +638,14 @@ onMounted(() => {
           {{ STRINGS.BUTTON_LABELS.BACK }}
         </Button>
         <div :class="STRINGS.CSS_CLASSES.FLEX_GAP_2">
+          <Button
+            v-if="stepIndex === steps.length"
+            :variant="STRINGS.BUTTON_VARIANTS.OUTLINE"
+            :size="STRINGS.BUTTON_SIZES.SM"
+            @click="downloadPDF"
+          >
+            {{ STRINGS.BUTTON_LABELS.DOWNLOAD_PDF }}
+          </Button>
           <Button
             :variant="STRINGS.BUTTON_VARIANTS.OUTLINE"
             :size="STRINGS.BUTTON_SIZES.SM"
