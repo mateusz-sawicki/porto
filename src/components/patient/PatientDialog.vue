@@ -13,7 +13,6 @@ import AddPatientForm from './AddPatientForm.vue'
 import type { AddPatient, UpdatePatient } from '@/types/patient/patient'
 import { DialogMode } from '@/types/common/status'
 import { preventDialogClose, useApiCall } from '@/composables/useApiCall'
-import { usePatients } from '@/composables/patient/usePatients'
 import { patientApi } from '@/services/patient/patientApi'
 
 interface Props {
@@ -33,6 +32,7 @@ interface Props {
 interface Emits {
   (e: 'close'): void
   (e: 'update', patientData: any): void
+  (e: 'save', patientData: AddPatient): void
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -42,9 +42,8 @@ const emit = defineEmits<Emits>()
 
 const addPatientFormRef = ref()
 
-// Use API call and patients composable
+// Use API call
 const { execute: executeApiCall } = useApiCall()
-const { addPatient: createPatient } = usePatients()
 
 // Reset form when dialog opens or populate with patient data for editing
 watch(
@@ -80,7 +79,7 @@ const handleSave = async (patientData: AddPatient) => {
       id: props.patientId,
       ...patientData
     }
-    
+
     const result = await executeApiCall(() => patientApi.updatePatient(props.patientId!, updateData), {
       withOverlay: true,
       overlayMessage: 'Updating patient...',
@@ -91,15 +90,8 @@ const handleSave = async (patientData: AddPatient) => {
       emit('close')
     }
   } else {
-    // For add mode, create the patient
-    const result = await executeApiCall(() => createPatient(patientData), {
-      withOverlay: true,
-      overlayMessage: 'Adding patient...',
-    })
-
-    if (result) {
-      emit('close')
-    }
+    // For add mode, emit save event to parent
+    emit('save', patientData)
   }
 }
 

@@ -35,7 +35,7 @@ const handlePatientCreated = async (patientData: any) => {
 
     if (result) {
       closeAddPatientDialog()
-      // No need to refresh - createPatient already updates the local array
+      // Patient list is automatically refreshed by createPatient function
     } else {
       // Handle error case
       console.error('Failed to add patient')

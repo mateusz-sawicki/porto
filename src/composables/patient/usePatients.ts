@@ -158,8 +158,25 @@ export function usePatients() {
           updatedAt: new Date(response.data.updatedAt),
         }
 
-        // Add to local array at the beginning (newest first)
-        patients.value.unshift(newPatient)
+        // Reset loading and error state
+        loading.value = false
+        error.value = null
+
+        // Refresh the entire list from server to ensure synchronization
+        try {
+          const refreshResponse = await patientApi.getPatients()
+          if (refreshResponse.success) {
+            patients.value = refreshResponse.data.map((patient) => ({
+              ...patient,
+              createdAt: new Date(patient.createdAt),
+              updatedAt: new Date(patient.updatedAt),
+            }))
+          }
+        } catch (refreshErr) {
+          console.error('Failed to refresh patients after adding:', refreshErr)
+          // Still add the patient locally as fallback
+          patients.value.unshift(newPatient)
+        }
 
         return newPatient
       } else {
