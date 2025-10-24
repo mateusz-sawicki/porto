@@ -7,7 +7,10 @@ import OdontogramStep from './steps/OdontogramStep.vue'
 import MedicalInterviewStep from './steps/MedicalInterviewStep.vue'
 import MeasurementsStep from './steps/MeasurementsStep.vue'
 import IntraoralExaminationStep from './steps/IntraoralExaminationStep.vue'
-import SummaryStep from './steps/SummaryStep.vue'
+import ReviewStep from './steps/ReviewStep.vue'
+import TreatmentGoalsStep from './steps/TreatmentGoalsStep.vue'
+import PhotoAnalysisStep from './steps/PhotoAnalysisStep.vue'
+import FinalSummaryStep from './steps/FinalSummaryStep.vue'
 import TreatmentPlanStepper from './components/TreatmentPlanStepper.vue'
 import BackToPatientDialog from '@/components/treatment-plan/BackToPatientDialog.vue'
 import { treatmentPlanApi, type TreatmentPlan } from '@/services/treatmentPlan/treatmentPlanApi'
@@ -43,6 +46,9 @@ const STRINGS = {
     ODONTOGRAM: 'Odontogram',
     MEASUREMENTS: 'Measurements',
     INTRAORAL_EXAMINATION: 'Intraoral Examination',
+    REVIEW: 'Review',
+    TREATMENT_GOALS: 'Treatment Goals',
+    PHOTO_ANALYSIS: 'Photo Analysis',
     SUMMARY: 'Summary',
   },
   STEP_DESCRIPTIONS: {
@@ -50,7 +56,10 @@ const STRINGS = {
     CONFIGURE_TOOTH_TREATMENTS: 'Configure tooth treatments',
     MEASUREMENTS_EVALUATION: 'Measurements evaluation of patient state',
     INTRAORAL_EXAMINATION_EVALUATION: 'Intraoral examination of patient state',
-    SUMMARY_OVERVIEW: 'Overview of all collected information',
+    REVIEW_OVERVIEW: 'Review of collected clinical information',
+    TREATMENT_GOALS_PLANNING: 'Define treatment goals and planning',
+    PHOTO_ANALYSIS_EVALUATION: 'Photo analysis evaluation of patient state',
+    SUMMARY_OVERVIEW: 'Final summary of all treatment information',
   },
   UI_TEXT: {
     LOADING_TREATMENT_PLAN: 'Loading treatment plan...',
@@ -97,6 +106,21 @@ const steps: Step[] = [
   },
   {
     step: 5,
+    title: STRINGS.STEP_TITLES.REVIEW,
+    description: STRINGS.STEP_DESCRIPTIONS.REVIEW_OVERVIEW,
+  },
+  {
+    step: 6,
+    title: STRINGS.STEP_TITLES.PHOTO_ANALYSIS,
+    description: STRINGS.STEP_DESCRIPTIONS.PHOTO_ANALYSIS_EVALUATION,
+  },
+  {
+    step: 7,
+    title: STRINGS.STEP_TITLES.TREATMENT_GOALS,
+    description: STRINGS.STEP_DESCRIPTIONS.TREATMENT_GOALS_PLANNING,
+  },
+  {
+    step: 8,
     title: STRINGS.STEP_TITLES.SUMMARY,
     description: STRINGS.STEP_DESCRIPTIONS.SUMMARY_OVERVIEW,
   },
@@ -113,7 +137,10 @@ const medicalInterviewStepRef = ref<MedicalInterviewStepRef | null>(null)
 const odontogramStepRef = ref<any | null>(null)
 const measurementsStepRef = ref<any | null>(null)
 const intraoralExaminationStepRef = ref<any | null>(null)
-const summaryStepRef = ref<any | null>(null)
+const reviewStepRef = ref<any | null>(null)
+const treatmentGoalsStepRef = ref<any | null>(null)
+const photoAnalysisStepRef = ref<any | null>(null)
+const finalSummaryStepRef = ref<any | null>(null)
 
 // Computed property that merges treatment plan with current steps data
 const treatmentPlanWithSteps = computed(() => {
@@ -149,6 +176,26 @@ function getAllStepsData() {
     if (intraoralExaminationStepRef.value?.getFormData) {
       stepsData.intraoralExamination = intraoralExaminationStepRef.value.getFormData()
     }
+
+    // Step 5: Review
+    if (reviewStepRef.value?.getFormData) {
+      stepsData.review = reviewStepRef.value.getFormData()
+    }
+
+    // Step 6: Photo Analysis
+    if (photoAnalysisStepRef.value?.getFormData) {
+      stepsData.photoAnalysis = photoAnalysisStepRef.value.getFormData()
+    }
+
+    // Step 7: Treatment Goals
+    if (treatmentGoalsStepRef.value?.getFormData) {
+      stepsData.treatmentGoals = treatmentGoalsStepRef.value.getFormData()
+    }
+
+    // Step 8: Final Summary
+    if (finalSummaryStepRef.value?.getFormData) {
+      stepsData.finalSummary = finalSummaryStepRef.value.getFormData()
+    }
   } catch (error) {
     console.error('Error collecting steps data:', error)
   }
@@ -168,8 +215,16 @@ function hasUnsavedChanges(): boolean {
       currentStepData = odontogramStepRef.value.getFormData()
     } else if (stepIndex.value === 3 && measurementsStepRef.value?.getFormData) {
       currentStepData = measurementsStepRef.value.getFormData()
-    } else if (stepIndex.value === 5 && summaryStepRef.value?.getFormData) {
-      currentStepData = summaryStepRef.value.getFormData()
+    } else if (stepIndex.value === 4 && intraoralExaminationStepRef.value?.getFormData) {
+      currentStepData = intraoralExaminationStepRef.value.getFormData()
+    } else if (stepIndex.value === 5 && reviewStepRef.value?.getFormData) {
+      currentStepData = reviewStepRef.value.getFormData()
+    } else if (stepIndex.value === 6 && photoAnalysisStepRef.value?.getFormData) {
+      currentStepData = photoAnalysisStepRef.value.getFormData()
+    } else if (stepIndex.value === 7 && treatmentGoalsStepRef.value?.getFormData) {
+      currentStepData = treatmentGoalsStepRef.value.getFormData()
+    } else if (stepIndex.value === 8 && finalSummaryStepRef.value?.getFormData) {
+      currentStepData = finalSummaryStepRef.value.getFormData()
     }
 
     const currentDataJson = JSON.stringify(currentStepData, null, 0)
@@ -194,8 +249,16 @@ function saveOriginalStepData(): void {
       currentStepData = odontogramStepRef.value.getFormData()
     } else if (stepIndex.value === 3 && measurementsStepRef.value?.getFormData) {
       currentStepData = measurementsStepRef.value.getFormData()
-    } else if (stepIndex.value === 5 && summaryStepRef.value?.getFormData) {
-      currentStepData = summaryStepRef.value.getFormData()
+    } else if (stepIndex.value === 4 && intraoralExaminationStepRef.value?.getFormData) {
+      currentStepData = intraoralExaminationStepRef.value.getFormData()
+    } else if (stepIndex.value === 5 && reviewStepRef.value?.getFormData) {
+      currentStepData = reviewStepRef.value.getFormData()
+    } else if (stepIndex.value === 6 && photoAnalysisStepRef.value?.getFormData) {
+      currentStepData = photoAnalysisStepRef.value.getFormData()
+    } else if (stepIndex.value === 7 && treatmentGoalsStepRef.value?.getFormData) {
+      currentStepData = treatmentGoalsStepRef.value.getFormData()
+    } else if (stepIndex.value === 8 && finalSummaryStepRef.value?.getFormData) {
+      currentStepData = finalSummaryStepRef.value.getFormData()
     }
 
     originalStepData.value = JSON.stringify(currentStepData, null, 0)
@@ -239,6 +302,14 @@ async function saveProgress(): Promise<void> {
       currentStepData = measurementsStepRef.value.getFormData()
     } else if (stepIndex.value === 4 && intraoralExaminationStepRef.value) {
       currentStepData = intraoralExaminationStepRef.value.getFormData()
+    } else if (stepIndex.value === 5 && reviewStepRef.value) {
+      currentStepData = reviewStepRef.value.getFormData()
+    } else if (stepIndex.value === 6 && photoAnalysisStepRef.value) {
+      currentStepData = photoAnalysisStepRef.value.getFormData()
+    } else if (stepIndex.value === 7 && treatmentGoalsStepRef.value) {
+      currentStepData = treatmentGoalsStepRef.value.getFormData()
+    } else if (stepIndex.value === 8 && finalSummaryStepRef.value) {
+      currentStepData = finalSummaryStepRef.value.getFormData()
     }
 
     if (treatmentPlan.value?.id) {
@@ -331,8 +402,14 @@ function handleNext(): void {
     measurementsStepRef.value.handleNextStep()
   } else if (stepIndex.value === 4 && intraoralExaminationStepRef.value) {
     intraoralExaminationStepRef.value.handleNextStep()
-  } else if (stepIndex.value === 5 && summaryStepRef.value) {
-    summaryStepRef.value.handleNextStep()
+  } else if (stepIndex.value === 5 && reviewStepRef.value) {
+    reviewStepRef.value.handleNextStep()
+  } else if (stepIndex.value === 6 && photoAnalysisStepRef.value) {
+    photoAnalysisStepRef.value.handleNextStep()
+  } else if (stepIndex.value === 7 && treatmentGoalsStepRef.value) {
+    treatmentGoalsStepRef.value.handleNextStep()
+  } else if (stepIndex.value === 8 && finalSummaryStepRef.value) {
+    finalSummaryStepRef.value.handleNextStep()
   } else {
     nextStep()
   }
@@ -354,6 +431,14 @@ async function nextStep(): Promise<void> {
         currentStepData = measurementsStepRef.value.getFormData()
       } else if (stepIndex.value === 4 && intraoralExaminationStepRef.value) {
         currentStepData = intraoralExaminationStepRef.value.getFormData()
+      } else if (stepIndex.value === 5 && reviewStepRef.value) {
+        currentStepData = reviewStepRef.value.getFormData()
+      } else if (stepIndex.value === 6 && photoAnalysisStepRef.value) {
+        currentStepData = photoAnalysisStepRef.value.getFormData()
+      } else if (stepIndex.value === 7 && treatmentGoalsStepRef.value) {
+        currentStepData = treatmentGoalsStepRef.value.getFormData()
+      } else if (stepIndex.value === 5 && photoAnalysisStepRef.value) {
+        currentStepData = photoAnalysisStepRef.value.getFormData()
       }
 
       // Calculate target step (next step)
@@ -393,6 +478,12 @@ async function prevStep(): Promise<void> {
         currentStepData = measurementsStepRef.value.getFormData()
       } else if (stepIndex.value === 4 && intraoralExaminationStepRef.value) {
         currentStepData = intraoralExaminationStepRef.value.getFormData()
+      } else if (stepIndex.value === 5 && reviewStepRef.value) {
+        currentStepData = reviewStepRef.value.getFormData()
+      } else if (stepIndex.value === 6 && photoAnalysisStepRef.value) {
+        currentStepData = photoAnalysisStepRef.value.getFormData()
+      } else if (stepIndex.value === 7 && treatmentGoalsStepRef.value) {
+        currentStepData = treatmentGoalsStepRef.value.getFormData()
       }
 
       // Calculate target step (previous step)
@@ -432,6 +523,12 @@ async function goToStep(targetStep: number): Promise<void> {
         currentStepData = measurementsStepRef.value.getFormData()
       } else if (stepIndex.value === 4 && intraoralExaminationStepRef.value) {
         currentStepData = intraoralExaminationStepRef.value.getFormData()
+      } else if (stepIndex.value === 5 && reviewStepRef.value) {
+        currentStepData = reviewStepRef.value.getFormData()
+      } else if (stepIndex.value === 6 && photoAnalysisStepRef.value) {
+        currentStepData = photoAnalysisStepRef.value.getFormData()
+      } else if (stepIndex.value === 7 && treatmentGoalsStepRef.value) {
+        currentStepData = treatmentGoalsStepRef.value.getFormData()
       }
 
       // Call API to move to target step
@@ -536,7 +633,7 @@ onMounted(() => {
         </Button>
         <div :class="STRINGS.CSS_CLASSES.FLEX_GAP_2">
           <Button
-            v-if="stepIndex === steps.length"
+            v-if="stepIndex === 5 || stepIndex === 8"
             :variant="STRINGS.BUTTON_VARIANTS.OUTLINE"
             :size="STRINGS.BUTTON_SIZES.SM"
             @click="downloadPDF"
@@ -611,12 +708,45 @@ onMounted(() => {
           />
         </div>
 
-        <!-- Step 5: Summary -->
+        <!-- Step 5: Review -->
         <div v-if="stepIndex === 5">
-          <SummaryStep
-            ref="summaryStepRef"
+          <ReviewStep
+            ref="reviewStepRef"
             :treatment-plan="treatmentPlanWithSteps"
             :all-steps-data="getAllStepsData()"
+            :step-index="stepIndex"
+            :is-loading="isLoading"
+            :on-next="onStepSubmit"
+          />
+        </div>
+
+        <!-- Step 6: Photo Analysis -->
+        <div v-if="stepIndex === 6">
+          <PhotoAnalysisStep
+            ref="photoAnalysisStepRef"
+            :treatment-plan="treatmentPlanWithSteps"
+            :step-index="stepIndex"
+            :is-loading="isLoading"
+            :on-next="onStepSubmit"
+          />
+        </div>
+
+        <!-- Step 7: Treatment Goals -->
+        <div v-if="stepIndex === 7">
+          <TreatmentGoalsStep
+            ref="treatmentGoalsStepRef"
+            :treatment-plan="treatmentPlanWithSteps"
+            :step-index="stepIndex"
+            :is-loading="isLoading"
+            :on-next="onStepSubmit"
+          />
+        </div>
+
+        <!-- Step 8: Final Summary -->
+        <div v-if="stepIndex === 8">
+          <FinalSummaryStep
+            ref="finalSummaryStepRef"
+            :treatment-plan="treatmentPlanWithSteps"
             :step-index="stepIndex"
             :is-loading="isLoading"
             :on-next="onStepSubmit"
@@ -636,7 +766,7 @@ onMounted(() => {
         </Button>
         <div :class="STRINGS.CSS_CLASSES.FLEX_GAP_2">
           <Button
-            v-if="stepIndex === steps.length"
+            v-if="stepIndex === 5 || stepIndex === 8"
             :variant="STRINGS.BUTTON_VARIANTS.OUTLINE"
             :size="STRINGS.BUTTON_SIZES.SM"
             @click="downloadPDF"
