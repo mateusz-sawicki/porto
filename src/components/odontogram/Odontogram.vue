@@ -8,6 +8,7 @@
     <div class="flex justify-center relative">
       <!-- Pin Button -->
       <Button
+        v-if="!props.isReadonly"
         @click="isPinned = !isPinned"
         variant="outline"
         size="sm"
@@ -47,10 +48,11 @@
               :direction="ToothContainerDirection.Top"
               side="left"
               :isPediatric="props.isPediatric"
-              @segment-click="handleSegmentClick"
-              @tooth-click="handleToothClick"
-              @remove-tooth="handleRemoveTooth"
-              @add-extra-tooth="handleAddExtraTooth"
+              :isReadonly="props.isReadonly"
+              @segment-click="handleSegmentClickSafe"
+              @tooth-click="handleToothClickSafe"
+              @remove-tooth="handleRemoveToothSafe"
+              @add-extra-tooth="handleAddExtraToothSafe"
             />
             <Quadrant
               :teeth="q2teeth"
@@ -59,10 +61,11 @@
               :direction="ToothContainerDirection.Top"
               side="right"
               :isPediatric="props.isPediatric"
-              @segment-click="handleSegmentClick"
-              @tooth-click="handleToothClick"
-              @remove-tooth="handleRemoveTooth"
-              @add-extra-tooth="handleAddExtraTooth"
+              :isReadonly="props.isReadonly"
+              @segment-click="handleSegmentClickSafe"
+              @tooth-click="handleToothClickSafe"
+              @remove-tooth="handleRemoveToothSafe"
+              @add-extra-tooth="handleAddExtraToothSafe"
             />
           </div>
 
@@ -81,10 +84,11 @@
               :direction="ToothContainerDirection.Bottom"
               side="left"
               :isPediatric="props.isPediatric"
-              @segment-click="handleSegmentClick"
-              @tooth-click="handleToothClick"
-              @remove-tooth="handleRemoveTooth"
-              @add-extra-tooth="handleAddExtraTooth"
+              :isReadonly="props.isReadonly"
+              @segment-click="handleSegmentClickSafe"
+              @tooth-click="handleToothClickSafe"
+              @remove-tooth="handleRemoveToothSafe"
+              @add-extra-tooth="handleAddExtraToothSafe"
             />
             <Quadrant
               :teeth="q3teeth"
@@ -93,10 +97,11 @@
               :direction="ToothContainerDirection.Bottom"
               side="right"
               :isPediatric="props.isPediatric"
-              @segment-click="handleSegmentClick"
-              @tooth-click="handleToothClick"
-              @remove-tooth="handleRemoveTooth"
-              @add-extra-tooth="handleAddExtraTooth"
+              :isReadonly="props.isReadonly"
+              @segment-click="handleSegmentClickSafe"
+              @tooth-click="handleToothClickSafe"
+              @remove-tooth="handleRemoveToothSafe"
+              @add-extra-tooth="handleAddExtraToothSafe"
             />
           </div>
         </div>
@@ -105,7 +110,7 @@
     </div>
 
     <!-- Controls underneath - Centered with max width -->
-    <div class="flex justify-center controls-section">
+    <div v-if="!props.isReadonly" class="flex justify-center controls-section">
       <div class="w-full max-w-2xl">
         <OdontogramControlsEnhanced
           :selectedProcedure="selectedProcedure"
@@ -121,7 +126,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref, onMounted, onUnmounted, nextTick, watch, inject, defineProps } from 'vue'
+import { computed, ref, onMounted, onUnmounted, nextTick, watch, inject, defineProps, withDefaults } from 'vue'
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area'
 import { Button } from '@/components/ui/button'
 import { Pin, PinOff } from 'lucide-vue-next'
@@ -130,11 +135,20 @@ import Quadrant from '@/components/odontogram/Quadrant.vue'
 import type { useOdontogram } from '@/composables/odontogram/useOdontogram'
 import OdontogramControlsEnhanced from './OdontogramControlsEnhanced.vue'
 
-const props = defineProps<{ isPediatric?: boolean }>()
+const props = withDefaults(defineProps<{
+  isPediatric?: boolean
+  isReadonly?: boolean
+}>(), {
+  isPediatric: false,
+  isReadonly: false,
+})
 
 const emit = defineEmits<{
   'pin-change': [isPinned: boolean]
 }>()
+
+// Debug: log readonly status
+console.log('🔍 Odontogram props.isReadonly:', props.isReadonly)
 
 const odontogram = inject<ReturnType<typeof useOdontogram>>('odontogram')
 if (!odontogram) throw new Error('Odontogram composable not provided!')
@@ -168,6 +182,31 @@ const {
   convertSelectedTeethToPrimary,
   convertSelectedTeethToPermanent,
 } = odontogram
+
+// Safe wrapper functions that respect readonly state
+const handleSegmentClickSafe = (...args: any[]) => {
+  if (!props.isReadonly) {
+    handleSegmentClick(...args)
+  }
+}
+
+const handleToothClickSafe = (...args: any[]) => {
+  if (!props.isReadonly) {
+    handleToothClick(...args)
+  }
+}
+
+const handleRemoveToothSafe = (...args: any[]) => {
+  if (!props.isReadonly) {
+    handleRemoveTooth(...args)
+  }
+}
+
+const handleAddExtraToothSafe = (...args: any[]) => {
+  if (!props.isReadonly) {
+    handleAddExtraTooth(...args)
+  }
+}
 
 // Constants
 const TOOTH_WIDTH = 90

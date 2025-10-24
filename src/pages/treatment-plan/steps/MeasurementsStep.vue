@@ -6,6 +6,7 @@ interface Props {
   stepIndex: number
   isLoading?: boolean
   onNext: (data: any) => void
+  isReadonly?: boolean
 }
 
 const props = defineProps<Props>()
@@ -128,7 +129,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="space-y-4">
+  <div class="space-y-4" :class="{ 'pointer-events-none': props.isReadonly }">
     <Vueform
       ref="vueformRef"
       v-model="formDataModel"

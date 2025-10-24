@@ -9,12 +9,12 @@
     </div>
 
     <!-- Search and Filter Section -->
-    <div 
-      class="search-filter-section"
-    >
+    <div class="search-filter-section">
       <!-- Search Input -->
       <div class="relative mb-4">
-        <Search class="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
+        <Search
+          class="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4"
+        />
         <Input
           v-model="searchQuery"
           placeholder="Search by tooth number or procedure name..."
@@ -24,80 +24,72 @@
 
       <!-- Filter Tags -->
       <div class="space-y-3 mb-6">
-      <!-- Overview Tags -->
-      <div class="flex flex-wrap gap-2">
-        <Badge
-          variant="outline"
-          class="cursor-pointer hover:bg-primary hover:text-primary-foreground transition-colors"
-          :class="{ 'bg-primary text-primary-foreground': activeFilter === 'all-teeth' }"
-          @click="setFilter('all-teeth')"
-        >
-          All Teeth ({{ sortedTeethWithProcedures.length }})
-        </Badge>
-        <Badge
-          variant="outline"
-          class="cursor-pointer hover:bg-primary hover:text-primary-foreground transition-colors"
-          :class="{ 'bg-primary text-primary-foreground': activeFilter === 'all-procedures' }"
-          @click="setFilter('all-procedures')"
-        >
-          All Procedures ({{ uniqueProcedureNames.length }})
-        </Badge>
-        <Badge
-          v-if="activeFilter"
-          variant="destructive"
-          class="cursor-pointer hover:bg-destructive/80 transition-colors"
-          @click="clearFilter"
-        >
-          Clear Filter
-        </Badge>
-      </div>
+        <!-- Overview Tags -->
+        <div class="flex flex-wrap gap-2">
+          <Badge
+            variant="outline"
+            class="cursor-pointer hover:bg-primary hover:text-primary-foreground transition-colors"
+            :class="{ 'bg-primary text-primary-foreground': activeFilter === 'all-teeth' }"
+            @click="setFilter('all-teeth')"
+          >
+            All Teeth ({{ sortedTeethWithProcedures.length }})
+          </Badge>
+          <Badge
+            variant="outline"
+            class="cursor-pointer hover:bg-primary hover:text-primary-foreground transition-colors"
+            :class="{ 'bg-primary text-primary-foreground': activeFilter === 'all-procedures' }"
+            @click="setFilter('all-procedures')"
+          >
+            All Procedures ({{ uniqueProcedureNames.length }})
+          </Badge>
+          <Badge
+            v-if="activeFilter"
+            variant="destructive"
+            class="cursor-pointer hover:bg-destructive/80 transition-colors"
+            @click="clearFilter"
+          >
+            Clear Filter
+          </Badge>
+        </div>
 
-      <!-- Specific Teeth Tags -->
-      <div class="flex flex-wrap gap-2">
-        <span class="text-sm text-muted-foreground font-medium">Teeth:</span>
-        <Badge
-          v-for="toothNumber in teethNumbers.slice(0, 8)"
-          :key="`tooth-${toothNumber}`"
-          variant="outline"
-          class="cursor-pointer hover:bg-blue-500 hover:text-white transition-colors"
-          :class="{ 'bg-blue-500 text-white': activeFilter === `tooth-${toothNumber}` }"
-          @click="setFilter(`tooth-${toothNumber}`)"
-        >
-          Tooth {{ toothNumber }} ({{ getToothProcedureCount(toothNumber) }})
-        </Badge>
-        <Badge
-          v-if="teethNumbers.length > 8"
-          variant="secondary"
-          class="cursor-default"
-        >
-          +{{ teethNumbers.length - 8 }} more teeth
-        </Badge>
-      </div>
+        <!-- Specific Teeth Tags -->
+        <div class="flex flex-wrap gap-2">
+          <span class="text-sm text-muted-foreground font-medium">Teeth:</span>
+          <Badge
+            v-for="toothNumber in teethNumbers.slice(0, 8)"
+            :key="`tooth-${toothNumber}`"
+            variant="outline"
+            class="cursor-pointer hover:bg-blue-500 hover:text-white transition-colors"
+            :class="{ 'bg-blue-500 text-white': activeFilter === `tooth-${toothNumber}` }"
+            @click="setFilter(`tooth-${toothNumber}`)"
+          >
+            Tooth {{ toothNumber }} ({{ getToothProcedureCount(toothNumber) }})
+          </Badge>
+          <Badge v-if="teethNumbers.length > 8" variant="secondary" class="cursor-default">
+            +{{ teethNumbers.length - 8 }} more teeth
+          </Badge>
+        </div>
 
-      <!-- Procedure Types Tags -->
-      <div class="flex flex-wrap gap-2">
-        <span class="text-sm text-muted-foreground font-medium">Procedures:</span>
-        <Badge
-          v-for="procedureName in uniqueProcedureNames.slice(0, 6)"
-          :key="`procedure-${procedureName}`"
-          variant="outline"
-          class="cursor-pointer hover:bg-green-500 hover:text-white transition-colors"
-          :class="{ 'bg-green-500 text-white': activeFilter === `procedure-${procedureName}` }"
-          @click="setFilter(`procedure-${procedureName}`)"
-        >
-          {{ procedureName }} ({{ getProcedureCount(procedureName) }})
-        </Badge>
-        <Badge
-          v-if="uniqueProcedureNames.length > 6"
-          variant="secondary"
-          class="cursor-default"
-        >
-          +{{ uniqueProcedureNames.length - 6 }} more procedures
-        </Badge>
+        <!-- Procedure Types Tags -->
+        <div class="flex flex-wrap gap-2">
+          <span class="text-sm text-muted-foreground font-medium">Procedures:</span>
+          <Badge
+            v-for="procedureName in uniqueProcedureNames.slice(0, 6)"
+            :key="`procedure-${procedureName}`"
+            variant="outline"
+            class="cursor-pointer hover:bg-green-500 hover:text-white transition-colors"
+            :class="{ 'bg-green-500 text-white': activeFilter === `procedure-${procedureName}` }"
+            @click="setFilter(`procedure-${procedureName}`)"
+          >
+            {{ procedureName }} ({{ getProcedureCount(procedureName) }})
+          </Badge>
+          <Badge v-if="uniqueProcedureNames.length > 6" variant="secondary" class="cursor-default">
+            +{{ uniqueProcedureNames.length - 6 }} more procedures
+          </Badge>
+        </div>
       </div>
     </div>
-    
-    </div> <!-- Close search-filter-section -->
+    <!-- Close search-filter-section -->
 
     <div
       v-if="filteredTeethWithProcedures.length === 0"
@@ -107,8 +99,12 @@
         <div class="w-12 h-12 rounded-full bg-muted flex items-center justify-center">
           <FileText class="w-6 h-6" />
         </div>
-        <p class="text-sm" v-if="sortedTeethWithProcedures.length === 0">No procedures assigned yet</p>
-        <p class="text-xs" v-if="sortedTeethWithProcedures.length === 0">Select procedures from the odontogram to see them here</p>
+        <p class="text-sm" v-if="sortedTeethWithProcedures.length === 0">
+          No procedures assigned yet
+        </p>
+        <p class="text-xs" v-if="sortedTeethWithProcedures.length === 0">
+          Select procedures from the odontogram to see them here
+        </p>
         <p class="text-sm" v-else>No results found</p>
         <p class="text-xs" v-else>Try searching for a different tooth number or procedure name</p>
       </div>
@@ -163,20 +159,21 @@
                 <div class="flex items-center gap-3">
                   <div
                     v-if="
-                      groupedProcedure.visual.visualType === 'Color' &&
+                      groupedProcedure.visual.visualType === ProcedureVisualType.Color &&
                       groupedProcedure.visual.value
                     "
                     class="w-4 h-4 rounded-sm flex-shrink-0"
                     :style="{ backgroundColor: groupedProcedure.visual.value }"
                   />
-                  <div
+                  <ProcedureIcon
                     v-else-if="
-                      groupedProcedure.visual.visualType === 'Icon' && groupedProcedure.visual.value
+                      groupedProcedure.visual.visualType === ProcedureVisualType.Icon &&
+                      groupedProcedure.visual.value
                     "
-                    class="w-4 h-4 flex items-center justify-center text-xs font-bold flex-shrink-0"
-                  >
-                    {{ groupedProcedure.visual.value }}
-                  </div>
+                    :icon-name="groupedProcedure.visual.value"
+                    :icon-source="groupedProcedure.visual.iconSource || 'lucide'"
+                    class="w-4 h-4 flex-shrink-0"
+                  />
                   <div
                     v-else-if="
                       groupedProcedure.visual.visualType === 'GumShape' &&
@@ -205,6 +202,7 @@
                       >
                         <span>{{ location }}</span>
                         <button
+                          v-if="!props.isReadonly"
                           @click="
                             () =>
                               removeSpecificProcedure(
@@ -221,12 +219,16 @@
                       </div>
                     </div>
                     <!-- Show count info -->
-                    <p v-if="groupedProcedure.originalProcedures.length > 1" class="text-xs text-muted-foreground mt-1">
+                    <p
+                      v-if="groupedProcedure.originalProcedures.length > 1"
+                      class="text-xs text-muted-foreground mt-1"
+                    >
                       {{ groupedProcedure.originalProcedures.length }} locations total
                     </p>
                   </div>
                 </div>
                 <Button
+                  v-if="!props.isReadonly"
                   variant="ghost"
                   size="sm"
                   @click="() => removeGroupedProcedure(toothData.toothNumber, groupedProcedure)"
@@ -258,12 +260,18 @@
     <div v-if="sortedTeethWithProcedures.length > 0" class="border-t pt-4 mt-6">
       <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
         <div class="space-y-1">
-          <div class="text-2xl font-bold text-primary">{{ filteredTeethWithProcedures.length }}</div>
-          <div class="text-xs text-muted-foreground">{{ searchQuery ? 'Filtered teeth' : 'Teeth with procedures' }}</div>
+          <div class="text-2xl font-bold text-primary">
+            {{ filteredTeethWithProcedures.length }}
+          </div>
+          <div class="text-xs text-muted-foreground">
+            {{ searchQuery ? 'Filtered teeth' : 'Teeth with procedures' }}
+          </div>
         </div>
         <div class="space-y-1">
           <div class="text-2xl font-bold text-primary">{{ filteredTotalProcedures }}</div>
-          <div class="text-xs text-muted-foreground">{{ searchQuery ? 'Filtered procedures' : 'Total procedures' }}</div>
+          <div class="text-xs text-muted-foreground">
+            {{ searchQuery ? 'Filtered procedures' : 'Total procedures' }}
+          </div>
         </div>
         <div class="space-y-1">
           <div class="text-2xl font-bold text-primary">{{ filteredProcedureGroups }}</div>
@@ -284,6 +292,8 @@ import { ChevronRight, X, FileText, Search } from 'lucide-vue-next'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
+import { ProcedureVisualType } from '@/types/odontogram/tooth'
+import ProcedureIcon from './ProcedureIcon.vue'
 
 interface Procedure {
   name: string
@@ -291,6 +301,7 @@ interface Procedure {
   visual: {
     visualType: 'Color' | 'Pattern' | 'Icon' | 'GumShape' | 'ToothShape'
     value: string
+    iconSource?: any
   }
 }
 
@@ -300,6 +311,7 @@ interface GroupedProcedure {
   visual: {
     visualType: 'Color' | 'Pattern' | 'Icon' | 'GumShape' | 'ToothShape'
     value: string
+    iconSource?: any
   }
   locations: string[]
   originalProcedures: Procedure[]
@@ -318,6 +330,7 @@ interface ToothWithGroupedProcedures {
 
 interface Props {
   teethWithProcedures: ToothWithProcedures[]
+  isReadonly?: boolean
 }
 
 interface Emits {
@@ -351,7 +364,11 @@ const teethWithGroupedProcedures = computed(() => {
         procedureGroups.set(key, {
           name: procedure.name,
           description: procedure.description,
-          visual: procedure.visual,
+          visual: {
+            visualType: procedure.visual.visualType,
+            value: procedure.visual.value,
+            iconSource: procedure.visual.iconSource,
+          },
           locations: [procedure.description || ''],
           originalProcedures: [procedure],
         })
@@ -398,8 +415,8 @@ const sortedTeethWithProcedures = computed(() => {
 // Get unique procedure names for filter tags
 const uniqueProcedureNames = computed(() => {
   const procedureNames = new Set<string>()
-  sortedTeethWithProcedures.value.forEach(tooth => {
-    tooth.groupedProcedures.forEach(procedure => {
+  sortedTeethWithProcedures.value.forEach((tooth) => {
+    tooth.groupedProcedures.forEach((procedure) => {
       procedureNames.add(procedure.name)
     })
   })
@@ -408,7 +425,7 @@ const uniqueProcedureNames = computed(() => {
 
 // Get teeth numbers that have procedures assigned
 const teethNumbers = computed(() => {
-  return sortedTeethWithProcedures.value.map(tooth => tooth.toothNumber)
+  return sortedTeethWithProcedures.value.map((tooth) => tooth.toothNumber)
 })
 
 // Filtered teeth based on search query and active filter
@@ -416,16 +433,20 @@ const filteredTeethWithProcedures = computed(() => {
   let filtered = sortedTeethWithProcedures.value
 
   // Apply active filter first
-  if (activeFilter.value && activeFilter.value !== 'all-teeth' && activeFilter.value !== 'all-procedures') {
+  if (
+    activeFilter.value &&
+    activeFilter.value !== 'all-teeth' &&
+    activeFilter.value !== 'all-procedures'
+  ) {
     if (activeFilter.value.startsWith('tooth-')) {
       // Filter by specific tooth number
       const toothNumber = activeFilter.value.replace('tooth-', '')
-      filtered = filtered.filter(tooth => tooth.toothNumber === toothNumber)
+      filtered = filtered.filter((tooth) => tooth.toothNumber === toothNumber)
     } else if (activeFilter.value.startsWith('procedure-')) {
       // Filter by specific procedure name
       const procedureName = activeFilter.value.replace('procedure-', '')
-      filtered = filtered.filter(tooth => 
-        tooth.groupedProcedures.some(procedure => procedure.name === procedureName)
+      filtered = filtered.filter((tooth) =>
+        tooth.groupedProcedures.some((procedure) => procedure.name === procedureName),
       )
     }
   }
@@ -433,15 +454,15 @@ const filteredTeethWithProcedures = computed(() => {
   // Then apply search query
   if (searchQuery.value.trim()) {
     const query = searchQuery.value.toLowerCase().trim()
-    filtered = filtered.filter(tooth => {
+    filtered = filtered.filter((tooth) => {
       // Match tooth number
       if (tooth.toothNumber.toLowerCase().includes(query)) {
         return true
       }
-      
+
       // Match procedure names
-      return tooth.groupedProcedures.some(procedure => 
-        procedure.name.toLowerCase().includes(query)
+      return tooth.groupedProcedures.some((procedure) =>
+        procedure.name.toLowerCase().includes(query),
       )
     })
   }
@@ -473,8 +494,8 @@ const filteredProcedureGroups = computed(() => {
 
 const filteredUniqueProcedureTypes = computed(() => {
   const procedureNames = new Set<string>()
-  filteredTeethWithProcedures.value.forEach(tooth => {
-    tooth.groupedProcedures.forEach(procedure => {
+  filteredTeethWithProcedures.value.forEach((tooth) => {
+    tooth.groupedProcedures.forEach((procedure) => {
       procedureNames.add(procedure.name)
     })
   })
@@ -504,8 +525,11 @@ const setFilter = (filter: string) => {
     activeFilter.value = filter
   }
   // Clear search when using specific filters
-  if (filter !== 'all-teeth' && filter !== 'all-procedures' && 
-      (filter.startsWith('tooth-') || filter.startsWith('procedure-'))) {
+  if (
+    filter !== 'all-teeth' &&
+    filter !== 'all-procedures' &&
+    (filter.startsWith('tooth-') || filter.startsWith('procedure-'))
+  ) {
     searchQuery.value = ''
   }
 }
@@ -517,12 +541,12 @@ const clearFilter = () => {
 
 const getProcedureCount = (procedureName: string) => {
   return sortedTeethWithProcedures.value.reduce((count, tooth) => {
-    return count + tooth.groupedProcedures.filter(p => p.name === procedureName).length
+    return count + tooth.groupedProcedures.filter((p) => p.name === procedureName).length
   }, 0)
 }
 
 const getToothProcedureCount = (toothNumber: string) => {
-  const tooth = sortedTeethWithProcedures.value.find(t => t.toothNumber === toothNumber)
+  const tooth = sortedTeethWithProcedures.value.find((t) => t.toothNumber === toothNumber)
   return tooth ? tooth.totalProcedureCount : 0
 }
 
@@ -554,5 +578,4 @@ const removeSpecificProcedure = (
 .search-filter-section {
   transition: all 0.3s ease-in-out;
 }
-
 </style>

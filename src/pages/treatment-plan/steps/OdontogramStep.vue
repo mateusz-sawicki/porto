@@ -2,12 +2,13 @@
   <div class="space-y-6">
     <div class="grid grid-cols-1 gap-6">
       <!-- Odontogram Component (chart + controls) -->
-      <Odontogram :isPediatric="props.isPediatric" />
+      <Odontogram :isPediatric="props.isPediatric" :isReadonly="props.isReadonly" />
 
       <!-- Procedures Summary -->
       <div>
         <ToothProceduresSummary
           :teeth-with-procedures="teethWithProcedures"
+          :is-readonly="props.isReadonly"
           @remove-procedure="handleRemoveProcedure"
         />
       </div>
@@ -48,10 +49,12 @@ interface Props {
   isPediatric?: boolean
   treatmentPlan?: any
   stepIndex?: number
+  isReadonly?: boolean
 }
 
 const props = withDefaults(defineProps<Props>(), {
   isPediatric: false,
+  isReadonly: false,
 })
 
 // Use odontogram composable to sync with chart data

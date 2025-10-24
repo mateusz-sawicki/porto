@@ -420,6 +420,7 @@
               <span class="font-medium">{{ group.name }}</span>
               <!-- Remove entire procedure group button -->
               <Button
+                v-if="!props.isReadonly"
                 variant="ghost"
                 size="sm"
                 @click="() => removeGroupedProcedure(group)"
@@ -437,6 +438,7 @@
               >
                 <span>{{ location }}</span>
                 <button
+                  v-if="!props.isReadonly"
                   @click="() => removeSpecificProcedure(group, index)"
                   class="w-3 h-3 rounded-full bg-secondary-foreground/20 hover:bg-destructive hover:text-destructive-foreground flex items-center justify-center transition-colors"
                   :title="`Remove ${group.name} from ${location}`"
@@ -485,6 +487,7 @@ interface Props {
   selectedSegments: string[]
   direction: ToothContainerDirection
   isPediatric?: boolean
+  isReadonly?: boolean
 }
 
 interface Emits {
@@ -993,9 +996,7 @@ const handleConvertSelectedToPermanent = () => {
 const handleApplyRootOnly = () => {
   if (canApplyRootOnly.value && odontogram?.handleProcedureSelect) {
     // Find the "tylko korzeń" procedure
-    const rootOnlyProcedure = procedures.value.find(
-      (p) => p.name === 'tylko korzeń',
-    )
+    const rootOnlyProcedure = procedures.value.find((p) => p.name === 'tylko korzeń')
     if (rootOnlyProcedure) {
       // Select this tooth and apply the procedure
       odontogram.selectedToothNumbers.value = [props.tooth.number]
@@ -1007,9 +1008,7 @@ const handleApplyRootOnly = () => {
 const handleApplyRootOnlyToSelected = () => {
   if (canApplyRootOnlyToSelected.value && odontogram?.handleProcedureSelect) {
     // Find the "tylko korzeń" procedure
-    const rootOnlyProcedure = procedures.value.find(
-      (p) => p.name === 'tylko korzeń',
-    )
+    const rootOnlyProcedure = procedures.value.find((p) => p.name === 'tylko korzeń')
     if (rootOnlyProcedure) {
       // Apply to all selected teeth
       odontogram.handleProcedureSelect(rootOnlyProcedure)

@@ -522,11 +522,7 @@ onMounted(() => {
       </div>
 
       <!-- Treatment Plan Stepper -->
-      <TreatmentPlanStepper
-        :steps="steps"
-        :current-step="stepIndex"
-        :on-step-change="goToStep"
-      />
+      <TreatmentPlanStepper :steps="steps" :current-step="stepIndex" :on-step-change="goToStep" />
 
       <!-- Top button section -->
       <div :class="STRINGS.CSS_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN" class="mb-6">
@@ -589,6 +585,7 @@ onMounted(() => {
             :isPediatric="treatmentPlan?.isPediatric || false"
             :treatment-plan="treatmentPlanWithSteps"
             :step-index="stepIndex"
+            :is-readonly="false"
           />
         </div>
 

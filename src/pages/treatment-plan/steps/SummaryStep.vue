@@ -226,128 +226,49 @@ onMounted(() => {
 
     <!-- Medical Interview Step -->
     <Card v-if="stepConfigurations.medicalInterview">
-      <CardHeader>
-        <CardTitle class="flex items-center justify-between">
-          Wywiad medyczny
-          <Badge variant="outline">
-            {{ medicalInterviewSummary.filledCount }} /
-            {{ medicalInterviewSummary.totalFields }} pól
-          </Badge>
-        </CardTitle>
-      </CardHeader>
       <CardContent>
-        <div class="pointer-events-none">
-          <MedicalInterviewStep
-            :treatment-plan="medicalInterviewTreatmentPlan"
-            :step-index="0"
-            :on-next="() => {}"
-          />
-        </div>
+        <MedicalInterviewStep
+          :treatment-plan="medicalInterviewTreatmentPlan"
+          :step-index="0"
+          :on-next="() => {}"
+          :is-readonly="true"
+        />
       </CardContent>
     </Card>
 
     <!-- Odontogram Step -->
     <Card v-if="stepConfigurations.odontogram">
-      <CardHeader>
-        <CardTitle>Odontogram</CardTitle>
-      </CardHeader>
       <CardContent>
-        <div class="pointer-events-none">
-          <OdontogramStep
-            :treatment-plan="odontogramTreatmentPlan"
-            :step-index="1"
-            :is-pediatric="props.treatmentPlan?.isPediatric || false"
-          />
-        </div>
+        <OdontogramStep
+          :treatment-plan="odontogramTreatmentPlan"
+          :step-index="1"
+          :is-pediatric="props.treatmentPlan?.isPediatric || false"
+          :is-readonly="true"
+        />
       </CardContent>
     </Card>
 
     <!-- Intraoral Examination Step -->
     <Card v-if="stepConfigurations.intraoralExamination">
-      <CardHeader>
-        <CardTitle>Badanie wewnątrzustne</CardTitle>
-      </CardHeader>
       <CardContent>
-        <div class="pointer-events-none">
-          <IntraoralExaminationStep
-            :treatment-plan="intraoralExaminationTreatmentPlan"
-            :step-index="2"
-            :on-next="() => {}"
-          />
-        </div>
+        <IntraoralExaminationStep
+          :treatment-plan="intraoralExaminationTreatmentPlan"
+          :step-index="2"
+          :on-next="() => {}"
+          :is-readonly="true"
+        />
       </CardContent>
     </Card>
 
     <!-- Measurements Step -->
     <Card v-if="stepConfigurations.measurements">
-      <CardHeader>
-        <CardTitle>Pomiary</CardTitle>
-      </CardHeader>
       <CardContent>
-        <div class="pointer-events-none">
-          <MeasurementsStep
-            :treatment-plan="measurementsTreatmentPlan"
-            :step-index="3"
-            :on-next="() => {}"
-          />
-        </div>
-      </CardContent>
-    </Card>
-
-    <!-- Overall Summary -->
-    <Card>
-      <CardHeader>
-        <CardTitle>Podsumowanie ogólne</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <div class="p-4 border rounded-lg text-center">
-            <h4 class="font-medium text-gray-900 mb-2">Wywiad medyczny</h4>
-            <Badge :variant="medicalInterviewSummary.filledCount > 0 ? 'default' : 'secondary'">
-              {{ medicalInterviewSummary.filledCount > 0 ? 'Wypełniony' : 'Pusty' }}
-            </Badge>
-          </div>
-          <div class="p-4 border rounded-lg text-center">
-            <h4 class="font-medium text-gray-900 mb-2">Odontogram</h4>
-            <Badge
-              :variant="
-                aggregatedData.odontogram?.teeth && aggregatedData.odontogram.teeth.length > 0
-                  ? 'default'
-                  : 'secondary'
-              "
-            >
-              {{
-                aggregatedData.odontogram?.teeth && aggregatedData.odontogram.teeth.length > 0
-                  ? 'Zapisany'
-                  : 'Pusty'
-              }}
-            </Badge>
-          </div>
-          <div class="p-4 border rounded-lg text-center">
-            <h4 class="font-medium text-gray-900 mb-2">Badanie wewnątrzustne</h4>
-            <Badge
-              :variant="
-                aggregatedData.intraoralExamination &&
-                Object.keys(aggregatedData.intraoralExamination).length > 0
-                  ? 'default'
-                  : 'secondary'
-              "
-            >
-              {{
-                aggregatedData.intraoralExamination &&
-                Object.keys(aggregatedData.intraoralExamination).length > 0
-                  ? 'Wypełniony'
-                  : 'Pusty'
-              }}
-            </Badge>
-          </div>
-          <div class="p-4 border rounded-lg text-center">
-            <h4 class="font-medium text-gray-900 mb-2">Pomiary</h4>
-            <Badge :variant="measurementsSummary ? 'default' : 'secondary'">
-              {{ measurementsSummary ? 'Wypełniony' : 'Pusty' }}
-            </Badge>
-          </div>
-        </div>
+        <MeasurementsStep
+          :treatment-plan="measurementsTreatmentPlan"
+          :step-index="3"
+          :on-next="() => {}"
+          :is-readonly="true"
+        />
       </CardContent>
     </Card>
   </div>
